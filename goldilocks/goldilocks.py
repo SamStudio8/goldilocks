@@ -1,6 +1,6 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
@@ -133,7 +133,7 @@ class Goldilocks(object):
             for group in self.groups:
                 chros[group] = self.load_chromosome(size, self.groups[group][chrno])
 
-            print "[SRCH] Chr:%d" % (chrno)
+            print("[SRCH] Chr:%d" % (chrno))
             # Ignore 0 position
             for i, region_s in enumerate(range(1, size+1-self.LENGTH+1, self.STRIDE)):
                 region_e = region_s + self.LENGTH - 1
@@ -166,7 +166,7 @@ class Goldilocks(object):
                     if self.GRAPHING:
                         # NOTE Use i not region_i so regions in the plot start
                         # at 0 for each chromosome rather than cascading
-                        print "%s\t%d\t%d\t%d" % (group, chrno, i, num_variants)
+                        print("%s\t%d\t%d\t%d" % (group, chrno, i, num_variants))
 
                 region_i += 1
         return regions
@@ -203,7 +203,7 @@ class Goldilocks(object):
         winners = []
 
         # Enrich selection by choosing a region with median GWAS and maximum iCHIP
-        print "WND\tGWAS\tiCHIP\tCHR\tPOSITIONS"
+        print("WND\tGWAS\tiCHIP\tCHR\tPOSITIONS")
         q_median = np.percentile(np.asarray(self.group_counts[filter_group]), 50)
 
         for region in sorted(
@@ -212,20 +212,20 @@ class Goldilocks(object):
         ):
             if region in self.candidates:
                 if self.regions[region]["group_counts"][enrich_group] > self.regions[region]["group_counts"][filter_group]:
-                    print "%d\t%d\t%d\t%s\t%10d - %10d" % (region,
+                    print("%d\t%d\t%d\t%s\t%10d - %10d" % (region,
                                                     self.regions[region]["group_counts"][filter_group],
                                                     self.regions[region]["group_counts"][enrich_group],
                                                     self.regions[region]["chr"],
                                                     self.regions[region]["pos_start"],
                                                     self.regions[region]["pos_end"],
-                    )
+                    ))
                     winners.append(self.regions[region])
         return winners
 
     def execute(self):
         """Execute Goldilocks search."""
         for i, f in enumerate(self.files):
-            print "[READ] %s [%d of %d]" % (self.files[f]["path"], i+1, len(self.files))
+            print("[READ] %s [%d of %d]" % (self.files[f]["path"], i+1, len(self.files)))
             self.load_variants_from_file(self.files[f]["path"], self.files[f]["group"])
 
         self.regions = self.search_regions()
