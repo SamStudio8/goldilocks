@@ -1,0 +1,5 @@
+numpy
+tox
+pytest
+nose
+python-coveralls
