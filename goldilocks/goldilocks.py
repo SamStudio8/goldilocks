@@ -6,6 +6,8 @@ __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 import numpy as np
 from math import floor, ceil
 
+from .strategies import VariantCounterStrategy
+
 #TODO Create function to actually count the variants (could be useful in API)
 
 class Goldilocks(object):
@@ -46,6 +48,8 @@ class Goldilocks(object):
         self.GRAPHING = False
 
         self.load_variant_files(self.paths_filename)
+
+        self.strategy = VariantCounterStrategy
 
 
     # Future: Ensure the file is valid.
@@ -108,15 +112,7 @@ class Goldilocks(object):
         f.close()
 
     def load_chromosome(self, size, locations):
-        """Return a NumPy array containing 1 for position elements where a variant
-        exists and 0 otherwise."""
-        chro = np.zeros(size+1, np.int8)
-
-        # Populate the chromosome array with 1 for each position a variant exists
-        for variant_loc in locations:
-            chro[variant_loc] = 1
-
-        return chro
+        return self.strategy.prepare(size, locations)
 
     def search_regions(self):
         """Conduct a census of the regions on each chromosome using the user
@@ -146,27 +142,27 @@ class Goldilocks(object):
                 }
 
                 for group in self.groups:
-                    num_variants = np.sum(chros[group][region_s:region_e+1])
-                    regions[region_i]["group_counts"][group] = num_variants
+                    value = self.strategy.evaluate(chros[group][region_s:region_e+1])
+                    regions[region_i]["group_counts"][group] = value
 
                     # TODO Should we be ignoring these regions?
                     # Record this region (if it contained variants in this group)
-                    if num_variants > 0:
-                        if num_variants not in self.group_buckets[group]:
+                    if value > 0:
+                        if value not in self.group_buckets[group]:
                             # Add this particular number of variants as a bucket
-                            self.group_buckets[group][num_variants] = []
+                            self.group_buckets[group][value] = []
 
                         # Add the region id to the bucket
-                        self.group_buckets[group][num_variants].append(region_i)
+                        self.group_buckets[group][value].append(region_i)
 
                         # Append the number of variants counted in this region
                         # for this group to a list used to calculate the median
-                        self.group_counts[group].append(num_variants)
+                        self.group_counts[group].append(value)
 
                     if self.GRAPHING:
                         # NOTE Use i not region_i so regions in the plot start
                         # at 0 for each chromosome rather than cascading
-                        print("%s\t%d\t%d\t%d" % (group, chrno, i, num_variants))
+                        print("%s\t%d\t%d\t%d" % (group, chrno, i, value))
 
                 region_i += 1
         return regions
