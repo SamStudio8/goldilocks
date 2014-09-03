@@ -203,54 +203,5 @@ class Goldilocks(object):
         print("[NOTE] %d of %d selected" % (num_selected, num_total))
         return candidates
 
-    # [Future] Hard coded default GWAS group
-    def initial_filter(self, group="gwas", window=None):
-        """Filter regions based on the distance from the median density of a given
-        variant group."""
-        if window is None:
-            window = self.MED_WINDOW
-        else:
-            window = float(window)/2
-
-        candidates = []
-
-        # Select middle 25% of GWAS group
-        q_low  = np.percentile(np.asarray(self.group_counts[group]), 50 - window)
-        q_high = np.percentile(np.asarray(self.group_counts[group]), 50 + window)
-
-        # For each "number of variants" bucket: which map the number of variants
-        # seen in a region, to all regions that contained that number of variants
-        for bucket in self.group_buckets[group]:
-            if bucket >= floor(q_low) and bucket <= ceil(q_high):
-                # Append all region data structures within the desired range
-                # to the list of candidates for enrichment
-                candidates += self.group_buckets[group][bucket]
-        return candidates
-
-    # [Future] Hard coded default iCHIP group
-    def enrich(self, filter_group="gwas", enrich_group="ichip"):
-        """Sort regions based on proximity to the absolute distance from the median
-        of the filter_group and then rank based on the maximum density of a given
-        enrichment group."""
-        winners = []
-
-        # Enrich selection by choosing a region with median GWAS and maximum iCHIP
-        print("WND\tGWAS\tiCHIP\tCHR\tPOSITIONS")
-        q_median = np.percentile(np.asarray(self.group_counts[filter_group]), 50)
-
-        for region in sorted(
-            self.regions,
-            key=lambda x: (abs(self.regions[x]["group_counts"][filter_group] - q_median), self.regions[x]["group_counts"][enrich_group])
-        ):
-            if region in self.candidates:
-                if self.regions[region]["group_counts"][enrich_group] > self.regions[region]["group_counts"][filter_group]:
-                    print("%d\t%d\t%d\t%s\t%10d - %10d" % (region,
-                                                    self.regions[region]["group_counts"][filter_group],
-                                                    self.regions[region]["group_counts"][enrich_group],
-                                                    self.regions[region]["chr"],
-                                                    self.regions[region]["pos_start"],
-                                                    self.regions[region]["pos_end"],
-                    ))
-                    winners.append(self.regions[region])
-        return winners
-
+    def _sort(self):
+        pass
