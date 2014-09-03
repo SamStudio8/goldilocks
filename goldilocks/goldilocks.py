@@ -6,18 +6,14 @@ __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 import numpy as np
 from math import floor, ceil
 
-from .strategies import VariantCounterStrategy
-
-#TODO Create function to actually count the variants (could be useful in API)
-
 class Goldilocks(object):
     """A class for reading Variant Query files and locating regions on a genome
     with particular variant density properties."""
 
-    def __init__(self, paths_file, length=1000000, stride=500000, med_window=12.5):
+    def __init__(self, strategy, length=1000000, stride=500000, med_window=12.5):
         """Initialise the internal structures and set arguments based on user input."""
 
-        self.files = {}         # Files to read variants from (path and group)
+        self.strategy = strategy# Search strategy
 
         self.chr_max_len = {}   # Map chromosomes to the largest variant position
                                 # seen across all files
@@ -40,79 +36,14 @@ class Goldilocks(object):
         self.winners = []       # Lists regions that pass the final filter and
                                 # enrichment processes
 
-        self.paths_filename = paths_file
-
         self.LENGTH = length
         self.STRIDE = stride # NOTE STRIDE must be non-zero, 1 is very a bad idea (TM)
         self.MED_WINDOW = med_window # Middle 25%, can also be overriden later
         self.GRAPHING = False
 
-        self.load_variant_files(self.paths_filename)
 
-        self.strategy = VariantCounterStrategy
-
-
-    # Future: Ensure the file is valid.
-    def load_variant_files(self, paths_filename):
-        """Load and process the paths file."""
-
-        path_list = open(paths_filename)
-        files = {}
-        current_group = None
-        for line in path_list:
-            if line.startswith("#"):
-                current_group = line[1:].strip()
-
-                if current_group in self.groups:
-                    raise Exception("[FAIL] Group %s has already been processed" % current_group)
-
-                self.groups[current_group] = {}
-                self.group_buckets[current_group] = {}
-                self.group_counts[current_group] = []
-                continue
-            if current_group is not None:
-                fields = line.split("\t")
-
-                if fields[0] in self.files:
-                    raise Exception("[FAIL] File %s has already been processed" % fields[0])
-
-                self.files[fields[0]] = {
-                    "path": fields[1].strip(),
-                    "group": current_group
-                }
-        path_list.close()
-
-    def load_variants_from_file(self, path, group):
-        """Load each variant position record from a Variant Query file into a given group."""
-
-        f = open(path)
-        for line in f:
-            fields = line.strip().split("\t")
-
-            chrno, pos = fields[0].split(":")
-            chrno = int(chrno) # NOTE Explodes for allosomes
-            pos = int(pos)     # NOTE Positions are 1-indexed
-
-            # Check group exists
-            if group not in self.groups:
-                raise Exception()
-            if chrno not in self.groups[group]:
-                self.groups[group][chrno] = []
-
-                if chrno not in self.chr_max_len:
-                    self.chr_max_len[chrno] = 1
-
-            # NOTE No duplicate checking to prevent list lookups
-            self.groups[group][chrno].append(pos)
-
-            # Check whether this is the highest variant position seen on this chr
-            if pos > self.chr_max_len[chrno]:
-                self.chr_max_len[chrno] = pos
-
-        f.close()
-
-    def load_chromosome(self, size, locations):
-        return self.strategy.prepare(size, locations)
+    def load_chromosome(self, size, data):
+        return self.strategy.prepare(size, data)
 
     def search_regions(self):
         """Conduct a census of the regions on each chromosome using the user
@@ -135,7 +66,7 @@ class Goldilocks(object):
                 region_e = region_s + self.LENGTH - 1
                 regions[region_i] = {
                     "ichr": i,
-                    "group_counts": {},
+                    "group_counts": {"total": 0},
                     "chr": chrno,
                     "pos_start": region_s,
                     "pos_end": region_e
@@ -144,20 +75,26 @@ class Goldilocks(object):
                 for group in self.groups:
                     value = self.strategy.evaluate(chros[group][region_s:region_e+1])
                     regions[region_i]["group_counts"][group] = value
+                    regions[region_i]["group_counts"]["total"] += value
 
-                    # TODO Should we be ignoring these regions?
-                    # Record this region (if it contained variants in this group)
-                    if value > 0:
-                        if value not in self.group_buckets[group]:
-                            # Add this particular number of variants as a bucket
-                            self.group_buckets[group][value] = []
+                    # TODO Should we be ignoring these regions if they are empty?
+                    if value not in self.group_buckets[group]:
+                        # Add this particular number of variants as a bucket
+                        self.group_buckets[group][value] = []
 
-                        # Add the region id to the bucket
-                        self.group_buckets[group][value].append(region_i)
+                    if value not in self.group_buckets["total"]:
+                        self.group_buckets["total"][value] = []
 
-                        # Append the number of variants counted in this region
-                        # for this group to a list used to calculate the median
-                        self.group_counts[group].append(value)
+                    # Add the region id to the bucket
+                    self.group_buckets[group][value].append(region_i)
+                    self.group_buckets["total"][value].append(region_i)
+
+                    # TODO Config option to include 0 in filter metrics
+#                   if value > 0:
+                    # Append the number of variants counted in this region
+                    # for this group to a list used to calculate the median
+                    self.group_counts[group].append(value)
+                    self.group_counts["total"].append(value)
 
                     if self.GRAPHING:
                         # NOTE Use i not region_i so regions in the plot start
@@ -166,6 +103,105 @@ class Goldilocks(object):
 
                 region_i += 1
         return regions
+
+    # TODO Pretty hacky at the moment... Just trying some things out!
+    def _filter(self, func="median", actual_distance=None, percentile_distance=None, direction=0, group=None):
+        distance = None
+        actual = False
+        if actual_distance is not None and percentile_distance is not None:
+            raise Exception("[FAIL] Cannot filter by both actual_distance and percentile_difference. Select one.")
+
+        if actual_distance is not None:
+            distance = actual_distance
+            actual = True
+
+        if percentile_distance is not None:
+            distance = percentile_distance
+
+        if distance is None:
+            raise Exception("[FAIL] Cannot filter by neither actual_distance and percentile_difference. Select one.")
+
+        valid_funcs = [
+                "median",
+                "mean",
+                "max",
+                "min"
+        ]
+
+        upper_window = float(distance) / 2
+        lower_window = float(distance) / 2
+
+        if direction > 0:
+            upper_window = upper_window * 2
+            lower_window = 0.0
+        elif direction < 0:
+            lower_window = lower_window * 2
+            upper_window = 0.0
+
+        if group is None:
+            group = "total"
+
+        target = None
+        if func.lower() == "median":
+            if actual:
+                q_low  = np.percentile(np.asarray(self.group_counts[group]), 50) - lower_window
+                q_high = np.percentile(np.asarray(self.group_counts[group]), 50) + upper_window
+            else:
+                q_low  = np.percentile(np.asarray(self.group_counts[group]), 50 - lower_window)
+                q_high = np.percentile(np.asarray(self.group_counts[group]), 50 + upper_window)
+            target = np.percentile(np.asarray(self.group_counts[group]), 50)
+        if func.lower() == "mean":
+            if actual:
+                q_low  = np.percentile(np.asarray(self.group_counts[group]), 50) - lower_window
+                q_high = np.percentile(np.asarray(self.group_counts[group]), 50) + upper_window
+            else:
+                q_low  = np.percentile(np.asarray(self.group_counts[group]), 50 - lower_window)
+                q_high = np.percentile(np.asarray(self.group_counts[group]), 50 + upper_window)
+            target = np.percentile(np.asarray(self.group_counts[group]), 50)
+        elif func.lower() == "max":
+            q_high = np.percentile(np.asarray(self.group_counts[group]), 100)
+            if actual:
+                q_low  = np.percentile(np.asarray(self.group_counts[group]), 100) - lower_window
+            else:
+                q_low  = np.percentile(np.asarray(self.group_counts[group]), 100 - lower_window)
+            target = q_high
+        elif func.lower() == "min":
+            q_low = np.percentile(np.asarray(self.group_counts[group]), 0)
+            if actual:
+                q_high = np.percentile(np.asarray(self.group_counts[group]), 0) + upper_window
+            else:
+                q_high = np.percentile(np.asarray(self.group_counts[group]), 0 + upper_window)
+            target = q_low
+        else:
+            raise NotImplementedException("[FAIL] Function '%s' not supported" % func.lower())
+
+        candidates = []
+        # For each "number of variants" bucket: which map the number of variants
+        # seen in a region, to all regions that contained that number of variants
+        print("[NOTE] Filtering values between %.2f and %.2f (inclusive)" % (floor(q_low), ceil(q_high)))
+        for bucket in self.group_buckets[group]:
+            if bucket >= floor(q_low) and bucket <= ceil(q_high):
+                # Append all region data structures within the desired range
+                # to the list of candidates for enrichment
+                candidates += self.group_buckets[group][bucket]
+
+        num_selected = 0
+        num_total = 0
+        print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
+        for region in sorted(self.regions,
+                        key=lambda x: (abs(self.regions[x]["group_counts"][group] - target),
+                            self.regions[x]["group_counts"][group])):
+            num_total += 1
+            if region in candidates:
+                num_selected += 1
+                print("%d\t%.2f\t%s\t%10d - %10d" % (region,
+                                                self.regions[region]["group_counts"][group],
+                                                self.regions[region]["chr"],
+                                                self.regions[region]["pos_start"],
+                                                self.regions[region]["pos_end"],
+                ))
+        print("[NOTE] %d of %d selected" % (num_selected, num_total))
+        return candidates
 
     # [Future] Hard coded default GWAS group
     def initial_filter(self, group="gwas", window=None):
@@ -218,15 +254,3 @@ class Goldilocks(object):
                     winners.append(self.regions[region])
         return winners
 
-    def execute(self):
-        """Execute Goldilocks search."""
-        for i, f in enumerate(self.files):
-            print("[READ] %s [%d of %d]" % (self.files[f]["path"], i+1, len(self.files)))
-            self.load_variants_from_file(self.files[f]["path"], self.files[f]["group"])
-
-        self.regions = self.search_regions()
-        self.candidates = self.initial_filter()
-        self.winners = self.enrich()
-
-if __name__ == "__main__":
-    Goldilocks("paths.g").execute()
