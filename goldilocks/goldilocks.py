@@ -9,8 +9,10 @@ from math import floor, ceil
 class Goldilocks(object):
     """A class for reading Variant Query files and locating regions on a genome
     with particular variant density properties."""
+    def load_chromosome(self, size, data):
+        return self.strategy.prepare(size, data)
 
-    def __init__(self, strategy, length=1000000, stride=500000, med_window=12.5):
+    def __init__(self, strategy, data, is_seq=True, length=1000000, stride=500000, med_window=12.5):
         """Initialise the internal structures and set arguments based on user input."""
 
         self.strategy = strategy# Search strategy
@@ -41,11 +43,28 @@ class Goldilocks(object):
         self.MED_WINDOW = med_window # Middle 25%, can also be overriden later
         self.GRAPHING = False
 
+        """Read data"""
+        self.groups = data
+        for group in self.groups:
+            #TODO Catch duplicates etc..
+            self.group_buckets[group] = {}
+            self.group_counts[group] = []
 
-    def load_chromosome(self, size, data):
-        return self.strategy.prepare(size, data)
+            for chrom in self.groups[group]:
+                # Remember to exclude 0-index
+                if is_seq:
+                    len_current_seq = len(self.groups[group][chrom]) - 1
+                else:
+                    len_current_seq = sorted(self.groups[group][chrom])[-1]
 
-    def search_regions(self):
+                if chrom not in self.chr_max_len:
+                    self.chr_max_len[chrom] = len_current_seq
+                if len_current_seq > self.chr_max_len[chrom]:
+                    self.chr_max_len = len_current_seq
+
+        self.group_buckets["total"] = {}
+        self.group_counts["total"] = []
+
         """Conduct a census of the regions on each chromosome using the user
         defined length and stride. Counting the number of variants present for
         each group."""
@@ -102,7 +121,7 @@ class Goldilocks(object):
                         print("%s\t%d\t%d\t%d" % (group, chrno, i, value))
 
                 region_i += 1
-        return regions
+        self.regions = regions
 
     # TODO Pretty hacky at the moment... Just trying some things out!
     def _filter(self, func="median", actual_distance=None, percentile_distance=None, direction=0, group=None):
