@@ -23,10 +23,10 @@ g = Goldilocks(NCounterStrategy, data, stride=1, length=3)
 
 candidates = g._filter("min", percentile_distance=75)
 
-#for reg in g.regions:
-#    print g.regions[reg]
+#########################################
+from Mountain.IO import fastareaders
+f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa")
+data = {"F": {1: f.get_next().seq}}
 
-
-#g.candidates = g.initial_filter()
-#g.winners = g.enrich()
-
+g = Goldilocks(GCRatioStrategy, data, stride=500000, length=1000000)
+candidates = g._filter("max", percentile_distance=10)
