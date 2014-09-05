@@ -1,5 +1,5 @@
 from goldilocks.goldilocks import Goldilocks
-from goldilocks.strategies import VariantCounterStrategy, GCRatioStrategy, NCounterStrategy
+from goldilocks.strategies import VariantCounterStrategy, GCRatioStrategy, NCounterStrategy, KMerCounterStrategy
 
 #TODO Methods may take a list of locations or may need to actually analyze
 #     a proper genomic sequence
@@ -32,6 +32,20 @@ for region in candidates:
                                     region["pos_end"],
     ))
 
+
+#########################################
+data = {"ONE": {1: "_AAACCCGGGCCCGGGAGAAAAAAA"}}
+g = Goldilocks(KMerCounterStrategy("AAA"), data, stride=1, length=6)
+
+candidates = g._filter("max", actual_distance=1)
+print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
+for region in candidates:
+    print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
+                                    region["group_counts"]["total"],
+                                    region["chr"],
+                                    region["pos_start"],
+                                    region["pos_end"],
+    ))
 
 #########################################
 data = {

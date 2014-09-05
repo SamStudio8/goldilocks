@@ -1,5 +1,27 @@
 import numpy as np
 
+class KMerCounterStrategy(object):
+
+    def __init__(self, kmer):
+        self.KMER = kmer
+
+    def prepare(self, size, data):
+        import re
+
+        # Populate the region array with 1 for the start position of desired K-Mer
+        chro = np.zeros(size+1, np.int8)
+
+        #TODO Use KMP?
+        for location in [m.start() for m in re.finditer(self.KMER, data)]:
+            chro[location] = 1
+        return chro
+
+    def evaluate(self, region):
+        # Need to allow for cases where the K-mer present flag has been placed
+        # at the very end of the region (and thus the region merely contains only
+        # the first base of the desired K-mer
+        return np.sum(region[:-(len(self.KMER)-1)])
+
 class VariantCounterStrategy(object):
 
     @staticmethod
@@ -25,7 +47,8 @@ class GCRatioStrategy(object):
         # Populate the region array with 1 for each position a GC base exists
         chro = np.zeros(size+1, np.int8)
         for location, base in enumerate(data):
-            if base.upper() == "G" or base.upper() == "C":
+            base_u = base.upper()
+            if base_u == "G" or base_u == "C":
                 chro[location] = 1
         return chro
 
