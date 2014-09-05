@@ -116,7 +116,7 @@ data = {"F": {
 
 # Will assume that files follow the recommendation that sequence lines
 # are no longer than 80 characters
-g = Goldilocks(KMerCounterStrategy(["AAA", "TTT"]), data, stride=500000, length=1000000)
+g = Goldilocks(KMerCounterStrategy(["AAA", "TTT", "GATTACA"]), data, stride=500000, length=1000000)
 candidates = g._filter("max", track="AAA")
 
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
