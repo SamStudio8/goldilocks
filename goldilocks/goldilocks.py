@@ -71,10 +71,6 @@ class Goldilocks(object):
         regions = {}
         region_i = 0
         for chrno, size in sorted(self.chr_max_len.items()):
-            if chrno == 6:
-                # Avoid human leukocyte antigen loci
-                continue
-
             chros = {}
             for group in self.groups:
                 chros[group] = self.load_chromosome(size, self.groups[group][chrno])
@@ -123,42 +119,13 @@ class Goldilocks(object):
                 region_i += 1
         self.regions = regions
 
-    # TODO Pretty hacky at the moment... Just trying some things out!
-    def _filter(self, func="median", actual_distance=None, percentile_distance=None, direction=0, group=None):
-        distance = None
-        actual = False
-        if actual_distance is not None and percentile_distance is not None:
-            raise Exception("[FAIL] Cannot filter by both actual_distance and percentile_difference. Select one.")
-
-        if actual_distance is not None:
-            distance = actual_distance
-            actual = True
-
-        if percentile_distance is not None:
-            distance = percentile_distance
-
-        if distance is None:
-            raise Exception("[FAIL] Cannot filter by neither actual_distance and percentile_difference. Select one.")
-
+    def __apply_filter_func(self, func, lower_window, upper_window, group, actual):
         valid_funcs = [
                 "median",
                 "mean",
                 "max",
                 "min"
         ]
-
-        upper_window = float(distance) / 2
-        lower_window = float(distance) / 2
-
-        if direction > 0:
-            upper_window = upper_window * 2
-            lower_window = 0.0
-        elif direction < 0:
-            lower_window = lower_window * 2
-            upper_window = 0.0
-
-        if group is None:
-            group = "total"
 
         target = None
         if func.lower() == "median":
@@ -193,6 +160,55 @@ class Goldilocks(object):
             target = q_low
         else:
             raise NotImplementedException("[FAIL] Function '%s' not supported" % func.lower())
+        return q_low, q_high, target
+
+
+    def __check_exclusions(self, exclusions, region_dict):
+        if exclusions is None or len(exclusions) == 0:
+            return False
+
+        for name in exclusions:
+            if name in region_dict:
+                if region_dict[name] in exclusions[name]:
+                    return True
+            else:
+                #TODO Invalid option
+                pass
+        return False
+
+    # TODO Pretty hacky at the moment... Just trying some things out!
+    def _filter(self, func="median", actual_distance=None, percentile_distance=None,
+            direction=0, group=None, limit=0, exclusions=None):
+        distance = None
+        actual = False
+        if actual_distance is not None and percentile_distance is not None:
+            raise Exception("[FAIL] Cannot filter by both actual_distance and percentile_difference. Select one.")
+
+        if actual_distance is not None:
+            distance = actual_distance
+            actual = True
+
+        if percentile_distance is not None:
+            distance = percentile_distance
+
+        if distance is None:
+            raise Exception("[FAIL] Cannot filter by neither actual_distance and percentile_difference. Select one.")
+
+
+        upper_window = float(distance) / 2
+        lower_window = float(distance) / 2
+
+        if direction > 0:
+            upper_window = upper_window * 2
+            lower_window = 0.0
+        elif direction < 0:
+            lower_window = lower_window * 2
+            upper_window = 0.0
+
+        if group is None:
+            group = "total"
+
+        q_low, q_high, target = self.__apply_filter_func(func, upper_window, lower_window, group, actual)
 
         candidates = []
         # For each "number of variants" bucket: which map the number of variants
@@ -205,7 +221,10 @@ class Goldilocks(object):
                 candidates += self.group_buckets[group][bucket]
 
         num_selected = 0
+        num_excluded = 0
         num_total = 0
+
+        filtered = []
         print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
         for region in sorted(self.regions,
                         key=lambda x: (abs(self.regions[x]["group_counts"][group] - target),
@@ -213,14 +232,21 @@ class Goldilocks(object):
             num_total += 1
             if region in candidates:
                 num_selected += 1
-                print("%d\t%.2f\t%s\t%10d - %10d" % (region,
-                                                self.regions[region]["group_counts"][group],
-                                                self.regions[region]["chr"],
-                                                self.regions[region]["pos_start"],
-                                                self.regions[region]["pos_end"],
-                ))
-        print("[NOTE] %d of %d selected" % (num_selected, num_total))
-        return candidates
+                if not self.__check_exclusions(exclusions, self.regions[region]):
+                    self.regions[region]["id"] = region
+                    filtered.append(self.regions[region])
+                else:
+                    num_excluded += 1
+
+        # Return the top N elements if desired
+        # TODO Report total, selected, selected-excluded and selected-filtered
+        if limit:
+            filtered = filtered[0:limit]
+
+        print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
+                (num_total, num_selected, num_excluded, limit))
+
+        return filtered
 
     def _sort(self):
         pass
