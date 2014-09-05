@@ -267,9 +267,10 @@ class Goldilocks(object):
 
             q_low, q_high, target = self.__apply_filter_func(func, upper_window, lower_window, group, actual)
         else:
+            #TODO Pretty ugly.
+            q_low, q_high, target = self.__apply_filter_func(func, 0, 0, group, actual)
             q_low  = min(np.asarray(self.group_counts[group]))
             q_high = max(np.asarray(self.group_counts[group]))
-            target = 0
 
         # For each "number of variants" bucket: which map the number of variants
         # seen in a region, to all regions that contained that number of variants
