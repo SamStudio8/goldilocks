@@ -34,13 +34,27 @@ for region in candidates:
 
 
 #########################################
-data = {"ONE": {1: "_ANAGGGANACAN"}}
+data = {
+    "ONE": {
+        1: "_ANAGGGANACAN",
+        2: "_ANAGGGANACAN",
+        3: "_ANANNNANACAN"
+    }
+}
 g = Goldilocks(NCounterStrategy, data, stride=1, length=3)
 
-candidates = g._filter("min", percentile_distance=75, limit=0,
+candidates = g._filter("min", actual_distance=5, limit=0,
         exclusions={
-            "start_lte": 3,
-            "end_gte": 10
+            0: {
+                "start_lte": 3,
+                "end_gte": 10
+            },
+            1: {
+                "chr": True
+            },
+            3: {
+                "start_gte": 9
+            }
         })
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:

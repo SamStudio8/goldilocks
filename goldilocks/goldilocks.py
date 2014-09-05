@@ -167,8 +167,8 @@ class Goldilocks(object):
         if exclusions is None or len(exclusions) == 0:
             return False
 
-        def exclude_chro(region_dict, chr_list):
-            if region_dict["chr"] in chr_list:
+        def exclude_chro(region_dict, chr_bool):
+            if chr_bool is True:
                 return True
             return False
 
@@ -194,19 +194,28 @@ class Goldilocks(object):
 
             return False
 
-        for name in exclusions:
+        # Chrom specific exclusions override overall (might be unexpected)
+        if region_dict["chr"] in exclusions:
+            to_apply = exclusions[region_dict["chr"]]
+        elif 0 in exclusions:
+            to_apply = exclusions[0]
+        else:
+            # No exclusions to apply to this region
+            return False
+
+        for name in to_apply:
             #TODO Could probably improve with a dict of funcs...
             ret = False
             if name == "chr":
-                ret = exclude_chro(region_dict, exclusions["chr"])
+                ret = exclude_chro(region_dict, to_apply["chr"])
             elif name == "start_lte":
-                ret = exclude_start(region_dict, -1, exclusions["start_lte"])
+                ret = exclude_start(region_dict, -1, to_apply["start_lte"])
             elif name == "start_gte":
-                ret = exclude_start(region_dict, 1, exclusions["start_gte"])
+                ret = exclude_start(region_dict, 1, to_apply["start_gte"])
             elif name == "end_lte":
-                ret = exclude_end(region_dict, -1, exclusions["end_lte"])
+                ret = exclude_end(region_dict, -1, to_apply["end_lte"])
             elif name == "end_gte":
-                ret = exclude_end(region_dict, 1, exclusions["end_gte"])
+                ret = exclude_end(region_dict, 1, to_apply["end_gte"])
             else:
                 #TODO Invalid option
                 pass
