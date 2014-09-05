@@ -163,7 +163,8 @@ class Goldilocks(object):
         return q_low, q_high, target
 
 
-    def __check_exclusions(self, exclusions, region_dict):
+    #TODO Support AND exclusions
+    def __check_exclusions(self, exclusions, region_dict, use_and=False):
         if exclusions is None or len(exclusions) == 0:
             return False
 
@@ -220,13 +221,23 @@ class Goldilocks(object):
                 #TODO Invalid option
                 pass
 
-            if ret is True:
-                return True
+            if use_and:
+                # Require all exclusions to be true...
+                if ret is False:
+                    return False
+            else:
+                # If we're not waiting on all conditions, we can exclude on the first
+                if ret is True:
+                    return True
+
+        if use_and:
+            # If we didn't bail on a previous false, all conditions must be satisfied
+            return True
         return False
 
     # TODO Pretty hacky at the moment... Just trying some things out!
     def _filter(self, func="median", actual_distance=None, percentile_distance=None,
-            direction=0, group=None, limit=0, exclusions=None):
+            direction=0, group=None, limit=0, exclusions=None, use_and=False):
         distance = None
         actual = False
         if actual_distance is not None and percentile_distance is not None:
@@ -279,7 +290,7 @@ class Goldilocks(object):
             num_total += 1
             if region in candidates:
                 num_selected += 1
-                if not self.__check_exclusions(exclusions, self.regions[region]):
+                if not self.__check_exclusions(exclusions, self.regions[region], use_and):
                     self.regions[region]["id"] = region
                     filtered.append(self.regions[region])
                 else:

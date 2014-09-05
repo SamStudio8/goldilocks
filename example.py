@@ -45,17 +45,22 @@ g = Goldilocks(NCounterStrategy, data, stride=1, length=3)
 
 candidates = g._filter("min", actual_distance=5, limit=0,
         exclusions={
+            # Filter any region with a starting position <= 3 AND an ending postion >= 10
             0: {
                 "start_lte": 3,
-                "end_gte": 10
+                "end_gte": 4
             },
+
+            # Filter anything from Chrm1
             1: {
                 "chr": True
             },
+
+            # Filter any region with an ending postion >= 9
             3: {
                 "start_gte": 9
             }
-        })
+        }, use_and=True)
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:
     print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
