@@ -225,7 +225,6 @@ class Goldilocks(object):
         num_total = 0
 
         filtered = []
-        print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
         for region in sorted(self.regions,
                         key=lambda x: (abs(self.regions[x]["group_counts"][group] - target),
                             self.regions[x]["group_counts"][group])):
