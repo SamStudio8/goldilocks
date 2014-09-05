@@ -250,26 +250,27 @@ class Goldilocks(object):
         if percentile_distance is not None:
             distance = percentile_distance
 
-        if distance is None:
-            raise Exception("[FAIL] Cannot filter by neither actual_distance and percentile_difference. Select one.")
-
-
-        upper_window = float(distance) / 2
-        lower_window = float(distance) / 2
-
-        if direction > 0:
-            upper_window = upper_window * 2
-            lower_window = 0.0
-        elif direction < 0:
-            lower_window = lower_window * 2
-            upper_window = 0.0
-
         if group is None:
             group = "total"
 
-        q_low, q_high, target = self.__apply_filter_func(func, upper_window, lower_window, group, actual)
-
         candidates = []
+        if distance is not None:
+            upper_window = float(distance) / 2
+            lower_window = float(distance) / 2
+
+            if direction > 0:
+                upper_window = upper_window * 2
+                lower_window = 0.0
+            elif direction < 0:
+                lower_window = lower_window * 2
+                upper_window = 0.0
+
+            q_low, q_high, target = self.__apply_filter_func(func, upper_window, lower_window, group, actual)
+        else:
+            q_low  = min(np.asarray(self.group_counts[group]))
+            q_high = max(np.asarray(self.group_counts[group]))
+            target = 0
+
         # For each "number of variants" bucket: which map the number of variants
         # seen in a region, to all regions that contained that number of variants
         print("[NOTE] Filtering values between %.2f and %.2f (inclusive)" % (floor(q_low), ceil(q_high)))
