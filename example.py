@@ -85,8 +85,6 @@ for region in candidates:
     ))
 
 #########################################
-import sys
-sys.exit()
 from Mountain.IO import fastareaders
 f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa")
 data = {"F": {
@@ -108,3 +106,25 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
+
+#########################################
+from Mountain.IO import fastareaders
+f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa")
+data = {"F": {
+            1: f.get_next().seq,
+        }}
+
+# Will assume that files follow the recommendation that sequence lines
+# are no longer than 80 characters
+g = Goldilocks(KMerCounterStrategy("AAA"), data, stride=500000, length=1000000)
+candidates = g._filter("max")
+
+print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
+for region in candidates:
+    print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
+                                    region["group_counts"]["total"],
+                                    region["chr"],
+                                    region["pos_start"],
+                                    region["pos_end"],
+    ))
+
