@@ -45,7 +45,7 @@ g = Goldilocks(NCounterStrategy, data, stride=1, length=3)
 
 candidates = g._filter("min", actual_distance=5, limit=0,
         exclusions={
-            # Filter any region with a starting position <= 3 AND an ending postion >= 10
+            # Filter any region with a starting position <= 3 AND an ending postion >= 4
             0: {
                 "start_lte": 3,
                 "end_gte": 4
