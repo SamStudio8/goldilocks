@@ -9,8 +9,8 @@ from math import floor, ceil
 class Goldilocks(object):
     """A class for reading Variant Query files and locating regions on a genome
     with particular variant density properties."""
-    def load_chromosome(self, size, data):
-        return self.strategy.prepare(size, data)
+    def load_chromosome(self, size, data, track):
+        return self.strategy.prepare(size, data, track)
 
     def __init__(self, strategy, data, is_seq=True, length=1000000, stride=500000, med_window=12.5):
         """Initialise the internal structures and set arguments based on user input."""
@@ -48,7 +48,7 @@ class Goldilocks(object):
         for group in self.groups:
             #TODO Catch duplicates etc..
             self.group_buckets[group] = {}
-            self.group_counts[group] = []
+            self.group_counts[group] = {}
 
             for chrom in self.groups[group]:
                 # Remember to exclude 0-index
@@ -63,7 +63,7 @@ class Goldilocks(object):
                     self.chr_max_len = len_current_seq
 
         self.group_buckets["total"] = {}
-        self.group_counts["total"] = []
+        self.group_counts["total"] = {}
 
         """Conduct a census of the regions on each chromosome using the user
         defined length and stride. Counting the number of variants present for
@@ -73,7 +73,9 @@ class Goldilocks(object):
         for chrno, size in sorted(self.chr_max_len.items()):
             chros = {}
             for group in self.groups:
-                chros[group] = self.load_chromosome(size, self.groups[group][chrno])
+                chros[group] = {}
+                for track in self.strategy.TRACKS:
+                    chros[group][track] = self.load_chromosome(size, self.groups[group][chrno], track)
 
             print("[SRCH] Chr:%d" % (chrno))
             # Ignore 0 position
@@ -81,45 +83,57 @@ class Goldilocks(object):
                 region_e = region_s + self.LENGTH - 1
                 regions[region_i] = {
                     "ichr": i,
-                    "group_counts": {"total": 0},
+                    "group_counts": {"total": {}},
                     "chr": chrno,
                     "pos_start": region_s,
                     "pos_end": region_e
                 }
 
                 for group in self.groups:
-                    value = self.strategy.evaluate(chros[group][region_s:region_e+1])
-                    regions[region_i]["group_counts"][group] = value
-                    regions[region_i]["group_counts"]["total"] += value
+                    for track in self.strategy.TRACKS:
+                        value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track)
 
-                    # TODO Should we be ignoring these regions if they are empty?
-                    if value not in self.group_buckets[group]:
-                        # Add this particular number of variants as a bucket
-                        self.group_buckets[group][value] = []
+                        if group not in regions[region_i]["group_counts"]:
+                            regions[region_i]["group_counts"][group] = {}
+                        if track not in regions[region_i]["group_counts"]["total"]:
+                            regions[region_i]["group_counts"]["total"][track] = 0
 
-                    if value not in self.group_buckets["total"]:
-                        self.group_buckets["total"][value] = []
+                        regions[region_i]["group_counts"][group][track] = value
+                        regions[region_i]["group_counts"]["total"][track] += value
 
-                    # Add the region id to the bucket
-                    self.group_buckets[group][value].append(region_i)
-                    self.group_buckets["total"][value].append(region_i)
+                        # TODO Should we be ignoring these regions if they are empty?
+                        if value not in self.group_buckets[group]:
+                            # Add this particular number of variants as a bucket
+                            self.group_buckets[group][value] = []
 
-                    # TODO Config option to include 0 in filter metrics
+                        if value not in self.group_buckets["total"]:
+                            self.group_buckets["total"][value] = []
+
+                        # Add the region id to the bucket
+                        self.group_buckets[group][value].append(region_i)
+                        self.group_buckets["total"][value].append(region_i)
+
+                        # TODO Config option to include 0 in filter metrics
 #                   if value > 0:
-                    # Append the number of variants counted in this region
-                    # for this group to a list used to calculate the median
-                    self.group_counts[group].append(value)
-                    self.group_counts["total"].append(value)
+                        # Append the number of variants counted in this region
+                        # for this group to a list used to calculate the median
+                        if track not in self.group_counts["total"]:
+                            self.group_counts["total"][track] = []
+                        if track not in self.group_counts[group]:
+                            self.group_counts[group][track] = []
 
-                    if self.GRAPHING:
-                        # NOTE Use i not region_i so regions in the plot start
-                        # at 0 for each chromosome rather than cascading
-                        print("%s\t%d\t%d\t%d" % (group, chrno, i, value))
+                        self.group_counts[group][track].append(value)
+                        self.group_counts["total"][track].append(value)
+
+                        if self.GRAPHING:
+                            # NOTE Use i not region_i so regions in the plot start
+                            # at 0 for each chromosome rather than cascading
+                            print("%s\t%d\t%d\t%d" % (group, chrno, i, value))
 
                 region_i += 1
         self.regions = regions
 
-    def __apply_filter_func(self, func, lower_window, upper_window, group, actual):
+    def __apply_filter_func(self, func, lower_window, upper_window, group, actual, track):
         valid_funcs = [
                 "median",
                 "mean",
@@ -130,33 +144,33 @@ class Goldilocks(object):
         target = None
         if func.lower() == "median":
             if actual:
-                q_low  = np.percentile(np.asarray(self.group_counts[group]), 50) - lower_window
-                q_high = np.percentile(np.asarray(self.group_counts[group]), 50) + upper_window
+                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50) - lower_window
+                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50) + upper_window
             else:
-                q_low  = np.percentile(np.asarray(self.group_counts[group]), 50 - lower_window)
-                q_high = np.percentile(np.asarray(self.group_counts[group]), 50 + upper_window)
-            target = np.percentile(np.asarray(self.group_counts[group]), 50)
+                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50 - lower_window)
+                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50 + upper_window)
+            target = np.percentile(np.asarray(self.group_counts[group][track]), 50)
         if func.lower() == "mean":
             if actual:
-                q_low  = np.percentile(np.asarray(self.group_counts[group]), 50) - lower_window
-                q_high = np.percentile(np.asarray(self.group_counts[group]), 50) + upper_window
+                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50) - lower_window
+                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50) + upper_window
             else:
-                q_low  = np.percentile(np.asarray(self.group_counts[group]), 50 - lower_window)
-                q_high = np.percentile(np.asarray(self.group_counts[group]), 50 + upper_window)
-            target = np.percentile(np.asarray(self.group_counts[group]), 50)
+                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50 - lower_window)
+                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50 + upper_window)
+            target = np.percentile(np.asarray(self.group_counts[group][track]), 50)
         elif func.lower() == "max":
-            q_high = np.percentile(np.asarray(self.group_counts[group]), 100)
+            q_high = np.percentile(np.asarray(self.group_counts[group][track]), 100)
             if actual:
-                q_low  = np.percentile(np.asarray(self.group_counts[group]), 100) - lower_window
+                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 100) - lower_window
             else:
-                q_low  = np.percentile(np.asarray(self.group_counts[group]), 100 - lower_window)
+                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 100 - lower_window)
             target = q_high
         elif func.lower() == "min":
-            q_low = np.percentile(np.asarray(self.group_counts[group]), 0)
+            q_low = np.percentile(np.asarray(self.group_counts[group][track]), 0)
             if actual:
-                q_high = np.percentile(np.asarray(self.group_counts[group]), 0) + upper_window
+                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 0) + upper_window
             else:
-                q_high = np.percentile(np.asarray(self.group_counts[group]), 0 + upper_window)
+                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 0 + upper_window)
             target = q_low
         else:
             raise NotImplementedException("[FAIL] Function '%s' not supported" % func.lower())
@@ -236,7 +250,7 @@ class Goldilocks(object):
         return False
 
     # TODO Pretty hacky at the moment... Just trying some things out!
-    def _filter(self, func="median", actual_distance=None, percentile_distance=None,
+    def _filter(self, func="median", track="1", actual_distance=None, percentile_distance=None,
             direction=0, group=None, limit=0, exclusions=None, use_and=False):
         distance = None
         actual = False
@@ -265,12 +279,12 @@ class Goldilocks(object):
                 lower_window = lower_window * 2
                 upper_window = 0.0
 
-            q_low, q_high, target = self.__apply_filter_func(func, upper_window, lower_window, group, actual)
+            q_low, q_high, target = self.__apply_filter_func(func, upper_window, lower_window, group, actual, track)
         else:
             #TODO Pretty ugly.
-            q_low, q_high, target = self.__apply_filter_func(func, 0, 0, group, actual)
-            q_low  = min(np.asarray(self.group_counts[group]))
-            q_high = max(np.asarray(self.group_counts[group]))
+            q_low, q_high, target = self.__apply_filter_func(func, 0, 0, group, actual, track)
+            q_low  = min(np.asarray(self.group_counts[group][track]))
+            q_high = max(np.asarray(self.group_counts[group][track]))
 
         # For each "number of variants" bucket: which map the number of variants
         # seen in a region, to all regions that contained that number of variants
@@ -287,8 +301,8 @@ class Goldilocks(object):
 
         filtered = []
         for region in sorted(self.regions,
-                        key=lambda x: (abs(self.regions[x]["group_counts"][group] - target),
-                            self.regions[x]["group_counts"][group])):
+                        key=lambda x: (abs(self.regions[x]["group_counts"][group][track] - target),
+                            self.regions[x]["group_counts"][group][track])):
             num_total += 1
             if region in candidates:
                 num_selected += 1

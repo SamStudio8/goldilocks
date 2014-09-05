@@ -5,12 +5,12 @@ from goldilocks.strategies import VariantCounterStrategy, GCRatioStrategy, NCoun
 #     a proper genomic sequence
 """Execute Goldilocks search."""
 data = {"ONE": {1: [1,2,5]}}
-g = Goldilocks(VariantCounterStrategy, data, is_seq=False, stride=1, length=3)
+g = Goldilocks(VariantCounterStrategy(), data, is_seq=False, stride=1, length=3)
 
 candidates = g._filter("max", actual_distance=1)
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:
-    print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
+    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
                                     region["group_counts"]["total"],
                                     region["chr"],
                                     region["pos_start"],
@@ -20,12 +20,12 @@ for region in candidates:
 
 #########################################
 data = {"ONE": {1: "_CCCGGGAGATTT"}}
-g = Goldilocks(GCRatioStrategy, data, stride=1, length=3)
+g = Goldilocks(GCRatioStrategy(), data, stride=1, length=3)
 
 candidates = g._filter("max", actual_distance=1)
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:
-    print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
+    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
                                     region["group_counts"]["total"],
                                     region["chr"],
                                     region["pos_start"],
@@ -35,12 +35,12 @@ for region in candidates:
 
 #########################################
 data = {"ONE": {1: "_AAACCCGGGCCCGGGAGAAAAAAA"}}
-g = Goldilocks(KMerCounterStrategy("AAA"), data, stride=1, length=6)
+g = Goldilocks(KMerCounterStrategy(["AAA"]), data, stride=1, length=6)
 
-candidates = g._filter("max", actual_distance=1)
+candidates = g._filter("max", actual_distance=1, track="AAA")
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:
-    print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
+    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
                                     region["group_counts"]["total"],
                                     region["chr"],
                                     region["pos_start"],
@@ -55,7 +55,7 @@ data = {
         3: "_ANANNNANACAN"
     }
 }
-g = Goldilocks(NCounterStrategy, data, stride=1, length=3)
+g = Goldilocks(NCounterStrategy(), data, stride=1, length=3)
 
 candidates = g._filter("min", limit=0,
         exclusions={
@@ -77,7 +77,7 @@ candidates = g._filter("min", limit=0,
         }, use_and=True)
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:
-    print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
+    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
                                     region["group_counts"]["total"],
                                     region["chr"],
                                     region["pos_start"],
@@ -93,14 +93,14 @@ data = {"F": {
 
 # Will assume that files follow the recommendation that sequence lines
 # are no longer than 80 characters
-g = Goldilocks(GCRatioStrategy, data, stride=500000, length=1000000)
+g = Goldilocks(GCRatioStrategy(), data, stride=500000, length=1000000)
 
 # Avoid human leukocyte antigen loci on chr6
 candidates = g._filter("max", percentile_distance=10, limit=10, exclusions={"chr": [6]})
 
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:
-    print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
+    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
                                     region["group_counts"]["total"],
                                     region["chr"],
                                     region["pos_start"],
@@ -116,12 +116,12 @@ data = {"F": {
 
 # Will assume that files follow the recommendation that sequence lines
 # are no longer than 80 characters
-g = Goldilocks(KMerCounterStrategy("AAA"), data, stride=500000, length=1000000)
-candidates = g._filter("max")
+g = Goldilocks(KMerCounterStrategy(["AAA", "TTT"]), data, stride=500000, length=1000000)
+candidates = g._filter("max", track="AAA")
 
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:
-    print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
+    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
                                     region["group_counts"]["total"],
                                     region["chr"],
                                     region["pos_start"],
