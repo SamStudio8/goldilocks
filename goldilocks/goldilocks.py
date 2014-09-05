@@ -167,13 +167,52 @@ class Goldilocks(object):
         if exclusions is None or len(exclusions) == 0:
             return False
 
-        for name in exclusions:
-            if name in region_dict:
-                if region_dict[name] in exclusions[name]:
+        def exclude_chro(region_dict, chr_list):
+            if region_dict["chr"] in chr_list:
+                return True
+            return False
+
+        # TODO Should probably allow these to be applied to particular chr...
+        def exclude_start(region_dict, operand, position):
+            if operand < 0:
+                if region_dict["pos_start"] <= position:
                     return True
+            elif operand > 0:
+                if region_dict["pos_start"] >= position:
+                    return True
+
+            return False
+
+        # TODO Should probably allow these to be applied to particular chr...
+        def exclude_end(region_dict, operand, position):
+            if operand < 0:
+                if region_dict["pos_end"] <= position:
+                    return True
+            elif operand > 0:
+                if region_dict["pos_end"] >= position:
+                    return True
+
+            return False
+
+        for name in exclusions:
+            #TODO Could probably improve with a dict of funcs...
+            ret = False
+            if name == "chr":
+                ret = exclude_chro(region_dict, exclusions["chr"])
+            elif name == "start_lte":
+                ret = exclude_start(region_dict, -1, exclusions["start_lte"])
+            elif name == "start_gte":
+                ret = exclude_start(region_dict, 1, exclusions["start_gte"])
+            elif name == "end_lte":
+                ret = exclude_end(region_dict, -1, exclusions["end_lte"])
+            elif name == "end_gte":
+                ret = exclude_end(region_dict, 1, exclusions["end_gte"])
             else:
                 #TODO Invalid option
                 pass
+
+            if ret is True:
+                return True
         return False
 
     # TODO Pretty hacky at the moment... Just trying some things out!

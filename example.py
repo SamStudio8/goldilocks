@@ -37,7 +37,11 @@ for region in candidates:
 data = {"ONE": {1: "_ANAGGGANACAN"}}
 g = Goldilocks(NCounterStrategy, data, stride=1, length=3)
 
-candidates = g._filter("min", percentile_distance=75, limit=3, exclusions={"chr": [1]})
+candidates = g._filter("min", percentile_distance=75, limit=0,
+        exclusions={
+            "start_lte": 3,
+            "end_gte": 10
+        })
 print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
 for region in candidates:
     print("%d\t%.2f\t%s\t%10d - %10d" % (region["id"],
@@ -48,6 +52,8 @@ for region in candidates:
     ))
 
 #########################################
+import sys
+sys.exit()
 from Mountain.IO import fastareaders
 f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa")
 data = {"F": {
