@@ -177,7 +177,6 @@ class Goldilocks(object):
         return q_low, q_high, target
 
 
-    #TODO Support AND exclusions
     def __check_exclusions(self, exclusions, region_dict, use_and=False):
         if exclusions is None or len(exclusions) == 0:
             return False
@@ -187,7 +186,6 @@ class Goldilocks(object):
                 return True
             return False
 
-        # TODO Should probably allow these to be applied to particular chr...
         def exclude_start(region_dict, operand, position):
             if operand < 0:
                 if region_dict["pos_start"] <= position:
@@ -198,7 +196,6 @@ class Goldilocks(object):
 
             return False
 
-        # TODO Should probably allow these to be applied to particular chr...
         def exclude_end(region_dict, operand, position):
             if operand < 0:
                 if region_dict["pos_end"] <= position:
