@@ -87,7 +87,7 @@ for region in candidates:
 #########################################
 
 data = {"F": {
-            1: "/store/sanger/ref/hs37d5.fa",
+            1: "/store/sanger/ref/hs37d5.fa1",
         }, "use_file": True}
 
 # Will assume that files follow the recommendation that sequence lines
@@ -109,7 +109,7 @@ for region in candidates:
 #########################################
 
 data = {"F": {
-            1: "/store/sanger/ref/hs37d5.fa",
+            1: "/store/sanger/ref/hs37d5.fa1",
         }, "use_file": True}
 
 # Will assume that files follow the recommendation that sequence lines

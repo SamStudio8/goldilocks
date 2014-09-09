@@ -11,8 +11,8 @@ from Mountain.IO import fastareaders
 class Goldilocks(object):
     """A class for reading Variant Query files and locating regions on a genome
     with particular variant density properties."""
-    def load_chromosome(self, size, data, track):
-        return self.strategy.prepare(size, data, track)
+    def load_chromosome(self, arr, data, track):
+        return self.strategy.prepare(arr, data, track)
 
     def __init__(self, strategy, data, is_seq=True, length=1000000, stride=500000, med_window=12.5):
         """Initialise the internal structures and set arguments based on user input."""
@@ -83,6 +83,8 @@ class Goldilocks(object):
             #TODO Naughty...
             f = fastareaders.FASTA_Library(self.groups[group][1])
             max_chr_sizes = f.max_chr_sizes.items()
+            chro = np.zeros(self.LENGTH+1, np.int8)
+            print max_chr_sizes
         else:
             max_chr_sizes = self.chr_max_len.items()
 
@@ -92,7 +94,9 @@ class Goldilocks(object):
                 chros[group] = {}
                 for track in self.strategy.TRACKS:
                     if not self.use_mountain:
-                        chros[group][track] = self.load_chromosome(size, self.groups[group][chrno], track)
+                        chro = np.zeros(size+1, np.int8)
+                        chro.fill(0)
+                        chros[group][track] = self.load_chromosome(chro, self.groups[group][chrno], track)
 
             if self.use_mountain:
                 f.seek_fasta(chrno)
@@ -108,26 +112,29 @@ class Goldilocks(object):
                     "pos_start": region_s,
                     "pos_end": region_e
                 }
-                print i
-                if self.use_mountain:
-                    print "FETCH"
-                    sseq = f.fetch_n_bases(self.LENGTH)
-                    print "LOAD"
-                    chros[group][track] = self.load_chromosome(length, sseq, track)
-                    print "LOADED"
-
-                    # Move the file pointer back to read the start of the next window
-                    tell = f.handler.tell()
-                    f.handler.seek(tell-self.LENGTH+self.STRIDE, 0)
-
+                #print i
                 for group in self.groups:
                     for track in self.strategy.TRACKS:
-                        print "EVAL"
+                        #print "EVAL"
                         if self.use_mountain:
+                            #print "FILL"
+                            chro.fill(0)
+                            #print "FETCH"
+                            seek_last = f.handler.tell()
+                            sseq = f.fetch_n_bases(self.LENGTH)
+                            #print "LOAD"
+                            chros[group][track] = self.load_chromosome(chro, sseq, track)
+                            #print "LOADED"
+
+                            # Move the file pointer back to read the start of the next window
+                            print i
+                            f.handler.seek(seek_last, 0)
+                            f.fetch_n_bases(self.STRIDE)
+
                             value = self.strategy.evaluate(chros[group][track], track)
                         else:
                             value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track)
-                        print "EVALUATED"
+                        #print "EVALUATED"
 
                         if group not in regions[region_i]["group_counts"]:
                             regions[region_i]["group_counts"][group] = {}
