@@ -113,28 +113,29 @@ class Goldilocks(object):
                     "pos_end": region_e
                 }
                 #print i
+                if self.use_mountain:
+                    #print "FILL"
+                    chro.fill(0)
+                    #print "FETCH"
+                    seek_last = f.handler.tell()-1
+                    sseq = f.fetch_n_bases(self.LENGTH)
+
+                    # Move the file pointer back to read the start of the next window
+                    print i
+                    f.handler.seek(seek_last, 0)
+                    f.fetch_n_bases(self.STRIDE)
+
                 for group in self.groups:
                     for track in self.strategy.TRACKS:
-                        #print "EVAL"
                         if self.use_mountain:
                             #print "FILL"
                             chro.fill(0)
-                            #print "FETCH"
-                            seek_last = f.handler.tell()
-                            sseq = f.fetch_n_bases(self.LENGTH)
-                            #print "LOAD"
                             chros[group][track] = self.load_chromosome(chro, sseq, track)
                             #print "LOADED"
-
-                            # Move the file pointer back to read the start of the next window
-                            print i
-                            f.handler.seek(seek_last, 0)
-                            f.fetch_n_bases(self.STRIDE)
 
                             value = self.strategy.evaluate(chros[group][track], track)
                         else:
                             value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track)
-                        #print "EVALUATED"
 
                         if group not in regions[region_i]["group_counts"]:
                             regions[region_i]["group_counts"][group] = {}
