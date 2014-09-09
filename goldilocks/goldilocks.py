@@ -6,6 +6,8 @@ __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 import numpy as np
 from math import floor, ceil
 
+from Mountain.IO import fastareaders
+
 class Goldilocks(object):
     """A class for reading Variant Query files and locating regions on a genome
     with particular variant density properties."""
@@ -42,25 +44,31 @@ class Goldilocks(object):
         self.STRIDE = stride # NOTE STRIDE must be non-zero, 1 is very a bad idea (TM)
         self.MED_WINDOW = med_window # Middle 25%, can also be overriden later
         self.GRAPHING = False
+        self.use_mountain = False
 
         """Read data"""
         self.groups = data
+        if "use_file" in self.groups:
+            self.use_mountain = True
+            del self.groups["use_file"]
+
         for group in self.groups:
             #TODO Catch duplicates etc..
             self.group_buckets[group] = {}
             self.group_counts[group] = {}
 
-            for chrom in self.groups[group]:
-                # Remember to exclude 0-index
-                if is_seq:
-                    len_current_seq = len(self.groups[group][chrom]) - 1
-                else:
-                    len_current_seq = sorted(self.groups[group][chrom])[-1]
+            if not self.use_mountain:
+                for chrom in self.groups[group]:
+                    # Remember to exclude 0-index
+                    if is_seq:
+                        len_current_seq = len(self.groups[group][chrom]) - 1
+                    else:
+                        len_current_seq = sorted(self.groups[group][chrom])[-1]
 
-                if chrom not in self.chr_max_len:
-                    self.chr_max_len[chrom] = len_current_seq
-                if len_current_seq > self.chr_max_len[chrom]:
-                    self.chr_max_len = len_current_seq
+                    if chrom not in self.chr_max_len:
+                        self.chr_max_len[chrom] = len_current_seq
+                    if len_current_seq > self.chr_max_len[chrom]:
+                        self.chr_max_len = len_current_seq
 
         self.group_buckets["total"] = {}
         self.group_counts["total"] = {}
@@ -70,14 +78,26 @@ class Goldilocks(object):
         each group."""
         regions = {}
         region_i = 0
-        for chrno, size in sorted(self.chr_max_len.items()):
+
+        if self.use_mountain:
+            #TODO Naughty...
+            f = fastareaders.FASTA_Library(self.groups[group][1])
+            max_chr_sizes = f.max_chr_sizes.items()
+        else:
+            max_chr_sizes = self.chr_max_len.items()
+
+        for chrno, size in sorted(max_chr_sizes):
             chros = {}
             for group in self.groups:
                 chros[group] = {}
                 for track in self.strategy.TRACKS:
-                    chros[group][track] = self.load_chromosome(size, self.groups[group][chrno], track)
+                    if not self.use_mountain:
+                        chros[group][track] = self.load_chromosome(size, self.groups[group][chrno], track)
 
-            print("[SRCH] Chr:%d" % (chrno))
+            if self.use_mountain:
+                f.seek_fasta(chrno)
+
+            print("[SRCH] Chr:%s" % str(chrno))
             # Ignore 0 position
             for i, region_s in enumerate(range(1, size+1-self.LENGTH+1, self.STRIDE)):
                 region_e = region_s + self.LENGTH - 1
@@ -88,10 +108,26 @@ class Goldilocks(object):
                     "pos_start": region_s,
                     "pos_end": region_e
                 }
+                print i
+                if self.use_mountain:
+                    print "FETCH"
+                    sseq = f.fetch_n_bases(self.LENGTH)
+                    print "LOAD"
+                    chros[group][track] = self.load_chromosome(length, sseq, track)
+                    print "LOADED"
+
+                    # Move the file pointer back to read the start of the next window
+                    tell = f.handler.tell()
+                    f.handler.seek(tell-self.LENGTH+self.STRIDE, 0)
 
                 for group in self.groups:
                     for track in self.strategy.TRACKS:
-                        value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track)
+                        print "EVAL"
+                        if self.use_mountain:
+                            value = self.strategy.evaluate(chros[group][track], track)
+                        else:
+                            value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track)
+                        print "EVALUATED"
 
                         if group not in regions[region_i]["group_counts"]:
                             regions[region_i]["group_counts"][group] = {}
