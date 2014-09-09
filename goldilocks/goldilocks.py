@@ -112,7 +112,7 @@ class Goldilocks(object):
                     "pos_start": region_s,
                     "pos_end": region_e
                 }
-                #print i
+
                 if self.use_mountain:
                     #print "FILL"
                     chro.fill(0)
@@ -121,7 +121,6 @@ class Goldilocks(object):
                     sseq = f.fetch_n_bases(self.LENGTH)
 
                     # Move the file pointer back to read the start of the next window
-                    print i
                     f.handler.seek(seek_last, 0)
                     f.fetch_n_bases(self.STRIDE)
 
