@@ -1,3 +1,4 @@
+{1: 5}
 [SRCH] Chr:1
 [NOTE] Filtering values between 1.00 and 2.00 (inclusive)
 [NOTE] 3 processed, 3 match search criteria, 0 excluded, 0 limit
@@ -5,6 +6,7 @@
 0	{'1': 2}	1	         1 -          3
 1	{'1': 1}	1	         2 -          4
 2	{'1': 1}	1	         3 -          5
+{1: 12}
 [SRCH] Chr:1
 [NOTE] Filtering values between 0.00 and 1.00 (inclusive)
 [NOTE] 10 processed, 10 match search criteria, 0 excluded, 0 limit
@@ -19,6 +21,7 @@
 7	{'1': 0.3333333333333333}	1	         8 -         10
 8	{'1': 0.0}	1	         9 -         11
 9	{'1': 0.0}	1	        10 -         12
+{1: 24}
 [SRCH] Chr:1
 [NOTE] Filtering values between 1.00 and 2.00 (inclusive)
 [NOTE] 19 processed, 6 match search criteria, 0 excluded, 0 limit
@@ -29,6 +32,7 @@
 15	{'AAA': 1}	1	        16 -         21
 16	{'AAA': 1}	1	        17 -         22
 18	{'AAA': 1}	1	        19 -         24
+{1: 12, 2: 12, 3: 12}
 [SRCH] Chr:1
 [SRCH] Chr:2
 [SRCH] Chr:3
@@ -51,520 +55,523 @@
 24	{'1': 2}	3	         5 -          7
 25	{'1': 2}	3	         6 -          8
 23	{'1': 3}	3	         4 -          6
-[READ] 1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
-[SRCH] Chr:1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
-[NOTE] Filtering values between 0.00 and 1.00 (inclusive)
-[NOTE] 497 processed, 497 match search criteria, 0 excluded, 10 limit
 #WND	VAL	CHR	POSITIONS (INC.)
-2	{'1': 0.568914}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   1000001 -    2000000
-3	{'1': 0.567003}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   1500001 -    2500000
-4	{'1': 0.553134}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   2000001 -    3000000
-5	{'1': 0.548165}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   2500001 -    3500000
-1	{'1': 0.539159}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	    500001 -    1500000
-11	{'1': 0.5181}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   5500001 -    6500000
-12	{'1': 0.51752}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   6000001 -    7000000
-312	{'1': 0.504268}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 156000001 -  157000000
-35	{'1': 0.50396}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  17500001 -   18500000
-18	{'1': 0.50197}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   9000001 -   10000000
+13	{'1': 0}	2	         4 -          6
+14	{'1': 0}	2	         5 -          7
+18	{'1': 0}	2	         9 -         11
+10	{'1': 1}	2	         1 -          3
+15	{'1': 1}	2	         6 -          8
+16	{'1': 1}	2	         7 -          9
+17	{'1': 1}	2	         8 -         10
+19	{'1': 1}	2	        10 -         12
+20	{'1': 1}	3	         1 -          3
+26	{'1': 1}	3	         7 -          9
+27	{'1': 1}	3	         8 -         10
+21	{'1': 2}	3	         2 -          4
+22	{'1': 2}	3	         3 -          5
+24	{'1': 2}	3	         5 -          7
+25	{'1': 2}	3	         6 -          8
+23	{'1': 3}	3	         4 -          6
 [READ] 1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
-[SRCH] Chr:1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
+{1: 249250620}
+[SRCH] Chr:1
 [NOTE] Filtering values between 0.00 and 32099.00 (inclusive)
 [NOTE] 497 processed, 497 match search criteria, 0 excluded, 0 limit
 #WND	VAL	CHR	POSITIONS (INC.)
-382	{'GATTACA': 148, 'AAA': 32099, 'TTT': 29423}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 191000001 -  192000000
-383	{'GATTACA': 156, 'AAA': 32066, 'TTT': 28378}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 191500001 -  192500000
-205	{'GATTACA': 150, 'AAA': 31884, 'TTT': 28430}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 102500001 -  103500000
-213	{'GATTACA': 129, 'AAA': 31781, 'TTT': 27216}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 106500001 -  107500000
-380	{'GATTACA': 150, 'AAA': 31658, 'TTT': 30875}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 190000001 -  191000000
-398	{'GATTACA': 178, 'AAA': 31485, 'TTT': 24717}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 199000001 -  200000000
-381	{'GATTACA': 150, 'AAA': 31400, 'TTT': 30509}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 190500001 -  191500000
-390	{'GATTACA': 153, 'AAA': 31385, 'TTT': 29808}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 195000001 -  196000000
-379	{'GATTACA': 152, 'AAA': 31365, 'TTT': 31395}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 189500001 -  190500000
-391	{'GATTACA': 134, 'AAA': 31186, 'TTT': 29685}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 195500001 -  196500000
-394	{'GATTACA': 169, 'AAA': 31124, 'TTT': 26787}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 197000001 -  198000000
-389	{'GATTACA': 180, 'AAA': 31089, 'TTT': 30444}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 194500001 -  195500000
-212	{'GATTACA': 126, 'AAA': 30898, 'TTT': 29612}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 106000001 -  107000000
-161	{'GATTACA': 138, 'AAA': 30830, 'TTT': 28935}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  80500001 -   81500000
-210	{'GATTACA': 152, 'AAA': 30694, 'TTT': 30135}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 105000001 -  106000000
-147	{'GATTACA': 129, 'AAA': 30620, 'TTT': 28443}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  73500001 -   74500000
-196	{'GATTACA': 147, 'AAA': 30602, 'TTT': 28766}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  98000001 -   99000000
-195	{'GATTACA': 154, 'AAA': 30589, 'TTT': 28672}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  97500001 -   98500000
-432	{'GATTACA': 125, 'AAA': 30559, 'TTT': 26870}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 216000001 -  217000000
-384	{'GATTACA': 156, 'AAA': 30543, 'TTT': 27222}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 192000001 -  193000000
-144	{'GATTACA': 144, 'AAA': 30500, 'TTT': 29320}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  72000001 -   73000000
-204	{'GATTACA': 144, 'AAA': 30402, 'TTT': 29220}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 102000001 -  103000000
-377	{'GATTACA': 144, 'AAA': 30285, 'TTT': 31264}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 188500001 -  189500000
-162	{'GATTACA': 156, 'AAA': 30257, 'TTT': 28274}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  81000001 -   82000000
-388	{'GATTACA': 170, 'AAA': 30186, 'TTT': 30166}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 194000001 -  195000000
-211	{'GATTACA': 147, 'AAA': 30164, 'TTT': 31286}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 105500001 -  106500000
-392	{'GATTACA': 142, 'AAA': 30148, 'TTT': 30017}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 196000001 -  197000000
-145	{'GATTACA': 124, 'AAA': 30129, 'TTT': 29854}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  72500001 -   73500000
-146	{'GATTACA': 123, 'AAA': 30071, 'TTT': 29448}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  73000001 -   74000000
-378	{'GATTACA': 147, 'AAA': 30020, 'TTT': 31841}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 189000001 -  190000000
-393	{'GATTACA': 146, 'AAA': 30008, 'TTT': 28879}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 196500001 -  197500000
-397	{'GATTACA': 131, 'AAA': 29969, 'TTT': 28961}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 198500001 -  199500000
-209	{'GATTACA': 141, 'AAA': 29924, 'TTT': 30103}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 104500001 -  105500000
-148	{'GATTACA': 119, 'AAA': 29895, 'TTT': 28197}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  74000001 -   75000000
-150	{'GATTACA': 137, 'AAA': 29881, 'TTT': 26275}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  75000001 -   76000000
-208	{'GATTACA': 155, 'AAA': 29762, 'TTT': 30411}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 104000001 -  105000000
-99	{'GATTACA': 131, 'AAA': 29745, 'TTT': 24221}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  49500001 -   50500000
-149	{'GATTACA': 126, 'AAA': 29625, 'TTT': 27391}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  74500001 -   75500000
-376	{'GATTACA': 137, 'AAA': 29529, 'TTT': 31584}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 188000001 -  189000000
-433	{'GATTACA': 153, 'AAA': 29400, 'TTT': 25608}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 216500001 -  217500000
-206	{'GATTACA': 138, 'AAA': 29399, 'TTT': 27576}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 103000001 -  104000000
-207	{'GATTACA': 139, 'AAA': 29390, 'TTT': 27441}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 103500001 -  104500000
-172	{'GATTACA': 189, 'AAA': 29389, 'TTT': 25630}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  86000001 -   87000000
-158	{'GATTACA': 156, 'AAA': 29292, 'TTT': 29117}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  79000001 -   80000000
-160	{'GATTACA': 143, 'AAA': 29190, 'TTT': 30146}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  80000001 -   81000000
-439	{'GATTACA': 233, 'AAA': 29188, 'TTT': 23993}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 219500001 -  220500000
-477	{'GATTACA': 173, 'AAA': 29106, 'TTT': 28232}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 238500001 -  239500000
-338	{'GATTACA': 182, 'AAA': 29096, 'TTT': 25196}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 169000001 -  170000000
-143	{'GATTACA': 142, 'AAA': 29072, 'TTT': 28578}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  71500001 -   72500000
-176	{'GATTACA': 136, 'AAA': 29064, 'TTT': 25759}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  88000001 -   89000000
-214	{'GATTACA': 122, 'AAA': 29015, 'TTT': 27302}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 107000001 -  108000000
-159	{'GATTACA': 155, 'AAA': 28914, 'TTT': 29785}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  79500001 -   80500000
-171	{'GATTACA': 198, 'AAA': 28785, 'TTT': 24845}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  85500001 -   86500000
-140	{'GATTACA': 242, 'AAA': 28740, 'TTT': 28809}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  70000001 -   71000000
-166	{'GATTACA': 117, 'AAA': 28704, 'TTT': 28472}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  83000001 -   84000000
-237	{'GATTACA': 118, 'AAA': 28677, 'TTT': 25687}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 118500001 -  119500000
-438	{'GATTACA': 146, 'AAA': 28647, 'TTT': 26267}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 219000001 -  220000000
-435	{'GATTACA': 238, 'AAA': 28608, 'TTT': 27472}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 217500001 -  218500000
-151	{'GATTACA': 195, 'AAA': 28569, 'TTT': 26545}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  75500001 -   76500000
-102	{'GATTACA': 381, 'AAA': 28553, 'TTT': 23897}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  51000001 -   52000000
-387	{'GATTACA': 140, 'AAA': 28520, 'TTT': 29949}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 193500001 -  194500000
-182	{'GATTACA': 234, 'AAA': 28478, 'TTT': 23846}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  91000001 -   92000000
-399	{'GATTACA': 339, 'AAA': 28461, 'TTT': 23444}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 199500001 -  200500000
-198	{'GATTACA': 135, 'AAA': 28395, 'TTT': 27321}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  99000001 -  100000000
-155	{'GATTACA': 289, 'AAA': 28358, 'TTT': 26070}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  77500001 -   78500000
-199	{'GATTACA': 183, 'AAA': 28342, 'TTT': 26930}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  99500001 -  100500000
-395	{'GATTACA': 167, 'AAA': 28329, 'TTT': 28943}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 197500001 -  198500000
-486	{'GATTACA': 267, 'AAA': 28316, 'TTT': 24611}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 243000001 -  244000000
-186	{'GATTACA': 317, 'AAA': 28314, 'TTT': 25946}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  93000001 -   94000000
-167	{'GATTACA': 122, 'AAA': 28292, 'TTT': 26681}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  83500001 -   84500000
-177	{'GATTACA': 206, 'AAA': 28258, 'TTT': 26617}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  88500001 -   89500000
-197	{'GATTACA': 146, 'AAA': 28255, 'TTT': 28563}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  98500001 -   99500000
-215	{'GATTACA': 125, 'AAA': 28171, 'TTT': 26053}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 107500001 -  108500000
-375	{'GATTACA': 137, 'AAA': 28158, 'TTT': 31583}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 187500001 -  188500000
-346	{'GATTACA': 236, 'AAA': 28157, 'TTT': 23885}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 173000001 -  174000000
-216	{'GATTACA': 146, 'AAA': 28093, 'TTT': 24359}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 108000001 -  109000000
-339	{'GATTACA': 170, 'AAA': 28027, 'TTT': 26816}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 169500001 -  170500000
-327	{'GATTACA': 130, 'AAA': 28020, 'TTT': 26812}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 163500001 -  164500000
-100	{'GATTACA': 151, 'AAA': 28000, 'TTT': 22650}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  50000001 -   51000000
-181	{'GATTACA': 181, 'AAA': 27982, 'TTT': 25203}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  90500001 -   91500000
-163	{'GATTACA': 214, 'AAA': 27962, 'TTT': 29827}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  81500001 -   82500000
-431	{'GATTACA': 146, 'AAA': 27944, 'TTT': 28633}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 215500001 -  216500000
-434	{'GATTACA': 212, 'AAA': 27928, 'TTT': 26787}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 217000001 -  218000000
-173	{'GATTACA': 224, 'AAA': 27829, 'TTT': 26751}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  86500001 -   87500000
-185	{'GATTACA': 368, 'AAA': 27800, 'TTT': 25503}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  92500001 -   93500000
-372	{'GATTACA': 170, 'AAA': 27720, 'TTT': 29343}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 186000001 -  187000000
-341	{'GATTACA': 197, 'AAA': 27645, 'TTT': 25721}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 170500001 -  171500000
-374	{'GATTACA': 170, 'AAA': 27581, 'TTT': 31237}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 187000001 -  188000000
-170	{'GATTACA': 208, 'AAA': 27485, 'TTT': 23569}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  85000001 -   86000000
-139	{'GATTACA': 138, 'AAA': 27385, 'TTT': 30094}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  69500001 -   70500000
-194	{'GATTACA': 171, 'AAA': 27374, 'TTT': 29538}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  97000001 -   98000000
-373	{'GATTACA': 179, 'AAA': 27370, 'TTT': 30468}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 186500001 -  187500000
-165	{'GATTACA': 133, 'AAA': 27334, 'TTT': 29436}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  82500001 -   83500000
-317	{'GATTACA': 128, 'AAA': 27313, 'TTT': 26214}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 158500001 -  159500000
-371	{'GATTACA': 159, 'AAA': 27289, 'TTT': 29579}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 185500001 -  186500000
-385	{'GATTACA': 186, 'AAA': 27284, 'TTT': 28944}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 192500001 -  193500000
-126	{'GATTACA': 280, 'AAA': 27232, 'TTT': 26025}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  63000001 -   64000000
-340	{'GATTACA': 135, 'AAA': 27193, 'TTT': 28246}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 170000001 -  171000000
-478	{'GATTACA': 188, 'AAA': 27159, 'TTT': 28045}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 239000001 -  240000000
-482	{'GATTACA': 212, 'AAA': 27105, 'TTT': 25333}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 241000001 -  242000000
-337	{'GATTACA': 131, 'AAA': 27101, 'TTT': 25356}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 168500001 -  169500000
-101	{'GATTACA': 243, 'AAA': 26997, 'TTT': 23562}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  50500001 -   51500000
-141	{'GATTACA': 254, 'AAA': 26996, 'TTT': 28071}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  70500001 -   71500000
-238	{'GATTACA': 149, 'AAA': 26956, 'TTT': 24268}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 119000001 -  120000000
-157	{'GATTACA': 160, 'AAA': 26948, 'TTT': 28668}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  78500001 -   79500000
-485	{'GATTACA': 269, 'AAA': 26895, 'TTT': 23668}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 242500001 -  243500000
-156	{'GATTACA': 290, 'AAA': 26799, 'TTT': 27210}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  78000001 -   79000000
-154	{'GATTACA': 142, 'AAA': 26788, 'TTT': 26061}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  77000001 -   78000000
-169	{'GATTACA': 202, 'AAA': 26783, 'TTT': 26188}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  84500001 -   85500000
-492	{'GATTACA': 238, 'AAA': 26771, 'TTT': 21608}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 246000001 -  247000000
-396	{'GATTACA': 150, 'AAA': 26763, 'TTT': 31691}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 198000001 -  199000000
-121	{'GATTACA': 129, 'AAA': 26738, 'TTT': 25064}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  60500001 -   61500000
-437	{'GATTACA': 186, 'AAA': 26734, 'TTT': 27671}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 218500001 -  219500000
-200	{'GATTACA': 269, 'AAA': 26724, 'TTT': 28113}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 100000001 -  101000000
-168	{'GATTACA': 164, 'AAA': 26712, 'TTT': 27931}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  84000001 -   85000000
-164	{'GATTACA': 195, 'AAA': 26685, 'TTT': 30319}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  82000001 -   83000000
-443	{'GATTACA': 136, 'AAA': 26616, 'TTT': 24112}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 221500001 -  222500000
-476	{'GATTACA': 208, 'AAA': 26615, 'TTT': 27941}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 238000001 -  239000000
-436	{'GATTACA': 214, 'AAA': 26526, 'TTT': 27070}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 218000001 -  219000000
-133	{'GATTACA': 161, 'AAA': 26517, 'TTT': 28177}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  66500001 -   67500000
-192	{'GATTACA': 125, 'AAA': 26495, 'TTT': 29730}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  96000001 -   97000000
-422	{'GATTACA': 273, 'AAA': 26492, 'TTT': 21270}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 211000001 -  212000000
-178	{'GATTACA': 200, 'AAA': 26477, 'TTT': 26696}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  89000001 -   90000000
-142	{'GATTACA': 132, 'AAA': 26437, 'TTT': 28856}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  71000001 -   72000000
-444	{'GATTACA': 192, 'AAA': 26383, 'TTT': 22391}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 222000001 -  223000000
-326	{'GATTACA': 132, 'AAA': 26381, 'TTT': 28037}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 163000001 -  164000000
-386	{'GATTACA': 178, 'AAA': 26367, 'TTT': 30931}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 193000001 -  194000000
-316	{'GATTACA': 166, 'AAA': 26365, 'TTT': 26233}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 158000001 -  159000000
-193	{'GATTACA': 162, 'AAA': 26351, 'TTT': 29813}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  96500001 -   97500000
-134	{'GATTACA': 272, 'AAA': 26316, 'TTT': 27303}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  67000001 -   68000000
-138	{'GATTACA': 147, 'AAA': 26314, 'TTT': 29092}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  69000001 -   70000000
-487	{'GATTACA': 225, 'AAA': 26301, 'TTT': 24712}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 243500001 -  244500000
-354	{'GATTACA': 134, 'AAA': 26232, 'TTT': 21465}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 177000001 -  178000000
-236	{'GATTACA': 112, 'AAA': 26229, 'TTT': 25293}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 118000001 -  119000000
-440	{'GATTACA': 270, 'AAA': 26206, 'TTT': 25212}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 220000001 -  221000000
-481	{'GATTACA': 307, 'AAA': 26172, 'TTT': 25787}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 240500001 -  241500000
-183	{'GATTACA': 311, 'AAA': 26066, 'TTT': 23560}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  91500001 -   92500000
-355	{'GATTACA': 179, 'AAA': 26023, 'TTT': 24398}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 177500001 -  178500000
-203	{'GATTACA': 210, 'AAA': 26007, 'TTT': 29570}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 101500001 -  102500000
-493	{'GATTACA': 317, 'AAA': 25967, 'TTT': 21248}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 246500001 -  247500000
-120	{'GATTACA': 144, 'AAA': 25948, 'TTT': 26227}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  60000001 -   61000000
-430	{'GATTACA': 164, 'AAA': 25928, 'TTT': 29283}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 215000001 -  216000000
-125	{'GATTACA': 401, 'AAA': 25889, 'TTT': 24427}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  62500001 -   63500000
-328	{'GATTACA': 163, 'AAA': 25837, 'TTT': 25577}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 164000001 -  165000000
-345	{'GATTACA': 152, 'AAA': 25816, 'TTT': 26383}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 172500001 -  173500000
-342	{'GATTACA': 248, 'AAA': 25804, 'TTT': 25732}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 171000001 -  172000000
-230	{'GATTACA': 238, 'AAA': 25649, 'TTT': 25630}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 115000001 -  116000000
-137	{'GATTACA': 167, 'AAA': 25612, 'TTT': 27065}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  68500001 -   69500000
-217	{'GATTACA': 195, 'AAA': 25572, 'TTT': 25254}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 108500001 -  109500000
-227	{'GATTACA': 383, 'AAA': 25553, 'TTT': 26286}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 113500001 -  114500000
-369	{'GATTACA': 275, 'AAA': 25480, 'TTT': 27256}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 184500001 -  185500000
-229	{'GATTACA': 277, 'AAA': 25477, 'TTT': 24144}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 114500001 -  115500000
-466	{'GATTACA': 224, 'AAA': 25444, 'TTT': 24218}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 233000001 -  234000000
-370	{'GATTACA': 221, 'AAA': 25433, 'TTT': 29913}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 185000001 -  186000000
-184	{'GATTACA': 387, 'AAA': 25423, 'TTT': 25246}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  92000001 -   93000000
-318	{'GATTACA': 122, 'AAA': 25422, 'TTT': 22222}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 159000001 -  160000000
-351	{'GATTACA': 173, 'AAA': 25411, 'TTT': 24719}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 175500001 -  176500000
-465	{'GATTACA': 210, 'AAA': 25395, 'TTT': 22700}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 232500001 -  233500000
-201	{'GATTACA': 199, 'AAA': 25375, 'TTT': 29446}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 100500001 -  101500000
-484	{'GATTACA': 316, 'AAA': 25343, 'TTT': 23878}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 242000001 -  243000000
-483	{'GATTACA': 305, 'AAA': 25321, 'TTT': 24910}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 241500001 -  242500000
-122	{'GATTACA': 181, 'AAA': 25304, 'TTT': 25957}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  61000001 -   62000000
-132	{'GATTACA': 149, 'AAA': 25292, 'TTT': 29227}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  66000001 -   67000000
-475	{'GATTACA': 241, 'AAA': 25291, 'TTT': 28263}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 237500001 -  238500000
-343	{'GATTACA': 200, 'AAA': 25259, 'TTT': 27914}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 171500001 -  172500000
-347	{'GATTACA': 321, 'AAA': 25252, 'TTT': 29104}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 173500001 -  174500000
-450	{'GATTACA': 259, 'AAA': 25239, 'TTT': 26225}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 225000001 -  226000000
-344	{'GATTACA': 135, 'AAA': 25220, 'TTT': 28795}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 172000001 -  173000000
-179	{'GATTACA': 177, 'AAA': 25203, 'TTT': 26163}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  89500001 -   90500000
-417	{'GATTACA': 169, 'AAA': 25159, 'TTT': 24031}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 208500001 -  209500000
-494	{'GATTACA': 271, 'AAA': 25121, 'TTT': 24184}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 247000001 -  248000000
-315	{'GATTACA': 172, 'AAA': 25118, 'TTT': 24011}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 157500001 -  158500000
-228	{'GATTACA': 257, 'AAA': 25090, 'TTT': 24452}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 114000001 -  115000000
-175	{'GATTACA': 165, 'AAA': 25059, 'TTT': 27101}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  87500001 -   88500000
-442	{'GATTACA': 148, 'AAA': 25023, 'TTT': 27416}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 221000001 -  222000000
-491	{'GATTACA': 217, 'AAA': 25023, 'TTT': 21860}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 245500001 -  246500000
-333	{'GATTACA': 214, 'AAA': 25020, 'TTT': 24992}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 166500001 -  167500000
-428	{'GATTACA': 198, 'AAA': 24982, 'TTT': 25135}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 214000001 -  215000000
-103	{'GATTACA': 404, 'AAA': 24972, 'TTT': 23963}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  51500001 -   52500000
-97	{'GATTACA': 120, 'AAA': 24941, 'TTT': 21277}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  48500001 -   49500000
-152	{'GATTACA': 196, 'AAA': 24940, 'TTT': 28060}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  76000001 -   77000000
-180	{'GATTACA': 202, 'AAA': 24927, 'TTT': 26991}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  90000001 -   91000000
-98	{'GATTACA': 115, 'AAA': 24910, 'TTT': 23300}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  49000001 -   50000000
-115	{'GATTACA': 158, 'AAA': 24907, 'TTT': 22488}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  57500001 -   58500000
-191	{'GATTACA': 163, 'AAA': 24874, 'TTT': 29457}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  95500001 -   96500000
-429	{'GATTACA': 193, 'AAA': 24862, 'TTT': 28032}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 214500001 -  215500000
-368	{'GATTACA': 236, 'AAA': 24817, 'TTT': 25822}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 184000001 -  185000000
-352	{'GATTACA': 147, 'AAA': 24766, 'TTT': 26917}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 176000001 -  177000000
-174	{'GATTACA': 220, 'AAA': 24705, 'TTT': 27505}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  87000001 -   88000000
-202	{'GATTACA': 197, 'AAA': 24660, 'TTT': 29057}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 101000001 -  102000000
-114	{'GATTACA': 172, 'AAA': 24649, 'TTT': 23860}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  57000001 -   58000000
-113	{'GATTACA': 175, 'AAA': 24631, 'TTT': 23680}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  56500001 -   57500000
-480	{'GATTACA': 313, 'AAA': 24589, 'TTT': 26865}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 240000001 -  241000000
-445	{'GATTACA': 224, 'AAA': 24586, 'TTT': 23124}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 222500001 -  223500000
-129	{'GATTACA': 216, 'AAA': 24557, 'TTT': 24605}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  64500001 -   65500000
-325	{'GATTACA': 193, 'AAA': 24536, 'TTT': 27399}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 162500001 -  163500000
-454	{'GATTACA': 227, 'AAA': 24515, 'TTT': 22640}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 227000001 -  228000000
-359	{'GATTACA': 236, 'AAA': 24502, 'TTT': 25642}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 179500001 -  180500000
-451	{'GATTACA': 443, 'AAA': 24502, 'TTT': 20642}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 225500001 -  226500000
-421	{'GATTACA': 210, 'AAA': 24474, 'TTT': 23120}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 210500001 -  211500000
-16	{'GATTACA': 489, 'AAA': 24462, 'TTT': 20595}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   8000001 -    9000000
-414	{'GATTACA': 154, 'AAA': 24455, 'TTT': 24848}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 207000001 -  208000000
-418	{'GATTACA': 168, 'AAA': 24345, 'TTT': 21556}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 209000001 -  210000000
-123	{'GATTACA': 326, 'AAA': 24342, 'TTT': 27768}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  61500001 -   62500000
-187	{'GATTACA': 283, 'AAA': 24314, 'TTT': 25606}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  93500001 -   94500000
-479	{'GATTACA': 234, 'AAA': 24308, 'TTT': 27997}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 239500001 -  240500000
-293	{'GATTACA': 204, 'AAA': 24265, 'TTT': 23881}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 146500001 -  147500000
-124	{'GATTACA': 477, 'AAA': 24199, 'TTT': 24889}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  62000001 -   63000000
-153	{'GATTACA': 127, 'AAA': 24161, 'TTT': 27931}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  76500001 -   77500000
-218	{'GATTACA': 359, 'AAA': 24147, 'TTT': 22310}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 109000001 -  110000000
-360	{'GATTACA': 263, 'AAA': 24127, 'TTT': 25408}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 180000001 -  181000000
-116	{'GATTACA': 139, 'AAA': 24118, 'TTT': 22103}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  58000001 -   59000000
-239	{'GATTACA': 136, 'AAA': 24096, 'TTT': 22416}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 119500001 -  120500000
-135	{'GATTACA': 281, 'AAA': 24092, 'TTT': 25026}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  67500001 -   68500000
-127	{'GATTACA': 243, 'AAA': 24078, 'TTT': 25998}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  63500001 -   64500000
-235	{'GATTACA': 154, 'AAA': 24065, 'TTT': 24657}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 117500001 -  118500000
-470	{'GATTACA': 429, 'AAA': 24039, 'TTT': 20730}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 235000001 -  236000000
-91	{'GATTACA': 512, 'AAA': 24036, 'TTT': 23241}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  45500001 -   46500000
-469	{'GATTACA': 277, 'AAA': 24004, 'TTT': 18615}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 234500001 -  235500000
-136	{'GATTACA': 213, 'AAA': 23989, 'TTT': 25078}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  68000001 -   69000000
-189	{'GATTACA': 216, 'AAA': 23985, 'TTT': 24439}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  94500001 -   95500000
-400	{'GATTACA': 419, 'AAA': 23975, 'TTT': 23953}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 200000001 -  201000000
-474	{'GATTACA': 246, 'AAA': 23947, 'TTT': 28031}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 237000001 -  238000000
-41	{'GATTACA': 327, 'AAA': 23905, 'TTT': 18355}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  20500001 -   21500000
-467	{'GATTACA': 197, 'AAA': 23905, 'TTT': 24703}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 233500001 -  234500000
-119	{'GATTACA': 137, 'AAA': 23904, 'TTT': 24979}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  59500001 -   60500000
-294	{'GATTACA': 252, 'AAA': 23894, 'TTT': 22894}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 147000001 -  148000000
-305	{'GATTACA': 116, 'AAA': 23810, 'TTT': 21419}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 152500001 -  153500000
-330	{'GATTACA': 188, 'AAA': 23802, 'TTT': 21975}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 165000001 -  166000000
-423	{'GATTACA': 351, 'AAA': 23797, 'TTT': 22807}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 211500001 -  212500000
-222	{'GATTACA': 168, 'AAA': 23783, 'TTT': 23998}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 111000001 -  112000000
-356	{'GATTACA': 276, 'AAA': 23780, 'TTT': 27817}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 178000001 -  179000000
-112	{'GATTACA': 143, 'AAA': 23768, 'TTT': 23717}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  56000001 -   57000000
-332	{'GATTACA': 141, 'AAA': 23750, 'TTT': 25916}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 166000001 -  167000000
-464	{'GATTACA': 173, 'AAA': 23749, 'TTT': 23238}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 232000001 -  233000000
-104	{'GATTACA': 447, 'AAA': 23735, 'TTT': 24860}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  52000001 -   53000000
-471	{'GATTACA': 473, 'AAA': 23664, 'TTT': 22863}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 235500001 -  236500000
-85	{'GATTACA': 317, 'AAA': 23624, 'TTT': 22292}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  42500001 -   43500000
-364	{'GATTACA': 310, 'AAA': 23590, 'TTT': 23514}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 182000001 -  183000000
-190	{'GATTACA': 212, 'AAA': 23531, 'TTT': 25876}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  95000001 -   96000000
-353	{'GATTACA': 120, 'AAA': 23521, 'TTT': 24333}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 176500001 -  177500000
-365	{'GATTACA': 320, 'AAA': 23493, 'TTT': 24628}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 182500001 -  183500000
-226	{'GATTACA': 466, 'AAA': 23483, 'TTT': 23540}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 113000001 -  114000000
-424	{'GATTACA': 343, 'AAA': 23468, 'TTT': 23146}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 212000001 -  213000000
-336	{'GATTACA': 168, 'AAA': 23418, 'TTT': 25490}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 168000001 -  169000000
-468	{'GATTACA': 204, 'AAA': 23410, 'TTT': 21773}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 234000001 -  235000000
-495	{'GATTACA': 198, 'AAA': 23409, 'TTT': 29014}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 247500001 -  248500000
-363	{'GATTACA': 217, 'AAA': 23357, 'TTT': 22459}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 181500001 -  182500000
-117	{'GATTACA': 141, 'AAA': 23335, 'TTT': 21836}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  58500001 -   59500000
-300	{'GATTACA': 633, 'AAA': 23244, 'TTT': 22795}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 150000001 -  151000000
-84	{'GATTACA': 209, 'AAA': 23233, 'TTT': 20384}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  42000001 -   43000000
-314	{'GATTACA': 140, 'AAA': 23230, 'TTT': 22331}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 157000001 -  158000000
-130	{'GATTACA': 287, 'AAA': 23181, 'TTT': 26318}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  65000001 -   66000000
-357	{'GATTACA': 411, 'AAA': 23168, 'TTT': 27002}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 178500001 -  179500000
-448	{'GATTACA': 402, 'AAA': 23162, 'TTT': 22885}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 224000001 -  225000000
-367	{'GATTACA': 205, 'AAA': 23150, 'TTT': 26758}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 183500001 -  184500000
-366	{'GATTACA': 268, 'AAA': 23122, 'TTT': 25703}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 183000001 -  184000000
-441	{'GATTACA': 179, 'AAA': 23105, 'TTT': 27621}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 220500001 -  221500000
-225	{'GATTACA': 330, 'AAA': 23104, 'TTT': 21199}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 112500001 -  113500000
-131	{'GATTACA': 254, 'AAA': 23081, 'TTT': 29666}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  65500001 -   66500000
-453	{'GATTACA': 255, 'AAA': 23073, 'TTT': 21106}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 226500001 -  227500000
-348	{'GATTACA': 347, 'AAA': 23061, 'TTT': 31851}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 174000001 -  175000000
-118	{'GATTACA': 127, 'AAA': 23059, 'TTT': 22987}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  59000001 -   60000000
-188	{'GATTACA': 232, 'AAA': 23056, 'TTT': 24300}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  94000001 -   95000000
-299	{'GATTACA': 488, 'AAA': 23049, 'TTT': 23227}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 149500001 -  150500000
-496	{'GATTACA': 122, 'AAA': 23027, 'TTT': 25768}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 248000001 -  249000000
-111	{'GATTACA': 152, 'AAA': 22948, 'TTT': 23935}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  55500001 -   56500000
-234	{'GATTACA': 194, 'AAA': 22914, 'TTT': 22549}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 117000001 -  118000000
-231	{'GATTACA': 136, 'AAA': 22875, 'TTT': 24304}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 115500001 -  116500000
-447	{'GATTACA': 333, 'AAA': 22875, 'TTT': 19068}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 223500001 -  224500000
-427	{'GATTACA': 144, 'AAA': 22874, 'TTT': 24883}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 213500001 -  214500000
-358	{'GATTACA': 377, 'AAA': 22866, 'TTT': 27725}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 179000001 -  180000000
-329	{'GATTACA': 168, 'AAA': 22859, 'TTT': 23442}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 164500001 -  165500000
-90	{'GATTACA': 477, 'AAA': 22830, 'TTT': 19244}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  45000001 -   46000000
-462	{'GATTACA': 301, 'AAA': 22829, 'TTT': 23579}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 231000001 -  232000000
-488	{'GATTACA': 318, 'AAA': 22808, 'TTT': 24636}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 244000001 -  245000000
-105	{'GATTACA': 589, 'AAA': 22784, 'TTT': 25036}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  52500001 -   53500000
-232	{'GATTACA': 158, 'AAA': 22761, 'TTT': 24276}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 116000001 -  117000000
-463	{'GATTACA': 227, 'AAA': 22751, 'TTT': 24839}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 231500001 -  232500000
-425	{'GATTACA': 354, 'AAA': 22732, 'TTT': 25258}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 212500001 -  213500000
-70	{'GATTACA': 395, 'AAA': 22726, 'TTT': 22638}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  35000001 -   36000000
-472	{'GATTACA': 428, 'AAA': 22714, 'TTT': 23538}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 236000001 -  237000000
-128	{'GATTACA': 197, 'AAA': 22670, 'TTT': 25454}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  64000001 -   65000000
-415	{'GATTACA': 150, 'AAA': 22629, 'TTT': 22711}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 207500001 -  208500000
-42	{'GATTACA': 387, 'AAA': 22534, 'TTT': 18452}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  21000001 -   22000000
-489	{'GATTACA': 424, 'AAA': 22525, 'TTT': 24404}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 244500001 -  245500000
-458	{'GATTACA': 266, 'AAA': 22509, 'TTT': 21396}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 229000001 -  230000000
-233	{'GATTACA': 181, 'AAA': 22485, 'TTT': 22437}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 116500001 -  117500000
-334	{'GATTACA': 311, 'AAA': 22456, 'TTT': 25564}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 167000001 -  168000000
-350	{'GATTACA': 141, 'AAA': 22439, 'TTT': 21643}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 175000001 -  176000000
-419	{'GATTACA': 187, 'AAA': 22412, 'TTT': 24625}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 209500001 -  210500000
-71	{'GATTACA': 545, 'AAA': 22371, 'TTT': 25676}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  35500001 -   36500000
-306	{'GATTACA': 356, 'AAA': 22353, 'TTT': 18598}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 153000001 -  154000000
-292	{'GATTACA': 157, 'AAA': 22329, 'TTT': 20677}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 146000001 -  147000000
-223	{'GATTACA': 183, 'AAA': 22328, 'TTT': 24578}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 111500001 -  112500000
-449	{'GATTACA': 239, 'AAA': 22325, 'TTT': 27162}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 224500001 -  225500000
-298	{'GATTACA': 264, 'AAA': 22297, 'TTT': 21883}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 149000001 -  150000000
-349	{'GATTACA': 239, 'AAA': 22279, 'TTT': 26154}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 174500001 -  175500000
-17	{'GATTACA': 450, 'AAA': 22245, 'TTT': 18381}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   8500001 -    9500000
-319	{'GATTACA': 183, 'AAA': 22242, 'TTT': 19834}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 159500001 -  160500000
-69	{'GATTACA': 172, 'AAA': 22232, 'TTT': 18326}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  34500001 -   35500000
-331	{'GATTACA': 186, 'AAA': 22048, 'TTT': 25271}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 165500001 -  166500000
-335	{'GATTACA': 278, 'AAA': 22047, 'TTT': 25627}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 167500001 -  168500000
-473	{'GATTACA': 339, 'AAA': 22011, 'TTT': 25972}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 236500001 -  237500000
-96	{'GATTACA': 135, 'AAA': 21944, 'TTT': 19156}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  48000001 -   49000000
-301	{'GATTACA': 648, 'AAA': 21930, 'TTT': 21333}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 150500001 -  151500000
-224	{'GATTACA': 186, 'AAA': 21921, 'TTT': 21688}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 112000001 -  113000000
-241	{'GATTACA': 136, 'AAA': 21899, 'TTT': 19220}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 120500001 -  121500000
-240	{'GATTACA': 152, 'AAA': 21866, 'TTT': 19535}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 120000001 -  121000000
-461	{'GATTACA': 245, 'AAA': 21845, 'TTT': 21713}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 230500001 -  231500000
-56	{'GATTACA': 706, 'AAA': 21837, 'TTT': 21356}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  28000001 -   29000000
-323	{'GATTACA': 213, 'AAA': 21742, 'TTT': 25376}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 161500001 -  162500000
-324	{'GATTACA': 232, 'AAA': 21711, 'TTT': 26195}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 162000001 -  163000000
-446	{'GATTACA': 183, 'AAA': 21667, 'TTT': 19913}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 223000001 -  224000000
-320	{'GATTACA': 241, 'AAA': 21630, 'TTT': 20862}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 160000001 -  161000000
-416	{'GATTACA': 154, 'AAA': 21527, 'TTT': 22191}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 208000001 -  209000000
-490	{'GATTACA': 372, 'AAA': 21499, 'TTT': 23058}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 245000001 -  246000000
-94	{'GATTACA': 283, 'AAA': 21415, 'TTT': 22010}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  47000001 -   48000000
-304	{'GATTACA': 106, 'AAA': 21401, 'TTT': 24505}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 152000001 -  153000000
-426	{'GATTACA': 253, 'AAA': 21273, 'TTT': 27517}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 213000001 -  214000000
-420	{'GATTACA': 224, 'AAA': 21142, 'TTT': 27102}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 210000001 -  211000000
-78	{'GATTACA': 486, 'AAA': 21114, 'TTT': 22451}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  39000001 -   40000000
-68	{'GATTACA': 120, 'AAA': 21073, 'TTT': 18565}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  34000001 -   35000000
-362	{'GATTACA': 164, 'AAA': 20949, 'TTT': 22100}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 181000001 -  182000000
-290	{'GATTACA': 318, 'AAA': 20919, 'TTT': 22938}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 145000001 -  146000000
-28	{'GATTACA': 172, 'AAA': 20898, 'TTT': 23639}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  14000001 -   15000000
-321	{'GATTACA': 324, 'AAA': 20885, 'TTT': 20193}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 160500001 -  161500000
-310	{'GATTACA': 597, 'AAA': 20826, 'TTT': 18943}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 155000001 -  156000000
-221	{'GATTACA': 192, 'AAA': 20798, 'TTT': 20682}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 110500001 -  111500000
-459	{'GATTACA': 263, 'AAA': 20791, 'TTT': 22450}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 229500001 -  230500000
-452	{'GATTACA': 395, 'AAA': 20784, 'TTT': 18911}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 226000001 -  227000000
-322	{'GATTACA': 316, 'AAA': 20657, 'TTT': 22424}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 161000001 -  162000000
-307	{'GATTACA': 600, 'AAA': 20629, 'TTT': 19297}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 153500001 -  154500000
-77	{'GATTACA': 316, 'AAA': 20586, 'TTT': 19862}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  38500001 -   39500000
-80	{'GATTACA': 487, 'AAA': 20558, 'TTT': 22094}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  40000001 -   41000000
-75	{'GATTACA': 301, 'AAA': 20493, 'TTT': 16714}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  37500001 -   38500000
-108	{'GATTACA': 273, 'AAA': 20425, 'TTT': 17123}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  54000001 -   55000000
-219	{'GATTACA': 367, 'AAA': 20411, 'TTT': 19436}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 109500001 -  110500000
-297	{'GATTACA': 198, 'AAA': 20372, 'TTT': 21232}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 148500001 -  149500000
-413	{'GATTACA': 191, 'AAA': 20347, 'TTT': 22995}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 206500001 -  207500000
-57	{'GATTACA': 761, 'AAA': 20341, 'TTT': 22707}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  28500001 -   29500000
-289	{'GATTACA': 189, 'AAA': 20299, 'TTT': 20052}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 144500001 -  145500000
-361	{'GATTACA': 264, 'AAA': 20219, 'TTT': 24884}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 180500001 -  181500000
-81	{'GATTACA': 450, 'AAA': 20179, 'TTT': 22842}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  40500001 -   41500000
-76	{'GATTACA': 306, 'AAA': 20094, 'TTT': 18164}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  38000001 -   39000000
-55	{'GATTACA': 560, 'AAA': 19966, 'TTT': 19079}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  27500001 -   28500000
-93	{'GATTACA': 342, 'AAA': 19955, 'TTT': 20416}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  46500001 -   47500000
-110	{'GATTACA': 270, 'AAA': 19951, 'TTT': 20595}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  55000001 -   56000000
-460	{'GATTACA': 192, 'AAA': 19869, 'TTT': 22209}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 230000001 -  231000000
-83	{'GATTACA': 174, 'AAA': 19856, 'TTT': 18474}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  41500001 -   42500000
-10	{'GATTACA': 114, 'AAA': 19806, 'TTT': 16815}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   5000001 -    6000000
-86	{'GATTACA': 333, 'AAA': 19802, 'TTT': 20491}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  43000001 -   44000000
-308	{'GATTACA': 439, 'AAA': 19737, 'TTT': 19438}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 154000001 -  155000000
-92	{'GATTACA': 513, 'AAA': 19705, 'TTT': 22350}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  46000001 -   47000000
-62	{'GATTACA': 409, 'AAA': 19688, 'TTT': 18247}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  31000001 -   32000000
-89	{'GATTACA': 407, 'AAA': 19561, 'TTT': 19822}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  44500001 -   45500000
-47	{'GATTACA': 555, 'AAA': 19557, 'TTT': 19260}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  23500001 -   24500000
-46	{'GATTACA': 407, 'AAA': 19527, 'TTT': 18249}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  23000001 -   24000000
-48	{'GATTACA': 468, 'AAA': 19522, 'TTT': 20533}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  24000001 -   25000000
-302	{'GATTACA': 561, 'AAA': 19509, 'TTT': 22567}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 151000001 -  152000000
-303	{'GATTACA': 258, 'AAA': 19503, 'TTT': 24926}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 151500001 -  152500000
-79	{'GATTACA': 499, 'AAA': 19474, 'TTT': 21767}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  39500001 -   40500000
-457	{'GATTACA': 221, 'AAA': 19463, 'TTT': 19293}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 228500001 -  229500000
-404	{'GATTACA': 408, 'AAA': 19365, 'TTT': 21274}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 202000001 -  203000000
-67	{'GATTACA': 205, 'AAA': 19360, 'TTT': 18723}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  33500001 -   34500000
-407	{'GATTACA': 433, 'AAA': 19334, 'TTT': 19829}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 203500001 -  204500000
-19	{'GATTACA': 651, 'AAA': 19328, 'TTT': 21152}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   9500001 -   10500000
-72	{'GATTACA': 563, 'AAA': 19297, 'TTT': 21416}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  36000001 -   37000000
-405	{'GATTACA': 243, 'AAA': 19238, 'TTT': 19141}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 202500001 -  203500000
-38	{'GATTACA': 293, 'AAA': 19188, 'TTT': 15622}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  19000001 -   20000000
-39	{'GATTACA': 374, 'AAA': 19167, 'TTT': 19257}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  19500001 -   20500000
-15	{'GATTACA': 393, 'AAA': 19115, 'TTT': 19520}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   7500001 -    8500000
-406	{'GATTACA': 349, 'AAA': 19097, 'TTT': 20335}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 203000001 -  204000000
-311	{'GATTACA': 591, 'AAA': 19075, 'TTT': 18155}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 155500001 -  156500000
-9	{'GATTACA': 117, 'AAA': 19072, 'TTT': 18482}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   4500001 -    5500000
-49	{'GATTACA': 358, 'AAA': 19057, 'TTT': 19872}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  24500001 -   25500000
-63	{'GATTACA': 460, 'AAA': 19054, 'TTT': 18616}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  31500001 -   32500000
-107	{'GATTACA': 185, 'AAA': 19022, 'TTT': 17365}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  53500001 -   54500000
-61	{'GATTACA': 171, 'AAA': 19018, 'TTT': 15575}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  30500001 -   31500000
-291	{'GATTACA': 251, 'AAA': 19011, 'TTT': 19121}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 145500001 -  146500000
-95	{'GATTACA': 242, 'AAA': 18956, 'TTT': 19163}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  47500001 -   48500000
-29	{'GATTACA': 202, 'AAA': 18892, 'TTT': 19749}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  14500001 -   15500000
-401	{'GATTACA': 316, 'AAA': 18857, 'TTT': 19515}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 200500001 -  201500000
-82	{'GATTACA': 284, 'AAA': 18833, 'TTT': 19633}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  41000001 -   42000000
-309	{'GATTACA': 408, 'AAA': 18775, 'TTT': 17935}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 154500001 -  155500000
-106	{'GATTACA': 395, 'AAA': 18750, 'TTT': 21011}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  53000001 -   54000000
-66	{'GATTACA': 475, 'AAA': 18746, 'TTT': 20092}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  33000001 -   34000000
-27	{'GATTACA': 346, 'AAA': 18724, 'TTT': 21559}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  13500001 -   14500000
-51	{'GATTACA': 420, 'AAA': 18620, 'TTT': 18784}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  25500001 -   26500000
-40	{'GATTACA': 317, 'AAA': 18595, 'TTT': 18268}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  20000001 -   21000000
-410	{'GATTACA': 349, 'AAA': 18519, 'TTT': 16546}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 205000001 -  206000000
-65	{'GATTACA': 656, 'AAA': 18505, 'TTT': 20575}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  32500001 -   33500000
-455	{'GATTACA': 178, 'AAA': 18333, 'TTT': 18935}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 227500001 -  228500000
-50	{'GATTACA': 421, 'AAA': 18330, 'TTT': 19728}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  25000001 -   26000000
-64	{'GATTACA': 487, 'AAA': 18311, 'TTT': 18478}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  32000001 -   33000000
-313	{'GATTACA': 243, 'AAA': 17902, 'TTT': 19097}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 156500001 -  157500000
-295	{'GATTACA': 176, 'AAA': 17882, 'TTT': 15232}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 147500001 -  148500000
-88	{'GATTACA': 329, 'AAA': 17879, 'TTT': 19820}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  44000001 -   45000000
-37	{'GATTACA': 171, 'AAA': 17863, 'TTT': 14732}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  18500001 -   19500000
-52	{'GATTACA': 500, 'AAA': 17844, 'TTT': 17878}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  26000001 -   27000000
-403	{'GATTACA': 398, 'AAA': 17786, 'TTT': 20759}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 201500001 -  202500000
-20	{'GATTACA': 546, 'AAA': 17775, 'TTT': 21329}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  10000001 -   11000000
-409	{'GATTACA': 328, 'AAA': 17767, 'TTT': 18429}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 204500001 -  205500000
-220	{'GATTACA': 233, 'AAA': 17689, 'TTT': 19670}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 110000001 -  111000000
-32	{'GATTACA': 535, 'AAA': 17685, 'TTT': 17299}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  16000001 -   17000000
-74	{'GATTACA': 156, 'AAA': 17632, 'TTT': 16145}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  37000001 -   38000000
-18	{'GATTACA': 514, 'AAA': 17551, 'TTT': 17073}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   9000001 -   10000000
-31	{'GATTACA': 445, 'AAA': 17540, 'TTT': 18152}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  15500001 -   16500000
-21	{'GATTACA': 445, 'AAA': 17538, 'TTT': 17817}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  10500001 -   11500000
-285	{'GATTACA': 146, 'AAA': 17498, 'TTT': 17648}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 142500001 -  143500000
-109	{'GATTACA': 330, 'AAA': 17484, 'TTT': 17598}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  54500001 -   55500000
-30	{'GATTACA': 317, 'AAA': 17440, 'TTT': 18532}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  15000001 -   16000000
-24	{'GATTACA': 415, 'AAA': 17398, 'TTT': 21444}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  12000001 -   13000000
-87	{'GATTACA': 318, 'AAA': 17172, 'TTT': 18649}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  43500001 -   44500000
-408	{'GATTACA': 276, 'AAA': 17170, 'TTT': 18289}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 204000001 -  205000000
-45	{'GATTACA': 267, 'AAA': 17132, 'TTT': 17569}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  22500001 -   23500000
-22	{'GATTACA': 451, 'AAA': 17075, 'TTT': 16287}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  11000001 -   12000000
-43	{'GATTACA': 421, 'AAA': 17022, 'TTT': 16661}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  21500001 -   22500000
-60	{'GATTACA': 107, 'AAA': 17002, 'TTT': 16291}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  30000001 -   31000000
-0	{'GATTACA': 157, 'AAA': 16982, 'TTT': 15688}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	         1 -    1000000
-288	{'GATTACA': 147, 'AAA': 16878, 'TTT': 16540}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 144000001 -  145000000
-44	{'GATTACA': 348, 'AAA': 16845, 'TTT': 17208}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  22000001 -   23000000
-53	{'GATTACA': 647, 'AAA': 16827, 'TTT': 18791}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  26500001 -   27500000
-11	{'GATTACA': 202, 'AAA': 16773, 'TTT': 13011}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   5500001 -    6500000
-33	{'GATTACA': 454, 'AAA': 16770, 'TTT': 17215}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  16500001 -   17500000
-402	{'GATTACA': 272, 'AAA': 16721, 'TTT': 17216}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 201000001 -  202000000
-54	{'GATTACA': 582, 'AAA': 16680, 'TTT': 17847}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  27000001 -   28000000
-8	{'GATTACA': 120, 'AAA': 16526, 'TTT': 18024}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   4000001 -    5000000
-25	{'GATTACA': 335, 'AAA': 16372, 'TTT': 17391}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  12500001 -   13500000
-14	{'GATTACA': 242, 'AAA': 16260, 'TTT': 20185}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   7000001 -    8000000
-73	{'GATTACA': 354, 'AAA': 16159, 'TTT': 17458}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  36500001 -   37500000
-13	{'GATTACA': 353, 'AAA': 16001, 'TTT': 21022}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   6500001 -    7500000
-26	{'GATTACA': 414, 'AAA': 15983, 'TTT': 15883}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  13000001 -   14000000
-12	{'GATTACA': 391, 'AAA': 15876, 'TTT': 15613}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   6000001 -    7000000
-36	{'GATTACA': 157, 'AAA': 15716, 'TTT': 16646}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  18000001 -   19000000
-456	{'GATTACA': 196, 'AAA': 15714, 'TTT': 17205}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 228000001 -  229000000
-312	{'GATTACA': 441, 'AAA': 15481, 'TTT': 16301}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 156000001 -  157000000
-23	{'GATTACA': 433, 'AAA': 15464, 'TTT': 18328}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  11500001 -   12500000
-411	{'GATTACA': 226, 'AAA': 15265, 'TTT': 14164}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 205500001 -  206500000
-412	{'GATTACA': 189, 'AAA': 15229, 'TTT': 17047}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 206000001 -  207000000
-58	{'GATTACA': 468, 'AAA': 15210, 'TTT': 19067}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  29000001 -   30000000
-296	{'GATTACA': 122, 'AAA': 15014, 'TTT': 14626}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 148000001 -  149000000
-287	{'GATTACA': 198, 'AAA': 14984, 'TTT': 16564}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 143500001 -  144500000
-286	{'GATTACA': 176, 'AAA': 14913, 'TTT': 15635}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 143000001 -  144000000
-35	{'GATTACA': 277, 'AAA': 14480, 'TTT': 16530}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  17500001 -   18500000
-34	{'GATTACA': 371, 'AAA': 14397, 'TTT': 16028}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  17000001 -   18000000
-1	{'GATTACA': 254, 'AAA': 13527, 'TTT': 12439}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	    500001 -    1500000
-2	{'GATTACA': 364, 'AAA': 13169, 'TTT': 11675}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   1000001 -    2000000
-59	{'GATTACA': 155, 'AAA': 13146, 'TTT': 15688}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  29500001 -   30500000
-3	{'GATTACA': 310, 'AAA': 12574, 'TTT': 12321}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   1500001 -    2500000
-7	{'GATTACA': 157, 'AAA': 12427, 'TTT': 13764}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   3500001 -    4500000
-242	{'GATTACA': 37, 'AAA': 11763, 'TTT': 10522}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 121000001 -  122000000
-284	{'GATTACA': 77, 'AAA': 9759, 'TTT': 9801}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 142000001 -  143000000
-5	{'GATTACA': 60, 'AAA': 9563, 'TTT': 9720}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   2500001 -    3500000
-6	{'GATTACA': 105, 'AAA': 9452, 'TTT': 9768}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   3000001 -    4000000
-4	{'GATTACA': 144, 'AAA': 8872, 'TTT': 10244}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   2000001 -    3000000
-243	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 121500001 -  122500000
-244	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 122000001 -  123000000
-245	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 122500001 -  123500000
-246	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 123000001 -  124000000
-247	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 123500001 -  124500000
-248	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 124000001 -  125000000
-249	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 124500001 -  125500000
-250	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 125000001 -  126000000
-251	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 125500001 -  126500000
-252	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 126000001 -  127000000
-253	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 126500001 -  127500000
-254	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 127000001 -  128000000
-255	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 127500001 -  128500000
-256	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 128000001 -  129000000
-257	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 128500001 -  129500000
-258	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 129000001 -  130000000
-259	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 129500001 -  130500000
-260	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 130000001 -  131000000
-261	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 130500001 -  131500000
-262	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 131000001 -  132000000
-263	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 131500001 -  132500000
-264	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 132000001 -  133000000
-265	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 132500001 -  133500000
-266	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 133000001 -  134000000
-267	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 133500001 -  134500000
-268	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 134000001 -  135000000
-269	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 134500001 -  135500000
-270	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 135000001 -  136000000
-271	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 135500001 -  136500000
-272	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 136000001 -  137000000
-273	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 136500001 -  137500000
-274	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 137000001 -  138000000
-275	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 137500001 -  138500000
-276	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 138000001 -  139000000
-277	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 138500001 -  139500000
-278	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 139000001 -  140000000
-279	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 139500001 -  140500000
-280	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 140000001 -  141000000
-281	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 140500001 -  141500000
-282	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 141000001 -  142000000
-283	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 141500001 -  142500000
+382	{'GATTACA': 148, 'AAA': 32099, 'TTT': 29423}	1	 191000001 -  192000000
+383	{'GATTACA': 156, 'AAA': 32066, 'TTT': 28378}	1	 191500001 -  192500000
+205	{'GATTACA': 150, 'AAA': 31884, 'TTT': 28430}	1	 102500001 -  103500000
+213	{'GATTACA': 129, 'AAA': 31782, 'TTT': 27216}	1	 106500001 -  107500000
+380	{'GATTACA': 150, 'AAA': 31658, 'TTT': 30875}	1	 190000001 -  191000000
+398	{'GATTACA': 178, 'AAA': 31485, 'TTT': 24717}	1	 199000001 -  200000000
+381	{'GATTACA': 150, 'AAA': 31400, 'TTT': 30509}	1	 190500001 -  191500000
+390	{'GATTACA': 153, 'AAA': 31385, 'TTT': 29808}	1	 195000001 -  196000000
+379	{'GATTACA': 152, 'AAA': 31365, 'TTT': 31395}	1	 189500001 -  190500000
+391	{'GATTACA': 134, 'AAA': 31186, 'TTT': 29685}	1	 195500001 -  196500000
+394	{'GATTACA': 169, 'AAA': 31124, 'TTT': 26787}	1	 197000001 -  198000000
+389	{'GATTACA': 180, 'AAA': 31089, 'TTT': 30444}	1	 194500001 -  195500000
+212	{'GATTACA': 126, 'AAA': 30897, 'TTT': 29612}	1	 106000001 -  107000000
+161	{'GATTACA': 138, 'AAA': 30830, 'TTT': 28935}	1	  80500001 -   81500000
+210	{'GATTACA': 152, 'AAA': 30694, 'TTT': 30135}	1	 105000001 -  106000000
+147	{'GATTACA': 129, 'AAA': 30620, 'TTT': 28443}	1	  73500001 -   74500000
+196	{'GATTACA': 147, 'AAA': 30601, 'TTT': 28766}	1	  98000001 -   99000000
+195	{'GATTACA': 154, 'AAA': 30589, 'TTT': 28672}	1	  97500001 -   98500000
+432	{'GATTACA': 125, 'AAA': 30559, 'TTT': 26870}	1	 216000001 -  217000000
+384	{'GATTACA': 156, 'AAA': 30543, 'TTT': 27222}	1	 192000001 -  193000000
+144	{'GATTACA': 144, 'AAA': 30500, 'TTT': 29320}	1	  72000001 -   73000000
+204	{'GATTACA': 144, 'AAA': 30402, 'TTT': 29220}	1	 102000001 -  103000000
+377	{'GATTACA': 144, 'AAA': 30285, 'TTT': 31264}	1	 188500001 -  189500000
+162	{'GATTACA': 156, 'AAA': 30257, 'TTT': 28274}	1	  81000001 -   82000000
+388	{'GATTACA': 170, 'AAA': 30186, 'TTT': 30166}	1	 194000001 -  195000000
+211	{'GATTACA': 147, 'AAA': 30164, 'TTT': 31286}	1	 105500001 -  106500000
+392	{'GATTACA': 142, 'AAA': 30148, 'TTT': 30017}	1	 196000001 -  197000000
+145	{'GATTACA': 124, 'AAA': 30129, 'TTT': 29854}	1	  72500001 -   73500000
+146	{'GATTACA': 123, 'AAA': 30071, 'TTT': 29448}	1	  73000001 -   74000000
+378	{'GATTACA': 147, 'AAA': 30020, 'TTT': 31841}	1	 189000001 -  190000000
+393	{'GATTACA': 146, 'AAA': 30008, 'TTT': 28879}	1	 196500001 -  197500000
+397	{'GATTACA': 131, 'AAA': 29969, 'TTT': 28960}	1	 198500001 -  199500000
+209	{'GATTACA': 141, 'AAA': 29924, 'TTT': 30103}	1	 104500001 -  105500000
+148	{'GATTACA': 119, 'AAA': 29895, 'TTT': 28197}	1	  74000001 -   75000000
+150	{'GATTACA': 137, 'AAA': 29881, 'TTT': 26274}	1	  75000001 -   76000000
+208	{'GATTACA': 155, 'AAA': 29762, 'TTT': 30411}	1	 104000001 -  105000000
+99	{'GATTACA': 131, 'AAA': 29745, 'TTT': 24221}	1	  49500001 -   50500000
+149	{'GATTACA': 126, 'AAA': 29625, 'TTT': 27391}	1	  74500001 -   75500000
+376	{'GATTACA': 137, 'AAA': 29529, 'TTT': 31584}	1	 188000001 -  189000000
+433	{'GATTACA': 153, 'AAA': 29400, 'TTT': 25608}	1	 216500001 -  217500000
+206	{'GATTACA': 138, 'AAA': 29399, 'TTT': 27576}	1	 103000001 -  104000000
+207	{'GATTACA': 139, 'AAA': 29390, 'TTT': 27441}	1	 103500001 -  104500000
+172	{'GATTACA': 189, 'AAA': 29389, 'TTT': 25630}	1	  86000001 -   87000000
+158	{'GATTACA': 156, 'AAA': 29292, 'TTT': 29117}	1	  79000001 -   80000000
+160	{'GATTACA': 143, 'AAA': 29190, 'TTT': 30146}	1	  80000001 -   81000000
+439	{'GATTACA': 233, 'AAA': 29188, 'TTT': 23993}	1	 219500001 -  220500000
+477	{'GATTACA': 173, 'AAA': 29106, 'TTT': 28232}	1	 238500001 -  239500000
+338	{'GATTACA': 182, 'AAA': 29096, 'TTT': 25196}	1	 169000001 -  170000000
+143	{'GATTACA': 142, 'AAA': 29072, 'TTT': 28578}	1	  71500001 -   72500000
+176	{'GATTACA': 136, 'AAA': 29064, 'TTT': 25759}	1	  88000001 -   89000000
+214	{'GATTACA': 122, 'AAA': 29015, 'TTT': 27302}	1	 107000001 -  108000000
+159	{'GATTACA': 155, 'AAA': 28914, 'TTT': 29785}	1	  79500001 -   80500000
+171	{'GATTACA': 198, 'AAA': 28785, 'TTT': 24845}	1	  85500001 -   86500000
+140	{'GATTACA': 242, 'AAA': 28740, 'TTT': 28809}	1	  70000001 -   71000000
+166	{'GATTACA': 117, 'AAA': 28704, 'TTT': 28472}	1	  83000001 -   84000000
+237	{'GATTACA': 118, 'AAA': 28677, 'TTT': 25687}	1	 118500001 -  119500000
+438	{'GATTACA': 146, 'AAA': 28647, 'TTT': 26267}	1	 219000001 -  220000000
+435	{'GATTACA': 238, 'AAA': 28608, 'TTT': 27472}	1	 217500001 -  218500000
+151	{'GATTACA': 195, 'AAA': 28569, 'TTT': 26545}	1	  75500001 -   76500000
+102	{'GATTACA': 381, 'AAA': 28553, 'TTT': 23897}	1	  51000001 -   52000000
+387	{'GATTACA': 140, 'AAA': 28520, 'TTT': 29950}	1	 193500001 -  194500000
+182	{'GATTACA': 234, 'AAA': 28478, 'TTT': 23846}	1	  91000001 -   92000000
+399	{'GATTACA': 339, 'AAA': 28461, 'TTT': 23444}	1	 199500001 -  200500000
+198	{'GATTACA': 135, 'AAA': 28394, 'TTT': 27321}	1	  99000001 -  100000000
+155	{'GATTACA': 289, 'AAA': 28358, 'TTT': 26070}	1	  77500001 -   78500000
+199	{'GATTACA': 183, 'AAA': 28342, 'TTT': 26930}	1	  99500001 -  100500000
+395	{'GATTACA': 167, 'AAA': 28329, 'TTT': 28943}	1	 197500001 -  198500000
+486	{'GATTACA': 267, 'AAA': 28316, 'TTT': 24611}	1	 243000001 -  244000000
+186	{'GATTACA': 317, 'AAA': 28314, 'TTT': 25946}	1	  93000001 -   94000000
+167	{'GATTACA': 122, 'AAA': 28292, 'TTT': 26681}	1	  83500001 -   84500000
+177	{'GATTACA': 206, 'AAA': 28258, 'TTT': 26617}	1	  88500001 -   89500000
+197	{'GATTACA': 146, 'AAA': 28255, 'TTT': 28563}	1	  98500001 -   99500000
+215	{'GATTACA': 125, 'AAA': 28171, 'TTT': 26053}	1	 107500001 -  108500000
+375	{'GATTACA': 137, 'AAA': 28158, 'TTT': 31583}	1	 187500001 -  188500000
+346	{'GATTACA': 236, 'AAA': 28157, 'TTT': 23885}	1	 173000001 -  174000000
+216	{'GATTACA': 146, 'AAA': 28093, 'TTT': 24359}	1	 108000001 -  109000000
+339	{'GATTACA': 170, 'AAA': 28026, 'TTT': 26816}	1	 169500001 -  170500000
+327	{'GATTACA': 130, 'AAA': 28020, 'TTT': 26812}	1	 163500001 -  164500000
+100	{'GATTACA': 151, 'AAA': 28000, 'TTT': 22650}	1	  50000001 -   51000000
+181	{'GATTACA': 181, 'AAA': 27982, 'TTT': 25203}	1	  90500001 -   91500000
+163	{'GATTACA': 214, 'AAA': 27962, 'TTT': 29827}	1	  81500001 -   82500000
+431	{'GATTACA': 146, 'AAA': 27944, 'TTT': 28633}	1	 215500001 -  216500000
+434	{'GATTACA': 212, 'AAA': 27928, 'TTT': 26787}	1	 217000001 -  218000000
+173	{'GATTACA': 224, 'AAA': 27829, 'TTT': 26751}	1	  86500001 -   87500000
+185	{'GATTACA': 368, 'AAA': 27800, 'TTT': 25503}	1	  92500001 -   93500000
+372	{'GATTACA': 170, 'AAA': 27720, 'TTT': 29343}	1	 186000001 -  187000000
+341	{'GATTACA': 197, 'AAA': 27645, 'TTT': 25721}	1	 170500001 -  171500000
+374	{'GATTACA': 170, 'AAA': 27581, 'TTT': 31237}	1	 187000001 -  188000000
+170	{'GATTACA': 208, 'AAA': 27485, 'TTT': 23569}	1	  85000001 -   86000000
+139	{'GATTACA': 138, 'AAA': 27385, 'TTT': 30094}	1	  69500001 -   70500000
+194	{'GATTACA': 171, 'AAA': 27374, 'TTT': 29538}	1	  97000001 -   98000000
+373	{'GATTACA': 179, 'AAA': 27370, 'TTT': 30468}	1	 186500001 -  187500000
+165	{'GATTACA': 133, 'AAA': 27334, 'TTT': 29436}	1	  82500001 -   83500000
+317	{'GATTACA': 128, 'AAA': 27313, 'TTT': 26214}	1	 158500001 -  159500000
+371	{'GATTACA': 159, 'AAA': 27289, 'TTT': 29579}	1	 185500001 -  186500000
+385	{'GATTACA': 186, 'AAA': 27284, 'TTT': 28944}	1	 192500001 -  193500000
+126	{'GATTACA': 280, 'AAA': 27232, 'TTT': 26025}	1	  63000001 -   64000000
+340	{'GATTACA': 135, 'AAA': 27193, 'TTT': 28246}	1	 170000001 -  171000000
+478	{'GATTACA': 188, 'AAA': 27159, 'TTT': 28045}	1	 239000001 -  240000000
+482	{'GATTACA': 212, 'AAA': 27105, 'TTT': 25333}	1	 241000001 -  242000000
+337	{'GATTACA': 131, 'AAA': 27101, 'TTT': 25356}	1	 168500001 -  169500000
+101	{'GATTACA': 243, 'AAA': 26997, 'TTT': 23562}	1	  50500001 -   51500000
+141	{'GATTACA': 254, 'AAA': 26996, 'TTT': 28071}	1	  70500001 -   71500000
+238	{'GATTACA': 149, 'AAA': 26956, 'TTT': 24267}	1	 119000001 -  120000000
+157	{'GATTACA': 160, 'AAA': 26948, 'TTT': 28668}	1	  78500001 -   79500000
+485	{'GATTACA': 269, 'AAA': 26895, 'TTT': 23668}	1	 242500001 -  243500000
+156	{'GATTACA': 290, 'AAA': 26799, 'TTT': 27210}	1	  78000001 -   79000000
+154	{'GATTACA': 142, 'AAA': 26788, 'TTT': 26061}	1	  77000001 -   78000000
+169	{'GATTACA': 202, 'AAA': 26783, 'TTT': 26188}	1	  84500001 -   85500000
+492	{'GATTACA': 238, 'AAA': 26771, 'TTT': 21608}	1	 246000001 -  247000000
+396	{'GATTACA': 150, 'AAA': 26763, 'TTT': 31691}	1	 198000001 -  199000000
+121	{'GATTACA': 129, 'AAA': 26738, 'TTT': 25064}	1	  60500001 -   61500000
+437	{'GATTACA': 186, 'AAA': 26734, 'TTT': 27671}	1	 218500001 -  219500000
+200	{'GATTACA': 269, 'AAA': 26724, 'TTT': 28113}	1	 100000001 -  101000000
+168	{'GATTACA': 164, 'AAA': 26712, 'TTT': 27931}	1	  84000001 -   85000000
+164	{'GATTACA': 195, 'AAA': 26685, 'TTT': 30319}	1	  82000001 -   83000000
+443	{'GATTACA': 136, 'AAA': 26616, 'TTT': 24112}	1	 221500001 -  222500000
+476	{'GATTACA': 208, 'AAA': 26615, 'TTT': 27941}	1	 238000001 -  239000000
+436	{'GATTACA': 214, 'AAA': 26526, 'TTT': 27070}	1	 218000001 -  219000000
+133	{'GATTACA': 161, 'AAA': 26517, 'TTT': 28177}	1	  66500001 -   67500000
+192	{'GATTACA': 125, 'AAA': 26496, 'TTT': 29730}	1	  96000001 -   97000000
+422	{'GATTACA': 273, 'AAA': 26492, 'TTT': 21270}	1	 211000001 -  212000000
+178	{'GATTACA': 200, 'AAA': 26477, 'TTT': 26696}	1	  89000001 -   90000000
+142	{'GATTACA': 132, 'AAA': 26437, 'TTT': 28856}	1	  71000001 -   72000000
+444	{'GATTACA': 192, 'AAA': 26383, 'TTT': 22391}	1	 222000001 -  223000000
+326	{'GATTACA': 132, 'AAA': 26381, 'TTT': 28037}	1	 163000001 -  164000000
+386	{'GATTACA': 178, 'AAA': 26367, 'TTT': 30931}	1	 193000001 -  194000000
+316	{'GATTACA': 166, 'AAA': 26365, 'TTT': 26233}	1	 158000001 -  159000000
+193	{'GATTACA': 162, 'AAA': 26350, 'TTT': 29813}	1	  96500001 -   97500000
+134	{'GATTACA': 272, 'AAA': 26316, 'TTT': 27303}	1	  67000001 -   68000000
+138	{'GATTACA': 147, 'AAA': 26314, 'TTT': 29092}	1	  69000001 -   70000000
+487	{'GATTACA': 225, 'AAA': 26301, 'TTT': 24712}	1	 243500001 -  244500000
+354	{'GATTACA': 134, 'AAA': 26232, 'TTT': 21465}	1	 177000001 -  178000000
+236	{'GATTACA': 112, 'AAA': 26229, 'TTT': 25293}	1	 118000001 -  119000000
+440	{'GATTACA': 270, 'AAA': 26206, 'TTT': 25212}	1	 220000001 -  221000000
+481	{'GATTACA': 307, 'AAA': 26172, 'TTT': 25787}	1	 240500001 -  241500000
+183	{'GATTACA': 311, 'AAA': 26066, 'TTT': 23560}	1	  91500001 -   92500000
+355	{'GATTACA': 179, 'AAA': 26023, 'TTT': 24398}	1	 177500001 -  178500000
+203	{'GATTACA': 210, 'AAA': 26007, 'TTT': 29570}	1	 101500001 -  102500000
+493	{'GATTACA': 317, 'AAA': 25967, 'TTT': 21248}	1	 246500001 -  247500000
+120	{'GATTACA': 144, 'AAA': 25948, 'TTT': 26227}	1	  60000001 -   61000000
+430	{'GATTACA': 164, 'AAA': 25928, 'TTT': 29283}	1	 215000001 -  216000000
+125	{'GATTACA': 401, 'AAA': 25889, 'TTT': 24427}	1	  62500001 -   63500000
+328	{'GATTACA': 163, 'AAA': 25837, 'TTT': 25577}	1	 164000001 -  165000000
+345	{'GATTACA': 152, 'AAA': 25816, 'TTT': 26383}	1	 172500001 -  173500000
+342	{'GATTACA': 248, 'AAA': 25804, 'TTT': 25732}	1	 171000001 -  172000000
+230	{'GATTACA': 238, 'AAA': 25649, 'TTT': 25630}	1	 115000001 -  116000000
+137	{'GATTACA': 167, 'AAA': 25612, 'TTT': 27065}	1	  68500001 -   69500000
+217	{'GATTACA': 195, 'AAA': 25572, 'TTT': 25254}	1	 108500001 -  109500000
+227	{'GATTACA': 383, 'AAA': 25553, 'TTT': 26286}	1	 113500001 -  114500000
+369	{'GATTACA': 275, 'AAA': 25480, 'TTT': 27256}	1	 184500001 -  185500000
+229	{'GATTACA': 277, 'AAA': 25477, 'TTT': 24144}	1	 114500001 -  115500000
+466	{'GATTACA': 224, 'AAA': 25444, 'TTT': 24218}	1	 233000001 -  234000000
+370	{'GATTACA': 221, 'AAA': 25433, 'TTT': 29913}	1	 185000001 -  186000000
+184	{'GATTACA': 387, 'AAA': 25423, 'TTT': 25246}	1	  92000001 -   93000000
+318	{'GATTACA': 122, 'AAA': 25422, 'TTT': 22221}	1	 159000001 -  160000000
+351	{'GATTACA': 173, 'AAA': 25411, 'TTT': 24719}	1	 175500001 -  176500000
+465	{'GATTACA': 210, 'AAA': 25395, 'TTT': 22700}	1	 232500001 -  233500000
+201	{'GATTACA': 199, 'AAA': 25375, 'TTT': 29446}	1	 100500001 -  101500000
+484	{'GATTACA': 316, 'AAA': 25343, 'TTT': 23878}	1	 242000001 -  243000000
+483	{'GATTACA': 305, 'AAA': 25321, 'TTT': 24910}	1	 241500001 -  242500000
+122	{'GATTACA': 181, 'AAA': 25304, 'TTT': 25957}	1	  61000001 -   62000000
+132	{'GATTACA': 149, 'AAA': 25292, 'TTT': 29227}	1	  66000001 -   67000000
+475	{'GATTACA': 241, 'AAA': 25291, 'TTT': 28263}	1	 237500001 -  238500000
+343	{'GATTACA': 200, 'AAA': 25259, 'TTT': 27914}	1	 171500001 -  172500000
+347	{'GATTACA': 321, 'AAA': 25252, 'TTT': 29104}	1	 173500001 -  174500000
+450	{'GATTACA': 259, 'AAA': 25239, 'TTT': 26225}	1	 225000001 -  226000000
+344	{'GATTACA': 135, 'AAA': 25220, 'TTT': 28795}	1	 172000001 -  173000000
+179	{'GATTACA': 177, 'AAA': 25203, 'TTT': 26163}	1	  89500001 -   90500000
+417	{'GATTACA': 169, 'AAA': 25159, 'TTT': 24031}	1	 208500001 -  209500000
+494	{'GATTACA': 271, 'AAA': 25121, 'TTT': 24184}	1	 247000001 -  248000000
+315	{'GATTACA': 172, 'AAA': 25118, 'TTT': 24011}	1	 157500001 -  158500000
+228	{'GATTACA': 257, 'AAA': 25090, 'TTT': 24452}	1	 114000001 -  115000000
+175	{'GATTACA': 165, 'AAA': 25059, 'TTT': 27101}	1	  87500001 -   88500000
+442	{'GATTACA': 148, 'AAA': 25023, 'TTT': 27416}	1	 221000001 -  222000000
+491	{'GATTACA': 217, 'AAA': 25023, 'TTT': 21860}	1	 245500001 -  246500000
+333	{'GATTACA': 214, 'AAA': 25020, 'TTT': 24992}	1	 166500001 -  167500000
+428	{'GATTACA': 198, 'AAA': 24982, 'TTT': 25135}	1	 214000001 -  215000000
+103	{'GATTACA': 404, 'AAA': 24972, 'TTT': 23963}	1	  51500001 -   52500000
+97	{'GATTACA': 120, 'AAA': 24941, 'TTT': 21277}	1	  48500001 -   49500000
+152	{'GATTACA': 196, 'AAA': 24940, 'TTT': 28060}	1	  76000001 -   77000000
+180	{'GATTACA': 202, 'AAA': 24927, 'TTT': 26991}	1	  90000001 -   91000000
+98	{'GATTACA': 115, 'AAA': 24910, 'TTT': 23300}	1	  49000001 -   50000000
+115	{'GATTACA': 158, 'AAA': 24907, 'TTT': 22488}	1	  57500001 -   58500000
+191	{'GATTACA': 163, 'AAA': 24874, 'TTT': 29457}	1	  95500001 -   96500000
+429	{'GATTACA': 193, 'AAA': 24862, 'TTT': 28032}	1	 214500001 -  215500000
+368	{'GATTACA': 236, 'AAA': 24817, 'TTT': 25822}	1	 184000001 -  185000000
+352	{'GATTACA': 147, 'AAA': 24766, 'TTT': 26917}	1	 176000001 -  177000000
+174	{'GATTACA': 220, 'AAA': 24705, 'TTT': 27505}	1	  87000001 -   88000000
+202	{'GATTACA': 197, 'AAA': 24660, 'TTT': 29057}	1	 101000001 -  102000000
+114	{'GATTACA': 172, 'AAA': 24649, 'TTT': 23860}	1	  57000001 -   58000000
+113	{'GATTACA': 175, 'AAA': 24631, 'TTT': 23680}	1	  56500001 -   57500000
+480	{'GATTACA': 313, 'AAA': 24589, 'TTT': 26865}	1	 240000001 -  241000000
+445	{'GATTACA': 224, 'AAA': 24586, 'TTT': 23124}	1	 222500001 -  223500000
+129	{'GATTACA': 216, 'AAA': 24557, 'TTT': 24605}	1	  64500001 -   65500000
+325	{'GATTACA': 193, 'AAA': 24536, 'TTT': 27399}	1	 162500001 -  163500000
+454	{'GATTACA': 227, 'AAA': 24515, 'TTT': 22640}	1	 227000001 -  228000000
+359	{'GATTACA': 236, 'AAA': 24502, 'TTT': 25642}	1	 179500001 -  180500000
+451	{'GATTACA': 443, 'AAA': 24502, 'TTT': 20642}	1	 225500001 -  226500000
+421	{'GATTACA': 210, 'AAA': 24474, 'TTT': 23120}	1	 210500001 -  211500000
+16	{'GATTACA': 489, 'AAA': 24462, 'TTT': 20595}	1	   8000001 -    9000000
+414	{'GATTACA': 154, 'AAA': 24455, 'TTT': 24848}	1	 207000001 -  208000000
+418	{'GATTACA': 168, 'AAA': 24345, 'TTT': 21556}	1	 209000001 -  210000000
+123	{'GATTACA': 326, 'AAA': 24342, 'TTT': 27768}	1	  61500001 -   62500000
+187	{'GATTACA': 283, 'AAA': 24314, 'TTT': 25606}	1	  93500001 -   94500000
+479	{'GATTACA': 234, 'AAA': 24308, 'TTT': 27997}	1	 239500001 -  240500000
+293	{'GATTACA': 204, 'AAA': 24265, 'TTT': 23881}	1	 146500001 -  147500000
+124	{'GATTACA': 477, 'AAA': 24199, 'TTT': 24889}	1	  62000001 -   63000000
+153	{'GATTACA': 127, 'AAA': 24161, 'TTT': 27931}	1	  76500001 -   77500000
+218	{'GATTACA': 359, 'AAA': 24147, 'TTT': 22310}	1	 109000001 -  110000000
+360	{'GATTACA': 263, 'AAA': 24127, 'TTT': 25408}	1	 180000001 -  181000000
+116	{'GATTACA': 139, 'AAA': 24118, 'TTT': 22103}	1	  58000001 -   59000000
+239	{'GATTACA': 136, 'AAA': 24096, 'TTT': 22416}	1	 119500001 -  120500000
+135	{'GATTACA': 281, 'AAA': 24092, 'TTT': 25026}	1	  67500001 -   68500000
+127	{'GATTACA': 243, 'AAA': 24078, 'TTT': 25998}	1	  63500001 -   64500000
+235	{'GATTACA': 154, 'AAA': 24065, 'TTT': 24657}	1	 117500001 -  118500000
+470	{'GATTACA': 429, 'AAA': 24039, 'TTT': 20730}	1	 235000001 -  236000000
+91	{'GATTACA': 512, 'AAA': 24036, 'TTT': 23241}	1	  45500001 -   46500000
+469	{'GATTACA': 277, 'AAA': 24004, 'TTT': 18615}	1	 234500001 -  235500000
+136	{'GATTACA': 213, 'AAA': 23989, 'TTT': 25078}	1	  68000001 -   69000000
+189	{'GATTACA': 216, 'AAA': 23985, 'TTT': 24439}	1	  94500001 -   95500000
+400	{'GATTACA': 419, 'AAA': 23975, 'TTT': 23953}	1	 200000001 -  201000000
+474	{'GATTACA': 246, 'AAA': 23947, 'TTT': 28031}	1	 237000001 -  238000000
+41	{'GATTACA': 327, 'AAA': 23905, 'TTT': 18355}	1	  20500001 -   21500000
+467	{'GATTACA': 197, 'AAA': 23905, 'TTT': 24703}	1	 233500001 -  234500000
+119	{'GATTACA': 137, 'AAA': 23904, 'TTT': 24979}	1	  59500001 -   60500000
+294	{'GATTACA': 252, 'AAA': 23894, 'TTT': 22894}	1	 147000001 -  148000000
+305	{'GATTACA': 116, 'AAA': 23810, 'TTT': 21419}	1	 152500001 -  153500000
+330	{'GATTACA': 188, 'AAA': 23802, 'TTT': 21975}	1	 165000001 -  166000000
+423	{'GATTACA': 351, 'AAA': 23797, 'TTT': 22807}	1	 211500001 -  212500000
+222	{'GATTACA': 168, 'AAA': 23783, 'TTT': 23998}	1	 111000001 -  112000000
+356	{'GATTACA': 276, 'AAA': 23780, 'TTT': 27817}	1	 178000001 -  179000000
+112	{'GATTACA': 143, 'AAA': 23768, 'TTT': 23717}	1	  56000001 -   57000000
+332	{'GATTACA': 141, 'AAA': 23750, 'TTT': 25916}	1	 166000001 -  167000000
+464	{'GATTACA': 173, 'AAA': 23749, 'TTT': 23238}	1	 232000001 -  233000000
+104	{'GATTACA': 447, 'AAA': 23735, 'TTT': 24860}	1	  52000001 -   53000000
+471	{'GATTACA': 473, 'AAA': 23664, 'TTT': 22863}	1	 235500001 -  236500000
+85	{'GATTACA': 317, 'AAA': 23624, 'TTT': 22292}	1	  42500001 -   43500000
+364	{'GATTACA': 310, 'AAA': 23590, 'TTT': 23514}	1	 182000001 -  183000000
+190	{'GATTACA': 212, 'AAA': 23531, 'TTT': 25876}	1	  95000001 -   96000000
+353	{'GATTACA': 120, 'AAA': 23521, 'TTT': 24333}	1	 176500001 -  177500000
+365	{'GATTACA': 320, 'AAA': 23493, 'TTT': 24628}	1	 182500001 -  183500000
+226	{'GATTACA': 466, 'AAA': 23483, 'TTT': 23540}	1	 113000001 -  114000000
+424	{'GATTACA': 343, 'AAA': 23468, 'TTT': 23146}	1	 212000001 -  213000000
+336	{'GATTACA': 168, 'AAA': 23418, 'TTT': 25490}	1	 168000001 -  169000000
+468	{'GATTACA': 204, 'AAA': 23410, 'TTT': 21773}	1	 234000001 -  235000000
+495	{'GATTACA': 198, 'AAA': 23409, 'TTT': 29014}	1	 247500001 -  248500000
+363	{'GATTACA': 217, 'AAA': 23357, 'TTT': 22459}	1	 181500001 -  182500000
+117	{'GATTACA': 141, 'AAA': 23335, 'TTT': 21836}	1	  58500001 -   59500000
+300	{'GATTACA': 633, 'AAA': 23244, 'TTT': 22795}	1	 150000001 -  151000000
+84	{'GATTACA': 209, 'AAA': 23233, 'TTT': 20384}	1	  42000001 -   43000000
+314	{'GATTACA': 140, 'AAA': 23230, 'TTT': 22331}	1	 157000001 -  158000000
+130	{'GATTACA': 287, 'AAA': 23181, 'TTT': 26318}	1	  65000001 -   66000000
+357	{'GATTACA': 411, 'AAA': 23168, 'TTT': 27002}	1	 178500001 -  179500000
+448	{'GATTACA': 402, 'AAA': 23162, 'TTT': 22885}	1	 224000001 -  225000000
+367	{'GATTACA': 205, 'AAA': 23150, 'TTT': 26758}	1	 183500001 -  184500000
+366	{'GATTACA': 268, 'AAA': 23123, 'TTT': 25702}	1	 183000001 -  184000000
+441	{'GATTACA': 179, 'AAA': 23105, 'TTT': 27621}	1	 220500001 -  221500000
+225	{'GATTACA': 330, 'AAA': 23104, 'TTT': 21199}	1	 112500001 -  113500000
+131	{'GATTACA': 254, 'AAA': 23081, 'TTT': 29666}	1	  65500001 -   66500000
+453	{'GATTACA': 255, 'AAA': 23073, 'TTT': 21106}	1	 226500001 -  227500000
+348	{'GATTACA': 347, 'AAA': 23061, 'TTT': 31851}	1	 174000001 -  175000000
+118	{'GATTACA': 127, 'AAA': 23059, 'TTT': 22987}	1	  59000001 -   60000000
+188	{'GATTACA': 232, 'AAA': 23056, 'TTT': 24300}	1	  94000001 -   95000000
+299	{'GATTACA': 488, 'AAA': 23049, 'TTT': 23227}	1	 149500001 -  150500000
+496	{'GATTACA': 122, 'AAA': 23027, 'TTT': 25768}	1	 248000001 -  249000000
+111	{'GATTACA': 152, 'AAA': 22948, 'TTT': 23935}	1	  55500001 -   56500000
+234	{'GATTACA': 194, 'AAA': 22914, 'TTT': 22549}	1	 117000001 -  118000000
+231	{'GATTACA': 136, 'AAA': 22875, 'TTT': 24304}	1	 115500001 -  116500000
+427	{'GATTACA': 144, 'AAA': 22874, 'TTT': 24883}	1	 213500001 -  214500000
+447	{'GATTACA': 333, 'AAA': 22874, 'TTT': 19068}	1	 223500001 -  224500000
+358	{'GATTACA': 377, 'AAA': 22866, 'TTT': 27725}	1	 179000001 -  180000000
+329	{'GATTACA': 168, 'AAA': 22859, 'TTT': 23442}	1	 164500001 -  165500000
+90	{'GATTACA': 477, 'AAA': 22830, 'TTT': 19244}	1	  45000001 -   46000000
+462	{'GATTACA': 301, 'AAA': 22829, 'TTT': 23579}	1	 231000001 -  232000000
+488	{'GATTACA': 318, 'AAA': 22808, 'TTT': 24636}	1	 244000001 -  245000000
+105	{'GATTACA': 589, 'AAA': 22784, 'TTT': 25036}	1	  52500001 -   53500000
+232	{'GATTACA': 158, 'AAA': 22761, 'TTT': 24276}	1	 116000001 -  117000000
+463	{'GATTACA': 227, 'AAA': 22751, 'TTT': 24839}	1	 231500001 -  232500000
+425	{'GATTACA': 354, 'AAA': 22732, 'TTT': 25258}	1	 212500001 -  213500000
+70	{'GATTACA': 395, 'AAA': 22726, 'TTT': 22638}	1	  35000001 -   36000000
+472	{'GATTACA': 428, 'AAA': 22714, 'TTT': 23538}	1	 236000001 -  237000000
+128	{'GATTACA': 197, 'AAA': 22670, 'TTT': 25454}	1	  64000001 -   65000000
+415	{'GATTACA': 150, 'AAA': 22629, 'TTT': 22711}	1	 207500001 -  208500000
+42	{'GATTACA': 387, 'AAA': 22534, 'TTT': 18452}	1	  21000001 -   22000000
+489	{'GATTACA': 424, 'AAA': 22525, 'TTT': 24404}	1	 244500001 -  245500000
+458	{'GATTACA': 266, 'AAA': 22509, 'TTT': 21396}	1	 229000001 -  230000000
+233	{'GATTACA': 181, 'AAA': 22485, 'TTT': 22437}	1	 116500001 -  117500000
+334	{'GATTACA': 311, 'AAA': 22456, 'TTT': 25564}	1	 167000001 -  168000000
+350	{'GATTACA': 141, 'AAA': 22439, 'TTT': 21643}	1	 175000001 -  176000000
+419	{'GATTACA': 187, 'AAA': 22412, 'TTT': 24625}	1	 209500001 -  210500000
+71	{'GATTACA': 545, 'AAA': 22371, 'TTT': 25676}	1	  35500001 -   36500000
+306	{'GATTACA': 356, 'AAA': 22353, 'TTT': 18598}	1	 153000001 -  154000000
+292	{'GATTACA': 157, 'AAA': 22329, 'TTT': 20677}	1	 146000001 -  147000000
+223	{'GATTACA': 183, 'AAA': 22328, 'TTT': 24578}	1	 111500001 -  112500000
+449	{'GATTACA': 239, 'AAA': 22325, 'TTT': 27162}	1	 224500001 -  225500000
+298	{'GATTACA': 264, 'AAA': 22297, 'TTT': 21883}	1	 149000001 -  150000000
+349	{'GATTACA': 239, 'AAA': 22279, 'TTT': 26154}	1	 174500001 -  175500000
+17	{'GATTACA': 450, 'AAA': 22245, 'TTT': 18381}	1	   8500001 -    9500000
+319	{'GATTACA': 183, 'AAA': 22242, 'TTT': 19834}	1	 159500001 -  160500000
+69	{'GATTACA': 172, 'AAA': 22232, 'TTT': 18326}	1	  34500001 -   35500000
+331	{'GATTACA': 186, 'AAA': 22048, 'TTT': 25271}	1	 165500001 -  166500000
+335	{'GATTACA': 278, 'AAA': 22047, 'TTT': 25627}	1	 167500001 -  168500000
+473	{'GATTACA': 339, 'AAA': 22011, 'TTT': 25972}	1	 236500001 -  237500000
+96	{'GATTACA': 135, 'AAA': 21944, 'TTT': 19156}	1	  48000001 -   49000000
+301	{'GATTACA': 648, 'AAA': 21930, 'TTT': 21333}	1	 150500001 -  151500000
+224	{'GATTACA': 186, 'AAA': 21921, 'TTT': 21688}	1	 112000001 -  113000000
+241	{'GATTACA': 136, 'AAA': 21899, 'TTT': 19220}	1	 120500001 -  121500000
+240	{'GATTACA': 152, 'AAA': 21866, 'TTT': 19535}	1	 120000001 -  121000000
+461	{'GATTACA': 245, 'AAA': 21845, 'TTT': 21713}	1	 230500001 -  231500000
+56	{'GATTACA': 706, 'AAA': 21837, 'TTT': 21356}	1	  28000001 -   29000000
+323	{'GATTACA': 213, 'AAA': 21742, 'TTT': 25376}	1	 161500001 -  162500000
+324	{'GATTACA': 232, 'AAA': 21711, 'TTT': 26195}	1	 162000001 -  163000000
+446	{'GATTACA': 183, 'AAA': 21667, 'TTT': 19913}	1	 223000001 -  224000000
+320	{'GATTACA': 241, 'AAA': 21630, 'TTT': 20862}	1	 160000001 -  161000000
+416	{'GATTACA': 154, 'AAA': 21527, 'TTT': 22191}	1	 208000001 -  209000000
+490	{'GATTACA': 372, 'AAA': 21499, 'TTT': 23058}	1	 245000001 -  246000000
+94	{'GATTACA': 283, 'AAA': 21415, 'TTT': 22010}	1	  47000001 -   48000000
+304	{'GATTACA': 106, 'AAA': 21401, 'TTT': 24505}	1	 152000001 -  153000000
+426	{'GATTACA': 253, 'AAA': 21273, 'TTT': 27517}	1	 213000001 -  214000000
+420	{'GATTACA': 224, 'AAA': 21142, 'TTT': 27102}	1	 210000001 -  211000000
+78	{'GATTACA': 486, 'AAA': 21114, 'TTT': 22451}	1	  39000001 -   40000000
+68	{'GATTACA': 120, 'AAA': 21073, 'TTT': 18565}	1	  34000001 -   35000000
+362	{'GATTACA': 164, 'AAA': 20949, 'TTT': 22100}	1	 181000001 -  182000000
+290	{'GATTACA': 318, 'AAA': 20919, 'TTT': 22938}	1	 145000001 -  146000000
+28	{'GATTACA': 172, 'AAA': 20898, 'TTT': 23639}	1	  14000001 -   15000000
+321	{'GATTACA': 324, 'AAA': 20885, 'TTT': 20193}	1	 160500001 -  161500000
+310	{'GATTACA': 597, 'AAA': 20826, 'TTT': 18943}	1	 155000001 -  156000000
+221	{'GATTACA': 192, 'AAA': 20798, 'TTT': 20682}	1	 110500001 -  111500000
+459	{'GATTACA': 263, 'AAA': 20791, 'TTT': 22450}	1	 229500001 -  230500000
+452	{'GATTACA': 395, 'AAA': 20784, 'TTT': 18911}	1	 226000001 -  227000000
+322	{'GATTACA': 316, 'AAA': 20657, 'TTT': 22424}	1	 161000001 -  162000000
+307	{'GATTACA': 600, 'AAA': 20629, 'TTT': 19297}	1	 153500001 -  154500000
+77	{'GATTACA': 316, 'AAA': 20586, 'TTT': 19862}	1	  38500001 -   39500000
+80	{'GATTACA': 487, 'AAA': 20558, 'TTT': 22094}	1	  40000001 -   41000000
+75	{'GATTACA': 301, 'AAA': 20493, 'TTT': 16714}	1	  37500001 -   38500000
+108	{'GATTACA': 273, 'AAA': 20425, 'TTT': 17123}	1	  54000001 -   55000000
+219	{'GATTACA': 367, 'AAA': 20411, 'TTT': 19437}	1	 109500001 -  110500000
+297	{'GATTACA': 198, 'AAA': 20372, 'TTT': 21232}	1	 148500001 -  149500000
+413	{'GATTACA': 191, 'AAA': 20347, 'TTT': 22995}	1	 206500001 -  207500000
+57	{'GATTACA': 761, 'AAA': 20340, 'TTT': 22707}	1	  28500001 -   29500000
+289	{'GATTACA': 189, 'AAA': 20299, 'TTT': 20052}	1	 144500001 -  145500000
+361	{'GATTACA': 264, 'AAA': 20219, 'TTT': 24884}	1	 180500001 -  181500000
+81	{'GATTACA': 450, 'AAA': 20179, 'TTT': 22842}	1	  40500001 -   41500000
+76	{'GATTACA': 306, 'AAA': 20094, 'TTT': 18164}	1	  38000001 -   39000000
+55	{'GATTACA': 560, 'AAA': 19966, 'TTT': 19079}	1	  27500001 -   28500000
+93	{'GATTACA': 342, 'AAA': 19955, 'TTT': 20416}	1	  46500001 -   47500000
+110	{'GATTACA': 270, 'AAA': 19951, 'TTT': 20595}	1	  55000001 -   56000000
+460	{'GATTACA': 192, 'AAA': 19869, 'TTT': 22209}	1	 230000001 -  231000000
+83	{'GATTACA': 174, 'AAA': 19856, 'TTT': 18474}	1	  41500001 -   42500000
+10	{'GATTACA': 114, 'AAA': 19806, 'TTT': 16815}	1	   5000001 -    6000000
+86	{'GATTACA': 333, 'AAA': 19802, 'TTT': 20491}	1	  43000001 -   44000000
+308	{'GATTACA': 439, 'AAA': 19737, 'TTT': 19438}	1	 154000001 -  155000000
+92	{'GATTACA': 513, 'AAA': 19705, 'TTT': 22350}	1	  46000001 -   47000000
+62	{'GATTACA': 409, 'AAA': 19688, 'TTT': 18247}	1	  31000001 -   32000000
+89	{'GATTACA': 407, 'AAA': 19561, 'TTT': 19822}	1	  44500001 -   45500000
+47	{'GATTACA': 555, 'AAA': 19557, 'TTT': 19260}	1	  23500001 -   24500000
+46	{'GATTACA': 407, 'AAA': 19527, 'TTT': 18249}	1	  23000001 -   24000000
+48	{'GATTACA': 468, 'AAA': 19522, 'TTT': 20533}	1	  24000001 -   25000000
+302	{'GATTACA': 561, 'AAA': 19509, 'TTT': 22567}	1	 151000001 -  152000000
+303	{'GATTACA': 258, 'AAA': 19503, 'TTT': 24926}	1	 151500001 -  152500000
+79	{'GATTACA': 499, 'AAA': 19474, 'TTT': 21767}	1	  39500001 -   40500000
+457	{'GATTACA': 221, 'AAA': 19463, 'TTT': 19293}	1	 228500001 -  229500000
+404	{'GATTACA': 408, 'AAA': 19365, 'TTT': 21274}	1	 202000001 -  203000000
+67	{'GATTACA': 205, 'AAA': 19360, 'TTT': 18723}	1	  33500001 -   34500000
+407	{'GATTACA': 433, 'AAA': 19334, 'TTT': 19829}	1	 203500001 -  204500000
+19	{'GATTACA': 651, 'AAA': 19328, 'TTT': 21152}	1	   9500001 -   10500000
+72	{'GATTACA': 563, 'AAA': 19297, 'TTT': 21416}	1	  36000001 -   37000000
+405	{'GATTACA': 243, 'AAA': 19238, 'TTT': 19141}	1	 202500001 -  203500000
+38	{'GATTACA': 293, 'AAA': 19188, 'TTT': 15622}	1	  19000001 -   20000000
+39	{'GATTACA': 374, 'AAA': 19167, 'TTT': 19257}	1	  19500001 -   20500000
+15	{'GATTACA': 393, 'AAA': 19115, 'TTT': 19520}	1	   7500001 -    8500000
+406	{'GATTACA': 349, 'AAA': 19097, 'TTT': 20335}	1	 203000001 -  204000000
+311	{'GATTACA': 591, 'AAA': 19075, 'TTT': 18155}	1	 155500001 -  156500000
+9	{'GATTACA': 117, 'AAA': 19072, 'TTT': 18481}	1	   4500001 -    5500000
+49	{'GATTACA': 358, 'AAA': 19057, 'TTT': 19872}	1	  24500001 -   25500000
+63	{'GATTACA': 460, 'AAA': 19054, 'TTT': 18616}	1	  31500001 -   32500000
+107	{'GATTACA': 185, 'AAA': 19022, 'TTT': 17365}	1	  53500001 -   54500000
+61	{'GATTACA': 171, 'AAA': 19018, 'TTT': 15575}	1	  30500001 -   31500000
+291	{'GATTACA': 251, 'AAA': 19011, 'TTT': 19121}	1	 145500001 -  146500000
+95	{'GATTACA': 242, 'AAA': 18956, 'TTT': 19163}	1	  47500001 -   48500000
+29	{'GATTACA': 202, 'AAA': 18892, 'TTT': 19749}	1	  14500001 -   15500000
+401	{'GATTACA': 316, 'AAA': 18857, 'TTT': 19515}	1	 200500001 -  201500000
+82	{'GATTACA': 284, 'AAA': 18833, 'TTT': 19633}	1	  41000001 -   42000000
+309	{'GATTACA': 408, 'AAA': 18775, 'TTT': 17935}	1	 154500001 -  155500000
+106	{'GATTACA': 395, 'AAA': 18750, 'TTT': 21011}	1	  53000001 -   54000000
+66	{'GATTACA': 475, 'AAA': 18746, 'TTT': 20092}	1	  33000001 -   34000000
+27	{'GATTACA': 346, 'AAA': 18724, 'TTT': 21559}	1	  13500001 -   14500000
+51	{'GATTACA': 420, 'AAA': 18620, 'TTT': 18784}	1	  25500001 -   26500000
+40	{'GATTACA': 317, 'AAA': 18595, 'TTT': 18268}	1	  20000001 -   21000000
+410	{'GATTACA': 349, 'AAA': 18519, 'TTT': 16546}	1	 205000001 -  206000000
+65	{'GATTACA': 656, 'AAA': 18504, 'TTT': 20575}	1	  32500001 -   33500000
+455	{'GATTACA': 178, 'AAA': 18333, 'TTT': 18935}	1	 227500001 -  228500000
+50	{'GATTACA': 421, 'AAA': 18330, 'TTT': 19728}	1	  25000001 -   26000000
+64	{'GATTACA': 487, 'AAA': 18311, 'TTT': 18478}	1	  32000001 -   33000000
+313	{'GATTACA': 243, 'AAA': 17902, 'TTT': 19097}	1	 156500001 -  157500000
+295	{'GATTACA': 176, 'AAA': 17882, 'TTT': 15232}	1	 147500001 -  148500000
+88	{'GATTACA': 329, 'AAA': 17879, 'TTT': 19820}	1	  44000001 -   45000000
+37	{'GATTACA': 171, 'AAA': 17863, 'TTT': 14732}	1	  18500001 -   19500000
+52	{'GATTACA': 500, 'AAA': 17844, 'TTT': 17878}	1	  26000001 -   27000000
+403	{'GATTACA': 398, 'AAA': 17786, 'TTT': 20759}	1	 201500001 -  202500000
+20	{'GATTACA': 546, 'AAA': 17775, 'TTT': 21329}	1	  10000001 -   11000000
+409	{'GATTACA': 328, 'AAA': 17767, 'TTT': 18429}	1	 204500001 -  205500000
+220	{'GATTACA': 233, 'AAA': 17689, 'TTT': 19670}	1	 110000001 -  111000000
+32	{'GATTACA': 535, 'AAA': 17685, 'TTT': 17299}	1	  16000001 -   17000000
+74	{'GATTACA': 156, 'AAA': 17632, 'TTT': 16145}	1	  37000001 -   38000000
+18	{'GATTACA': 514, 'AAA': 17552, 'TTT': 17073}	1	   9000001 -   10000000
+31	{'GATTACA': 445, 'AAA': 17540, 'TTT': 18152}	1	  15500001 -   16500000
+21	{'GATTACA': 445, 'AAA': 17538, 'TTT': 17817}	1	  10500001 -   11500000
+285	{'GATTACA': 146, 'AAA': 17498, 'TTT': 17648}	1	 142500001 -  143500000
+109	{'GATTACA': 330, 'AAA': 17484, 'TTT': 17598}	1	  54500001 -   55500000
+30	{'GATTACA': 317, 'AAA': 17440, 'TTT': 18532}	1	  15000001 -   16000000
+24	{'GATTACA': 415, 'AAA': 17398, 'TTT': 21444}	1	  12000001 -   13000000
+87	{'GATTACA': 318, 'AAA': 17172, 'TTT': 18649}	1	  43500001 -   44500000
+408	{'GATTACA': 276, 'AAA': 17170, 'TTT': 18289}	1	 204000001 -  205000000
+45	{'GATTACA': 267, 'AAA': 17132, 'TTT': 17569}	1	  22500001 -   23500000
+22	{'GATTACA': 451, 'AAA': 17075, 'TTT': 16287}	1	  11000001 -   12000000
+43	{'GATTACA': 421, 'AAA': 17022, 'TTT': 16661}	1	  21500001 -   22500000
+60	{'GATTACA': 107, 'AAA': 17002, 'TTT': 16291}	1	  30000001 -   31000000
+0	{'GATTACA': 157, 'AAA': 16982, 'TTT': 15688}	1	         1 -    1000000
+288	{'GATTACA': 147, 'AAA': 16878, 'TTT': 16540}	1	 144000001 -  145000000
+44	{'GATTACA': 348, 'AAA': 16845, 'TTT': 17208}	1	  22000001 -   23000000
+53	{'GATTACA': 647, 'AAA': 16827, 'TTT': 18791}	1	  26500001 -   27500000
+11	{'GATTACA': 202, 'AAA': 16773, 'TTT': 13011}	1	   5500001 -    6500000
+33	{'GATTACA': 454, 'AAA': 16770, 'TTT': 17215}	1	  16500001 -   17500000
+402	{'GATTACA': 272, 'AAA': 16721, 'TTT': 17216}	1	 201000001 -  202000000
+54	{'GATTACA': 582, 'AAA': 16680, 'TTT': 17847}	1	  27000001 -   28000000
+8	{'GATTACA': 120, 'AAA': 16526, 'TTT': 18024}	1	   4000001 -    5000000
+25	{'GATTACA': 335, 'AAA': 16372, 'TTT': 17391}	1	  12500001 -   13500000
+14	{'GATTACA': 242, 'AAA': 16260, 'TTT': 20185}	1	   7000001 -    8000000
+73	{'GATTACA': 354, 'AAA': 16159, 'TTT': 17458}	1	  36500001 -   37500000
+13	{'GATTACA': 353, 'AAA': 16001, 'TTT': 21022}	1	   6500001 -    7500000
+26	{'GATTACA': 414, 'AAA': 15983, 'TTT': 15883}	1	  13000001 -   14000000
+12	{'GATTACA': 391, 'AAA': 15876, 'TTT': 15613}	1	   6000001 -    7000000
+36	{'GATTACA': 157, 'AAA': 15716, 'TTT': 16646}	1	  18000001 -   19000000
+456	{'GATTACA': 196, 'AAA': 15714, 'TTT': 17205}	1	 228000001 -  229000000
+312	{'GATTACA': 441, 'AAA': 15481, 'TTT': 16301}	1	 156000001 -  157000000
+23	{'GATTACA': 433, 'AAA': 15464, 'TTT': 18328}	1	  11500001 -   12500000
+411	{'GATTACA': 226, 'AAA': 15265, 'TTT': 14164}	1	 205500001 -  206500000
+412	{'GATTACA': 189, 'AAA': 15229, 'TTT': 17047}	1	 206000001 -  207000000
+58	{'GATTACA': 468, 'AAA': 15210, 'TTT': 19067}	1	  29000001 -   30000000
+296	{'GATTACA': 122, 'AAA': 15014, 'TTT': 14626}	1	 148000001 -  149000000
+287	{'GATTACA': 198, 'AAA': 14984, 'TTT': 16564}	1	 143500001 -  144500000
+286	{'GATTACA': 176, 'AAA': 14913, 'TTT': 15635}	1	 143000001 -  144000000
+35	{'GATTACA': 277, 'AAA': 14480, 'TTT': 16530}	1	  17500001 -   18500000
+34	{'GATTACA': 371, 'AAA': 14397, 'TTT': 16028}	1	  17000001 -   18000000
+1	{'GATTACA': 254, 'AAA': 13527, 'TTT': 12439}	1	    500001 -    1500000
+2	{'GATTACA': 364, 'AAA': 13169, 'TTT': 11675}	1	   1000001 -    2000000
+59	{'GATTACA': 155, 'AAA': 13146, 'TTT': 15688}	1	  29500001 -   30500000
+3	{'GATTACA': 310, 'AAA': 12574, 'TTT': 12321}	1	   1500001 -    2500000
+7	{'GATTACA': 157, 'AAA': 12427, 'TTT': 13764}	1	   3500001 -    4500000
+242	{'GATTACA': 37, 'AAA': 11763, 'TTT': 10522}	1	 121000001 -  122000000
+284	{'GATTACA': 77, 'AAA': 9759, 'TTT': 9801}	1	 142000001 -  143000000
+5	{'GATTACA': 60, 'AAA': 9563, 'TTT': 9720}	1	   2500001 -    3500000
+6	{'GATTACA': 105, 'AAA': 9452, 'TTT': 9768}	1	   3000001 -    4000000
+4	{'GATTACA': 144, 'AAA': 8872, 'TTT': 10244}	1	   2000001 -    3000000
+243	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 121500001 -  122500000
+244	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 122000001 -  123000000
+245	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 122500001 -  123500000
+246	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 123000001 -  124000000
+247	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 123500001 -  124500000
+248	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 124000001 -  125000000
+249	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 124500001 -  125500000
+250	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 125000001 -  126000000
+251	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 125500001 -  126500000
+252	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 126000001 -  127000000
+253	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 126500001 -  127500000
+254	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 127000001 -  128000000
+255	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 127500001 -  128500000
+256	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 128000001 -  129000000
+257	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 128500001 -  129500000
+258	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 129000001 -  130000000
+259	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 129500001 -  130500000
+260	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 130000001 -  131000000
+261	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 130500001 -  131500000
+262	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 131000001 -  132000000
+263	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 131500001 -  132500000
+264	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 132000001 -  133000000
+265	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 132500001 -  133500000
+266	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 133000001 -  134000000
+267	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 133500001 -  134500000
+268	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 134000001 -  135000000
+269	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 134500001 -  135500000
+270	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 135000001 -  136000000
+271	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 135500001 -  136500000
+272	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 136000001 -  137000000
+273	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 136500001 -  137500000
+274	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 137000001 -  138000000
+275	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 137500001 -  138500000
+276	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 138000001 -  139000000
+277	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 138500001 -  139500000
+278	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 139000001 -  140000000
+279	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 139500001 -  140500000
+280	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 140000001 -  141000000
+281	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 140500001 -  141500000
+282	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 141000001 -  142000000
+283	{'GATTACA': 0, 'AAA': 0, 'TTT': 0}	1	 141500001 -  142500000
