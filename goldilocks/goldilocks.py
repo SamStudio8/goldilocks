@@ -83,8 +83,7 @@ class Goldilocks(object):
             #TODO Naughty...
             f = fastareaders.FASTA_Library(self.groups[group][1])
             max_chr_sizes = f.max_chr_sizes.items()
-            chro = np.zeros(self.LENGTH+1, np.int8)
-            print max_chr_sizes
+            chro = np.zeros(self.LENGTH, np.int8)
         else:
             max_chr_sizes = self.chr_max_len.items()
 

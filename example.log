@@ -52,23 +52,21 @@
 25	{'1': 2}	3	         6 -          8
 23	{'1': 3}	3	         4 -          6
 [READ] 1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
-[('1 dna:chromosome chromosome:GRCh37:1:1:249250621:1', 249250621)]
 [SRCH] Chr:1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
 [NOTE] Filtering values between 0.00 and 1.00 (inclusive)
 [NOTE] 497 processed, 497 match search criteria, 0 excluded, 10 limit
 #WND	VAL	CHR	POSITIONS (INC.)
-2	{'1': 0.5689134310865689}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   1000001 -    2000000
-3	{'1': 0.567002432997567}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   1500001 -    2500000
-4	{'1': 0.5531334468665531}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   2000001 -    3000000
-5	{'1': 0.5481644518355482}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   2500001 -    3500000
-1	{'1': 0.5391584608415392}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	    500001 -    1500000
-11	{'1': 0.5180994819005181}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   5500001 -    6500000
-12	{'1': 0.5175194824805175}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   6000001 -    7000000
-312	{'1': 0.5042674957325043}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 156000001 -  157000000
-35	{'1': 0.5039594960405039}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  17500001 -   18500000
-18	{'1': 0.501969498030502}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   9000001 -   10000000
+2	{'1': 0.568914}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   1000001 -    2000000
+3	{'1': 0.567003}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   1500001 -    2500000
+4	{'1': 0.553134}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   2000001 -    3000000
+5	{'1': 0.548165}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   2500001 -    3500000
+1	{'1': 0.539159}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	    500001 -    1500000
+11	{'1': 0.5181}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   5500001 -    6500000
+12	{'1': 0.51752}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   6000001 -    7000000
+312	{'1': 0.504268}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	 156000001 -  157000000
+35	{'1': 0.50396}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	  17500001 -   18500000
+18	{'1': 0.50197}	1 dna:chromosome chromosome:GRCh37:1:1:249250621:1	   9000001 -   10000000
 [READ] 1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
-[('1 dna:chromosome chromosome:GRCh37:1:1:249250621:1', 249250621)]
 [SRCH] Chr:1 dna:chromosome chromosome:GRCh37:1:1:249250621:1
 [NOTE] Filtering values between 0.00 and 32099.00 (inclusive)
 [NOTE] 497 processed, 497 match search criteria, 0 excluded, 0 limit
