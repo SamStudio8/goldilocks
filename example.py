@@ -31,7 +31,8 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
-
+import sys
+sys.exit()
 
 #########################################
 data = {"ONE": {1: "_AAACCCGGGCCCGGGAGAAAAAAA"}}
@@ -105,6 +106,7 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
+g.plot()
 
 #########################################
 
@@ -125,4 +127,5 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
+g.plot(track="AAA")
 
