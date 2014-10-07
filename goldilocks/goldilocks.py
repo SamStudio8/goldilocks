@@ -9,8 +9,8 @@ from math import floor, ceil
 class Goldilocks(object):
     """A class for reading Variant Query files and locating regions on a genome
     with particular variant density properties."""
-    def load_chromosome(self, size, data, track):
-        return self.strategy.prepare(size, data, track)
+    def load_chromosome(self, arr, data, track):
+        return self.strategy.prepare(arr, data, track)
 
     def __init__(self, strategy, data, is_seq=True, length=1000000, stride=500000, med_window=12.5):
         """Initialise the internal structures and set arguments based on user input."""
@@ -75,7 +75,8 @@ class Goldilocks(object):
             for group in self.groups:
                 chros[group] = {}
                 for track in self.strategy.TRACKS:
-                    chros[group][track] = self.load_chromosome(size, self.groups[group][chrno], track)
+                    chro = np.zeros(size+1, np.int8)
+                    chros[group][track] = self.load_chromosome(chro, self.groups[group][chrno], track)
 
             print("[SRCH] Chr:%d" % (chrno))
             # Ignore 0 position
@@ -318,6 +319,3 @@ class Goldilocks(object):
                 (num_total, num_selected, num_excluded, limit))
 
         return filtered
-
-    def _sort(self):
-        pass
