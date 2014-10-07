@@ -31,6 +31,7 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
+g.export_fasta(candidates, "ONE")
 
 
 #########################################
@@ -46,6 +47,7 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
+g.export_fasta(candidates, "ONE")
 
 #########################################
 data = {
@@ -83,6 +85,7 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
+g.export_fasta(candidates, "ONE")
 
 #########################################
 from Mountain.IO import fastareaders
@@ -110,6 +113,7 @@ for region in candidates:
                                     region["pos_end"],
     ))
 g.plot()
+g.export_fasta(candidates, "ONE")
 
 #########################################
 from Mountain.IO import fastareaders
@@ -135,4 +139,4 @@ for region in candidates:
                                     region["pos_end"],
     ))
 g.plot()
-
+g.export_fasta(candidates, "ONE")

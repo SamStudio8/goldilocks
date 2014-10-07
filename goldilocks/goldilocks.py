@@ -338,3 +338,7 @@ class Goldilocks(object):
         plt.title('%s-%s' % (group, track))
 
         plt.show()
+
+    def export_fasta(self, candidates, group):
+        for region in candidates:
+            print self.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]
