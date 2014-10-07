@@ -339,6 +339,28 @@ class Goldilocks(object):
 
         plt.show()
 
+    #TODO Export to file not stdout!
     def export_fasta(self, candidates, group):
         for region in candidates:
             print self.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]
+
+    #TODO Export to file not stdout!
+    def export_meta(self, group):
+        tracks = sorted(self.strategy.TRACKS)
+        tracks_header = ",".join(tracks)
+
+        print(",".join(["id", tracks_header, "chr", "pos_start", "pos_end"]))
+        for r in self.regions:
+            region = self.regions[r]
+            values_string = ""
+            for t in tracks:
+                values_string += str(region["group_counts"][group][t])
+                values_string += ","
+            values_string = values_string[:-1]
+            print(",".join([
+                str(r),
+                values_string,
+                str(region["chr"]),
+                str(region["pos_start"]),
+                str(region["pos_end"])]
+            ))

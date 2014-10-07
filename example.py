@@ -48,6 +48,7 @@ for region in candidates:
                                     region["pos_end"],
     ))
 g.export_fasta(candidates, "ONE")
+g.export_meta("ONE")
 
 #########################################
 data = {
