@@ -114,7 +114,7 @@ class Goldilocks(object):
                         self.group_buckets[group][value].append(region_i)
                         self.group_buckets["total"][value].append(region_i)
 
-                        # TODO Config option to include 0 in filter metrics
+                    # TODO Config option to include 0 in filter metrics
 #                   if value > 0:
                         # Append the number of variants counted in this region
                         # for this group to a list used to calculate the median
@@ -248,7 +248,7 @@ class Goldilocks(object):
         return False
 
     # TODO Pretty hacky at the moment... Just trying some things out!
-    def _filter(self, func="median", track="1", actual_distance=None, percentile_distance=None,
+    def _filter(self, func="median", track="default", actual_distance=None, percentile_distance=None,
             direction=0, group=None, limit=0, exclusions=None, use_and=False):
         distance = None
         actual = False
@@ -320,7 +320,7 @@ class Goldilocks(object):
 
         return filtered
 
-    def plot(self, group=None, track="1"):
+    def plot(self, group=None, track="default"):
         if group is None:
             group = "total"
 

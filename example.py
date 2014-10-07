@@ -86,10 +86,13 @@ for region in candidates:
 
 #########################################
 from Mountain.IO import fastareaders
-f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa")
-data = {"F": {
-            1: f.get_next().seq,
-        }}
+f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa1")
+f.get_next()
+data = {
+    "ONE": {
+        1: f.get_next().seq,
+     }
+}
 
 # Will assume that files follow the recommendation that sequence lines
 # are no longer than 80 characters
@@ -106,13 +109,17 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
+g.plot()
 
 #########################################
 from Mountain.IO import fastareaders
-f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa")
-data = {"F": {
-            1: f.get_next().seq,
-        }}
+f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa1")
+f.get_next()
+data = {
+    "ONE": {
+        1: f.get_next().seq,
+     }
+}
 
 # Will assume that files follow the recommendation that sequence lines
 # are no longer than 80 characters
@@ -127,4 +134,5 @@ for region in candidates:
                                     region["pos_start"],
                                     region["pos_end"],
     ))
+g.plot()
 

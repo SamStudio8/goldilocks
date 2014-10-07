@@ -23,7 +23,7 @@ class KMerCounterStrategy(object):
 class VariantCounterStrategy(object):
 
     def __init__(self, tracks=None):
-        self.TRACKS = ["1"]
+        self.TRACKS = ["default"]
 
     def prepare(self, arr, data, track):
         """Return a NumPy array containing 1 for position elements where a variant
@@ -40,7 +40,7 @@ class VariantCounterStrategy(object):
 class GCRatioStrategy(object):
 
     def __init__(self, tracks=None):
-        self.TRACKS = ["1"]
+        self.TRACKS = ["default"]
 
     def prepare(self, arr, data, track):
         # Populate the region array with 1 for each position a GC base exists
@@ -61,7 +61,7 @@ class GCRatioStrategy(object):
 class NCounterStrategy(object):
 
     def __init__(self, tracks=None):
-        self.TRACKS = ["1"]
+        self.TRACKS = ["default"]
 
     def prepare(self, arr, data, track):
         # Populate the region array with 1 for each position a missing base exists
