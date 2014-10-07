@@ -319,3 +319,22 @@ class Goldilocks(object):
                 (num_total, num_selected, num_excluded, limit))
 
         return filtered
+
+    def plot(self, group=None, track="1"):
+        if group is None:
+            group = "total"
+
+        import matplotlib.pyplot as plt
+        from pylab import *
+
+        num_regions = len(self.regions)
+        num_counts = [self.regions[x]["group_counts"][group][track] for x in sorted(self.regions)]
+
+        plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker="o")
+        plt.axis([0, num_regions, 0, max(num_counts)])
+
+        plt.xlabel("Region#")
+        plt.ylabel("Count")
+        plt.title('%s-%s' % (group, track))
+
+        plt.show()
