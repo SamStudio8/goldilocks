@@ -81,10 +81,8 @@ g = Goldilocks(GCRatioStrategy(), data, stride=500000, length=1000000)
 candidates = g._filter("max", percentile_distance=10, limit=10, exclusions={"chr": [6]})
 
 print candidates
-print len(candidates)
 
 g.plot()
-candidates.export_fasta("ONE")
 
 #########################################
 from Mountain.IO import fastareaders
@@ -104,4 +102,3 @@ candidates = g._filter("max", track="AAA")
 print candidates
 
 g.plot(track="AAA")
-candidates.export_fasta("ONE")

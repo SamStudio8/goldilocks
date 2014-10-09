@@ -333,7 +333,7 @@ class Goldilocks(object):
         # Return the top N elements if desired
         # TODO Report total, selected, selected-excluded and selected-filtered
         if limit:
-            filtered = CandidateList(filtered[0:limit])
+            filtered = CandidateList(self, filtered[0:limit])
 
         print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
                 (num_total, num_selected, num_excluded, limit))
