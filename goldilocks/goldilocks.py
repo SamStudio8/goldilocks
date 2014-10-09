@@ -354,6 +354,8 @@ class Goldilocks(object):
 
             max_val = max(num_counts)
             plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker='o')
+            plt.axis([0, num_regions, 0, max_val])
+            plt.ylabel(self.strategy.AXIS_TITLE)
         else:
             fig, ax = plt.subplots(len(self.groups[group]),1, sharex=True)
 
@@ -368,10 +370,13 @@ class Goldilocks(object):
 
                 ax[i].plot(range(0, num_regions), num_counts, c=colours[i], label="g"+str(chrom))
 
-        plt.axis([0, num_regions, 0, max_val])
+            # Y axis label
+            fig.text(
+                .05, 0.5, self.strategy.AXIS_TITLE, rotation='vertical',
+                horizontalalignment='center', verticalalignment='center'
+            )
 
         plt.xlabel("Region#")
-        plt.ylabel(self.strategy.AXIS_TITLE)
         plt.suptitle('%s-%s' % (group, track), fontsize=16)
 
         plt.show()
