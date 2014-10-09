@@ -371,7 +371,7 @@ class Goldilocks(object):
         plt.axis([0, num_regions, 0, max_val])
 
         plt.xlabel("Region#")
-        plt.ylabel("Count")
+        plt.ylabel(self.strategy.AXIS_TITLE)
         plt.suptitle('%s-%s' % (group, track), fontsize=16)
 
         plt.show()

@@ -4,6 +4,7 @@ class KMerCounterStrategy(object):
 
     def __init__(self, kmers):
         self.TRACKS = kmers
+        self.AXIS_TITLE = "Motif Count"
 
     def prepare(self, arr, data, track):
         import re
@@ -24,6 +25,7 @@ class VariantCounterStrategy(object):
 
     def __init__(self, tracks=None):
         self.TRACKS = ["default"]
+        self.AXIS_TITLE = "Variant Count"
 
     def prepare(self, arr, data, track):
         """Return a NumPy array containing 1 for position elements where a variant
@@ -41,6 +43,7 @@ class GCRatioStrategy(object):
 
     def __init__(self, tracks=None):
         self.TRACKS = ["default"]
+        self.AXIS_TITLE = "GC Ratio"
 
     def prepare(self, arr, data, track):
         # Populate the region array with 1 for each position a GC base exists
@@ -62,6 +65,7 @@ class NCounterStrategy(object):
 
     def __init__(self, tracks=None):
         self.TRACKS = ["default"]
+        self.AXIS_TITLE = "N Base Count"
 
     def prepare(self, arr, data, track):
         # Populate the region array with 1 for each position a missing base exists
