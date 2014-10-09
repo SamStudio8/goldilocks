@@ -368,6 +368,12 @@ class Goldilocks(object):
                     max_val = max(num_counts)
 
                 ax[i].plot(range(0, num_regions), num_counts, label="g"+str(chrom))
+                ax[i].text(
+                    1.05, 0.5, ("Chr#"+str(chrom)), transform=ax[i].transAxes,
+                    rotation=270, fontsize=12, va='top',
+                    horizontalalignment='center', verticalalignment='center'
+                )
+
 
             # Y axis label
             fig.text(
