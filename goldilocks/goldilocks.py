@@ -64,7 +64,6 @@ class Goldilocks(object):
         self.LENGTH = length
         self.STRIDE = stride # NOTE STRIDE must be non-zero, 1 is very a bad idea (TM)
         self.MED_WINDOW = med_window # Middle 25%, can also be overriden later
-        self.GRAPHING = False
 
         """Read data"""
         self.groups = data
@@ -76,6 +75,9 @@ class Goldilocks(object):
             for chrom in self.groups[group]:
                 # Remember to exclude 0-index
                 if is_seq:
+                    # Prepend _ to sequence to force 1-index
+                    self.groups[group][chrom] = "_" + self.groups[group][chrom]
+
                     len_current_seq = len(self.groups[group][chrom]) - 1
                 else:
                     len_current_seq = sorted(self.groups[group][chrom])[-1]
@@ -148,11 +150,6 @@ class Goldilocks(object):
 
                         self.group_counts[group][track].append(value)
                         self.group_counts["total"][track].append(value)
-
-                        if self.GRAPHING:
-                            # NOTE Use i not region_i so regions in the plot start
-                            # at 0 for each chromosome rather than cascading
-                            print("%s\t%d\t%d\t%d" % (group, chrno, i, value))
 
                 region_i += 1
         self.regions = regions
@@ -336,7 +333,7 @@ class Goldilocks(object):
         # Return the top N elements if desired
         # TODO Report total, selected, selected-excluded and selected-filtered
         if limit:
-            filtered = filtered[0:limit]
+            filtered = CandidateList(filtered[0:limit])
 
         print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
                 (num_total, num_selected, num_excluded, limit))

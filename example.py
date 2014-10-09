@@ -12,7 +12,7 @@ candidates = g._filter("max", actual_distance=1)
 print candidates
 
 #########################################
-data = {"ONE": {1: "_CCCGGGAGATTT"}}
+data = {"ONE": {1: "CCCGGGAGATTT"}}
 g = Goldilocks(GCRatioStrategy(), data, stride=1, length=3)
 
 candidates = g._filter("max", actual_distance=1)
@@ -22,7 +22,7 @@ print candidates
 candidates.export_fasta("ONE")
 
 #########################################
-data = {"ONE": {1: "_AAACCCGGGCCCGGGAGAAAAAAA"}}
+data = {"ONE": {1: "AAACCCGGGCCCGGGAGAAAAAAA"}}
 g = Goldilocks(KMerCounterStrategy(["AAA", "CCC"]), data, stride=1, length=6)
 
 candidates = g._filter("max", actual_distance=1, track="AAA")
@@ -35,9 +35,9 @@ g.export_meta("ONE")
 #########################################
 data = {
     "ONE": {
-        1: "_ANAGGGANACAN",
-        2: "_ANAGGGANACAN",
-        3: "_ANANNNANACAN"
+        1: "ANAGGGANACAN",
+        2: "ANAGGGANACAN",
+        3: "ANANNNANACAN"
     }
 }
 g = Goldilocks(NCounterStrategy(), data, stride=1, length=3)
@@ -81,6 +81,7 @@ g = Goldilocks(GCRatioStrategy(), data, stride=500000, length=1000000)
 candidates = g._filter("max", percentile_distance=10, limit=10, exclusions={"chr": [6]})
 
 print candidates
+print len(candidates)
 
 g.plot()
 candidates.export_fasta("ONE")
@@ -102,5 +103,5 @@ candidates = g._filter("max", track="AAA")
 
 print candidates
 
-g.plot()
+g.plot(track="AAA")
 candidates.export_fasta("ONE")
