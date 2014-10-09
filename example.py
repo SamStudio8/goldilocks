@@ -8,46 +8,28 @@ data = {"ONE": {1: [1,2,5]}}
 g = Goldilocks(VariantCounterStrategy(), data, is_seq=False, stride=1, length=3)
 
 candidates = g._filter("max", actual_distance=1)
-print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
-for region in candidates:
-    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
-                                    region["group_counts"]["total"],
-                                    region["chr"],
-                                    region["pos_start"],
-                                    region["pos_end"],
-    ))
 
+print candidates
 
 #########################################
 data = {"ONE": {1: "_CCCGGGAGATTT"}}
 g = Goldilocks(GCRatioStrategy(), data, stride=1, length=3)
 
 candidates = g._filter("max", actual_distance=1)
-print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
-for region in candidates:
-    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
-                                    region["group_counts"]["total"],
-                                    region["chr"],
-                                    region["pos_start"],
-                                    region["pos_end"],
-    ))
-g.export_fasta(candidates, "ONE")
 
+print candidates
+
+candidates.export_fasta("ONE")
 
 #########################################
 data = {"ONE": {1: "_AAACCCGGGCCCGGGAGAAAAAAA"}}
-g = Goldilocks(KMerCounterStrategy(["AAA"]), data, stride=1, length=6)
+g = Goldilocks(KMerCounterStrategy(["AAA", "CCC"]), data, stride=1, length=6)
 
 candidates = g._filter("max", actual_distance=1, track="AAA")
-print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
-for region in candidates:
-    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
-                                    region["group_counts"]["total"],
-                                    region["chr"],
-                                    region["pos_start"],
-                                    region["pos_end"],
-    ))
-g.export_fasta(candidates, "ONE")
+
+print candidates
+
+candidates.export_fasta("ONE")
 g.export_meta("ONE")
 
 #########################################
@@ -78,15 +60,8 @@ candidates = g._filter("min", limit=0,
                 "start_gte": 9
             }
         }, use_and=True)
-print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
-for region in candidates:
-    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
-                                    region["group_counts"]["total"],
-                                    region["chr"],
-                                    region["pos_start"],
-                                    region["pos_end"],
-    ))
-g.export_fasta(candidates, "ONE")
+print candidates
+candidates.export_fasta("ONE")
 
 #########################################
 from Mountain.IO import fastareaders
@@ -105,16 +80,10 @@ g = Goldilocks(GCRatioStrategy(), data, stride=500000, length=1000000)
 # Avoid human leukocyte antigen loci on chr6
 candidates = g._filter("max", percentile_distance=10, limit=10, exclusions={"chr": [6]})
 
-print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
-for region in candidates:
-    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
-                                    region["group_counts"]["total"],
-                                    region["chr"],
-                                    region["pos_start"],
-                                    region["pos_end"],
-    ))
+print candidates
+
 g.plot()
-g.export_fasta(candidates, "ONE")
+candidates.export_fasta("ONE")
 
 #########################################
 from Mountain.IO import fastareaders
@@ -131,13 +100,7 @@ data = {
 g = Goldilocks(KMerCounterStrategy(["AAA", "TTT", "GATTACA"]), data, stride=500000, length=1000000)
 candidates = g._filter("max", track="AAA")
 
-print("#WND\tVAL\tCHR\tPOSITIONS (INC.)")
-for region in candidates:
-    print("%d\t%s\t%s\t%10d - %10d" % (region["id"],
-                                    region["group_counts"]["total"],
-                                    region["chr"],
-                                    region["pos_start"],
-                                    region["pos_end"],
-    ))
+print candidates
+
 g.plot()
-g.export_fasta(candidates, "ONE")
+candidates.export_fasta("ONE")

@@ -6,6 +6,29 @@ __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 import numpy as np
 from math import floor, ceil
 
+class CandidateList(list):
+    def __init__(self, g, *args):
+        self.__goldilocks = g
+        list.__init__(self, *args)
+
+    def __repr__(self):
+        str_rep = "#WND\tVAL\tCHR\tPOSITIONS (INC.)\n"
+        for region in self:
+            str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
+                                            region["group_counts"]["total"],
+                                            region["chr"],
+                                            region["pos_start"],
+                                            region["pos_end"],
+            ))
+        return str_rep
+
+    #TODO Export to file not stdout!
+    def export_fasta(self, group):
+        for region in self:
+            print ">%s|Chr%s|Pos%d:%d" % (group, region["chr"], region["pos_start"], region["pos_end"])
+            print self.__goldilocks.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]
+
+
 class Goldilocks(object):
     """A class for reading Variant Query files and locating regions on a genome
     with particular variant density properties."""
@@ -297,7 +320,7 @@ class Goldilocks(object):
         num_excluded = 0
         num_total = 0
 
-        filtered = []
+        filtered = CandidateList(self)
         for region in sorted(self.regions,
                         key=lambda x: (abs(self.regions[x]["group_counts"][group][track] - target),
                             self.regions[x]["group_counts"][group][track])):
@@ -338,12 +361,6 @@ class Goldilocks(object):
         plt.title('%s-%s' % (group, track))
 
         plt.show()
-
-    #TODO Export to file not stdout!
-    def export_fasta(self, candidates, group):
-        for region in candidates:
-            print ">%s|Chr%s|Pos%d:%d" % (group, region["chr"], region["pos_start"], region["pos_end"])
-            print self.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]
 
     #TODO Export to file not stdout!
     def export_meta(self, group):
