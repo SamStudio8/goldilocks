@@ -343,7 +343,6 @@ class Goldilocks(object):
     def plot(self, group=None, track="default"):
         import matplotlib.pyplot as plt
         from pylab import *
-        colours = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 
         if group is None:
             group = "total"
@@ -368,7 +367,7 @@ class Goldilocks(object):
                 if max(num_counts) > max_val:
                     max_val = max(num_counts)
 
-                ax[i].plot(range(0, num_regions), num_counts, c=colours[i], label="g"+str(chrom))
+                ax[i].plot(range(0, num_regions), num_counts, label="g"+str(chrom))
 
             # Y axis label
             fig.text(
