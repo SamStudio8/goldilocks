@@ -342,6 +342,7 @@ class Goldilocks(object):
     #TODO Export to file not stdout!
     def export_fasta(self, candidates, group):
         for region in candidates:
+            print ">%s|Chr%s|Pos%d:%d" % (group, region["chr"], region["pos_start"], region["pos_end"])
             print self.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]
 
     #TODO Export to file not stdout!
