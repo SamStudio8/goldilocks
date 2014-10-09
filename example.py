@@ -64,6 +64,22 @@ print candidates
 candidates.export_fasta("ONE")
 
 #########################################
+data = {
+    "ONE": {
+        1: "ANAGGGANACANANAGGGANACANANAGGGANACANANAGGGANACANANAGGGACGCGCGCGGGGANACAN",
+        2: "ANAGGCGCGCNANAGGGANACGCGGGGCCCGACANANAGGGANACANANAGGGACGCGCGCGCGCCCGACAN",
+        3: "ANAGGCGCGCNANAGGGANACGCGGGGCCCGACANANAGGGANACANANAGGGACGCGCGCGCGCCCGACAN",
+        4: "GCGCGCGCGCGCGCGCGGGGGGGGGCGCCGCCNNNNNNNNNNNNNNNNGCGCGCGCGCGCGCGNNNNNNNNN"
+    }
+}
+g = Goldilocks(GCRatioStrategy(), data, stride=1, length=3)
+
+candidates = g._filter("min")
+
+print candidates
+g.plot("ONE")
+
+#########################################
 from Mountain.IO import fastareaders
 f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa1")
 f.get_next()

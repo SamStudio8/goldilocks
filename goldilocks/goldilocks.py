@@ -341,21 +341,38 @@ class Goldilocks(object):
         return filtered
 
     def plot(self, group=None, track="default"):
-        if group is None:
-            group = "total"
-
         import matplotlib.pyplot as plt
         from pylab import *
+        colours = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
 
-        num_regions = len(self.regions)
-        num_counts = [self.regions[x]["group_counts"][group][track] for x in sorted(self.regions)]
+        if group is None:
+            group = "total"
+            fig = plt.subplot(1,1,1)
 
-        plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker="o")
-        plt.axis([0, num_regions, 0, max(num_counts)])
+            num_regions = len(self.regions)
+            num_counts = [self.regions[x]["group_counts"][group][track] for x in sorted(self.regions)]
+
+            max_val = max(num_counts)
+            plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker='o')
+        else:
+            fig, ax = plt.subplots(len(self.groups[group]),1, sharex=True)
+
+            max_val = 0
+            for i, chrom in enumerate(self.groups[group]):
+
+                num_counts = [self.regions[x]["group_counts"][group][track] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]
+                num_regions = len(num_counts)
+
+                if max(num_counts) > max_val:
+                    max_val = max(num_counts)
+
+                ax[i].plot(range(0, num_regions), num_counts, c=colours[i], label="g"+str(chrom))
+
+        plt.axis([0, num_regions, 0, max_val])
 
         plt.xlabel("Region#")
         plt.ylabel("Count")
-        plt.title('%s-%s' % (group, track))
+        plt.suptitle('%s-%s' % (group, track), fontsize=16)
 
         plt.show()
 
