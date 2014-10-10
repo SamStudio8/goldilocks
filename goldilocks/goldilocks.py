@@ -387,9 +387,9 @@ class Goldilocks(object):
         plt.show()
 
     #TODO Export to file not stdout!
-    def export_meta(self, group):
+    def export_meta(self, group, sep=","):
         tracks = sorted(self.strategy.TRACKS)
-        tracks_header = ",".join(tracks)
+        tracks_header = sep.join(tracks)
 
         print(",".join(["id", tracks_header, "chr", "pos_start", "pos_end"]))
         for r in self.regions:
@@ -397,9 +397,9 @@ class Goldilocks(object):
             values_string = ""
             for t in tracks:
                 values_string += str(region["group_counts"][group][t])
-                values_string += ","
+                values_string += sep
             values_string = values_string[:-1]
-            print(",".join([
+            print(sep.join([
                 str(r),
                 values_string,
                 str(region["chr"]),
