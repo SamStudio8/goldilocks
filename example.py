@@ -30,7 +30,7 @@ candidates = g._filter("max", actual_distance=1, track="AAA")
 print candidates
 
 candidates.export_fasta("ONE")
-g.export_meta("ONE")
+g.export_meta("ONE", sep="\t")
 
 #########################################
 data = {

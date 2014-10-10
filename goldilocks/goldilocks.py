@@ -391,7 +391,7 @@ class Goldilocks(object):
         tracks = sorted(self.strategy.TRACKS)
         tracks_header = sep.join(tracks)
 
-        print(",".join(["id", tracks_header, "chr", "pos_start", "pos_end"]))
+        print(sep.join(["id", tracks_header, "chr", "pos_start", "pos_end"]))
         for r in self.regions:
             region = self.regions[r]
             values_string = ""
