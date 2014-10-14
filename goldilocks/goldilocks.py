@@ -342,7 +342,6 @@ class Goldilocks(object):
 
     def plot(self, group=None, track="default"):
         import matplotlib.pyplot as plt
-        from pylab import *
 
         if group is None:
             group = "total"
