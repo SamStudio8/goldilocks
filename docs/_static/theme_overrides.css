@@ -1,0 +1,10 @@
+/* override table width restrictions as found on https://github.com/getpelican/pelican/issues/1311 */
+.wy-table-responsive table td, .wy-table-responsive table th {
+    white-space: normal;
+}
+
+.wy-table-responsive {
+    margin-bottom: 24px;
+    max-width: 100%;
+    overflow: visible;
+}
