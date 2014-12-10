@@ -87,7 +87,9 @@ class Goldilocks(object):
                 if len_current_seq > self.chr_max_len[chrom]:
                     self.chr_max_len[chrom] = len_current_seq
 
-                if len_current_seq > self.max_chr_max_len:
+                if self.max_chr_max_len is None:
+                    self.max_chr_max_len = len_current_seq
+                elif len_current_seq > self.max_chr_max_len:
                     self.max_chr_max_len = len_current_seq
 
         self.group_buckets["total"] = {}
