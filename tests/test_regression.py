@@ -16,13 +16,19 @@ DATA = {
     "GroupOne": {
         1: "AAACCCNNNTTTAAACCCGGGNNNAAACCCGGGTTTNNNCCCGGGTTT",
         2: "GCGTNANNGANGGCTANTCTANAGCNNTTTCTNTNNGCANCANTTGNN",
+    },
+    "GroupTwo": {
+        1: "AAACCCNNNTTTAAACCCGGGNNNAAACCCGGGTTTNNNCCCGGGTTT",
+        2: "GCGTNANNGANGGCTANTCTANAGCNNTTTCTNTNNGCANCANTTGNN",
     }
 }
 STRIDE = 1
 LENGTH = 3
 
 # TODO Test group_counts
-# TODO Graphs and FASTA
+# TODO Hash Graphs and FASTA
+# TODO Test sorting and filtering beyond min
+# TODO Test regions for GroupTwo/total
 class TestGoldilocksRegression_NCounter(unittest.TestCase):
 
 #  GroupOne
@@ -147,6 +153,12 @@ class TestGoldilocksRegression_NCounter(unittest.TestCase):
                 45: 2,
             }
         }
+
+        cls.EXPECTED_REGION_TOTALS = []
+        for j in cls.EXPECTED_REGIONS:
+            for i in cls.EXPECTED_REGIONS[j]:
+                cls.EXPECTED_REGION_TOTALS.append(cls.EXPECTED_REGIONS[j][i]*2)
+
         cls.EXPECTED_BUCKETS = {
             0: [0, 1, 2, 3, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 25, 26,
                     27, 28, 29, 30, 31, 32, 33, 39, 40, 41, 42, 43, 44, 45,
@@ -162,6 +174,33 @@ class TestGoldilocksRegression_NCounter(unittest.TestCase):
 
     def test_number_regions(self):
         self.assertEqual(self.EXPECTED_REGION_COUNT, len(self.g.regions.items()))
+
+    # TODO Technically these check the metadata is correct and not the *actual* regions
+    def test_region_lengths(self):
+        number_comparisons = 0
+        # Ensure ALL meet LENGTH
+        for region_i, region_data in self.g.regions.items():
+            number_comparisons += 1
+            self.assertEqual(LENGTH, len(range(region_data["pos_start"], region_data["pos_end"])) + 1)
+        self.assertEqual(self.EXPECTED_REGION_COUNT, number_comparisons)
+
+    # TODO Technically these check the metadata is correct and not the *actual* regions
+    def test_region_stride(self):
+        number_comparisons = 0
+        # Ensure regions begin at right STRIDE
+        for region_i, region_data in self.g.regions.items():
+            number_comparisons += 1
+            expected_start = 1 + (region_data["ichr"] * STRIDE)
+            self.assertEqual(expected_start, region_data["pos_start"])
+
+            # -1 as the region includes the start element
+            expected_end = (expected_start - 1) + LENGTH
+            self.assertEqual(expected_end, region_data["pos_end"])
+        self.assertEqual(self.EXPECTED_REGION_COUNT, number_comparisons)
+
+###############################################################################
+# \/ NOTE Tests below depend only on GroupOne                              \/ #
+###############################################################################
 
     def test_content_regions(self):
         number_comparisons = 0
@@ -189,29 +228,21 @@ class TestGoldilocksRegression_NCounter(unittest.TestCase):
             self.assertEqual(sorted(self.EXPECTED_BUCKETS[bucket]), sorted(content))
         self.assertEqual(len(self.EXPECTED_BUCKETS), number_comparisons)
 
-    # TODO Technically these check the metadata is correct and not the *actual* regions
-    def test_region_lengths(self):
+###############################################################################
+# /\ NOTE Tests above depend only on GroupOne                              /\ #
+###############################################################################
+
+    def test_sort_min(self):
         number_comparisons = 0
-        # Ensure ALL meet LENGTH
-        for region_i, region_data in self.g.regions.items():
+        regions_min = self.g._filter("min")
+
+        # Merge sort required for stability
+        EXPECTED_MIN_REGION_ORDER = np.argsort(self.EXPECTED_REGION_TOTALS, kind="mergesort")
+
+        for i, region in enumerate(regions_min):
+            self.assertEquals(EXPECTED_MIN_REGION_ORDER[i], region['id'])
             number_comparisons += 1
-            self.assertEqual(LENGTH, len(range(region_data["pos_start"], region_data["pos_end"])) + 1)
         self.assertEqual(self.EXPECTED_REGION_COUNT, number_comparisons)
-
-    # TODO Technically these check the metadata is correct and not the *actual* regions
-    def test_region_stride(self):
-        number_comparisons = 0
-        # Ensure regions begin at right STRIDE
-        for region_i, region_data in self.g.regions.items():
-            number_comparisons += 1
-            expected_start = 1 + (region_data["ichr"] * STRIDE)
-            self.assertEqual(expected_start, region_data["pos_start"])
-
-            # -1 as the region includes the start element
-            expected_end = (expected_start - 1) + LENGTH
-            self.assertEqual(expected_end, region_data["pos_end"])
-        self.assertEqual(self.EXPECTED_REGION_COUNT, number_comparisons)
-
 
 if __name__ == '__main__':
     unittest.main()

@@ -12,7 +12,7 @@ class CandidateList(list):
         list.__init__(self, *args)
 
     def __repr__(self):
-        str_rep = "#WND\tVAL\tCHR\tPOSITIONS (INC.)\n"
+        str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
         for region in self:
             str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
                                             region["group_counts"]["total"],
@@ -29,13 +29,15 @@ class CandidateList(list):
             print(self.__goldilocks.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1])
 
 
+# TODO Generate database of regions with stats... SQL/SQLite
+#      - Probably more of a wrapper script than core-functionality: goldib
 class Goldilocks(object):
     """A class for reading Variant Query files and locating regions on a genome
     with particular variant density properties."""
     def load_chromosome(self, arr, data, track):
         return self.strategy.prepare(arr, data, track)
 
-    def __init__(self, strategy, data, is_seq=True, length=1000000, stride=500000, med_window=12.5):
+    def __init__(self, strategy, data, is_seq=True, length=None, stride=1, med_window=12.5):
         """Initialise the internal structures and set arguments based on user input."""
 
         self.strategy = strategy# Search strategy
@@ -55,18 +57,12 @@ class Goldilocks(object):
 
         self.regions = {}       # Stores information on each region checked
 
-        self.candidates = []    # Lists regions that meet the criteria for final
-                                # enrichment and processing
-
-        self.winners = []       # Lists regions that pass the final filter and
-                                # enrichment processes
-
-        self.LENGTH = length
-        self.STRIDE = stride # NOTE STRIDE must be non-zero, 1 is very a bad idea (TM)
         self.MED_WINDOW = med_window # Middle 25%, can also be overriden later
 
-        """Read data"""
+        # Read data
         self.groups = data
+        self.max_chr_max_len = None
+
         for group in self.groups:
             #TODO Catch duplicates etc..
             self.group_buckets[group] = {}
@@ -75,24 +71,45 @@ class Goldilocks(object):
             for chrom in self.groups[group]:
                 # Remember to exclude 0-index
                 if is_seq:
+                    # TODO This is awful.
                     # Prepend _ to sequence to force 1-index
-                    self.groups[group][chrom] = "_" + self.groups[group][chrom]
+                    if self.groups[group][chrom][0] != "_":
+                        self.groups[group][chrom] = "_" + self.groups[group][chrom]
 
                     len_current_seq = len(self.groups[group][chrom]) - 1
                 else:
                     len_current_seq = sorted(self.groups[group][chrom])[-1]
 
+                #TODO Should we not be looking for min length?
                 if chrom not in self.chr_max_len:
                     self.chr_max_len[chrom] = len_current_seq
+
                 if len_current_seq > self.chr_max_len[chrom]:
-                    self.chr_max_len = len_current_seq
+                    self.chr_max_len[chrom] = len_current_seq
+
+                if len_current_seq > self.max_chr_max_len:
+                    self.max_chr_max_len = len_current_seq
 
         self.group_buckets["total"] = {}
         self.group_counts["total"] = {}
 
-        """Conduct a census of the regions on each chromosome using the user
-        defined length and stride. Counting the number of variants present for
-        each group."""
+        # Ensure stride and length are valid, is a length has not been provided
+        # use the size of the largest chromosome divided by 10.
+        if stride < 1:
+            raise Exception("[FAIL] Stride must be at least 1 base wide.")
+        self.STRIDE = stride
+
+        # TODO Somewhat arbitrary...
+        if length is None:
+            length = self.max_chr_max_len / 10
+
+        if length < 1:
+            raise Exception("[FAIL] Length must be at least 1 base wide.")
+        self.LENGTH = length
+
+        # Conduct a census of the regions on each chromosome using the user
+        # defined length and stride. Counting the number of variants present for
+        # each group.
         regions = {}
         region_i = 0
         for chrno, size in sorted(self.chr_max_len.items()):
@@ -103,7 +120,7 @@ class Goldilocks(object):
                     chro = np.zeros(size+1, np.int8)
                     chros[group][track] = self.load_chromosome(chro, self.groups[group][chrno], track)
 
-            print("[SRCH] Chr:%d" % (chrno))
+            print("[SRCH] Chr:%s" % str(chrno))
             # Ignore 0 position
             for i, region_s in enumerate(range(1, size+1-self.LENGTH+1, self.STRIDE)):
                 region_e = region_s + self.LENGTH - 1
@@ -142,14 +159,18 @@ class Goldilocks(object):
                     # TODO Config option to include 0 in filter metrics
 #                   if value > 0:
                         # Append the number of variants counted in this region
-                        # for this group to a list used to calculate the median
+                        # for this group to a list
                         if track not in self.group_counts["total"]:
                             self.group_counts["total"][track] = []
                         if track not in self.group_counts[group]:
                             self.group_counts[group][track] = []
 
                         self.group_counts[group][track].append(value)
-                        self.group_counts["total"][track].append(value)
+
+                        try:
+                            self.group_counts["total"][track][region_i] += value
+                        except IndexError:
+                            self.group_counts["total"][track].append(value)
 
                 region_i += 1
         self.regions = regions
@@ -340,7 +361,7 @@ class Goldilocks(object):
 
         return filtered
 
-    def plot(self, group=None, track="default"):
+    def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None):
         import matplotlib.pyplot as plt
 
         if group is None:
@@ -352,10 +373,13 @@ class Goldilocks(object):
 
             max_val = max(num_counts)
             plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker='o')
+            plt.plot(range(0, num_regions), num_counts, "black")
             plt.axis([0, num_regions, 0, max_val])
             plt.ylabel(self.strategy.AXIS_TITLE)
+            if ylim:
+                plt.ylim(ylim)
         else:
-            fig, ax = plt.subplots(len(self.groups[group]),1, sharex=True)
+            fig, ax = plt.subplots(len(self.groups[group]),1, sharex=True, squeeze=False)
 
             max_val = 0
             for i, chrom in enumerate(self.groups[group]):
@@ -366,13 +390,15 @@ class Goldilocks(object):
                 if max(num_counts) > max_val:
                     max_val = max(num_counts)
 
-                ax[i].plot(range(0, num_regions), num_counts, label="g"+str(chrom))
-                ax[i].text(
-                    1.05, 0.5, ("Chr#"+str(chrom)), transform=ax[i].transAxes,
+                ax[i,0].plot(range(0, num_regions), num_counts, label="g"+str(chrom))
+                ax[i,0].text(
+                    1.05, 0.5, ("Chr#"+str(chrom)), transform=ax[i,0].transAxes,
                     rotation=270, fontsize=12, va='top',
                     horizontalalignment='center', verticalalignment='center'
                 )
 
+                if ylim:
+                    ax[i,0].set_ylim(ylim)
 
             # Y axis label
             fig.text(
@@ -380,10 +406,17 @@ class Goldilocks(object):
                 horizontalalignment='center', verticalalignment='center'
             )
 
-        plt.xlabel("Region#")
+        plt.xlabel("Region# (150bp)")
         plt.suptitle('%s-%s' % (group, track), fontsize=16)
 
-        plt.show()
+        if annotation:
+            plt.annotate(annotation, xy=(.5, 1.03),  xycoords='axes fraction', ha='center', va='center', fontsize=11)
+
+        if save_to:
+            plt.savefig(save_to)
+            plt.close()
+        else:
+            plt.show()
 
     #TODO Export to file not stdout!
     def export_meta(self, group, sep=","):

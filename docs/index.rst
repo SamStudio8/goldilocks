@@ -13,7 +13,7 @@ Contents:
 
    readme
    installation
-   usage
+   examples
    contributing
    authors
    changelog
