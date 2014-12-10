@@ -140,6 +140,7 @@ pos_end         The 1-indexed base of the sequence where the region ends (inclus
 group_counts    A dictionary mapping a sample name to the strategy result (in this case,
                 the number of N bases that appeared in the region), additionally a "total"
                 key is automatically added by Goldilocks which sums the results over all samples
+
 ============    =====
 
 In the example output above, the first (0th) censused region appears on

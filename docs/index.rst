@@ -14,6 +14,7 @@ Contents:
    readme
    installation
    examples
+   advanced
    contributing
    authors
    changelog
