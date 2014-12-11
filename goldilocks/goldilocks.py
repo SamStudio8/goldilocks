@@ -1,12 +1,15 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.2"
+__version__ = "0.0.31"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
 from math import floor, ceil
 
 class CandidateList(list):
+    """A list defining its own tab-delimited table string representation when
+    printed by a user. Provides other utility methods for generating other useful
+    outputs including exporting sequences to FASTA."""
     def __init__(self, g, *args):
         self.__goldilocks = g
         list.__init__(self, *args)
@@ -24,6 +27,7 @@ class CandidateList(list):
 
     #TODO Export to file not stdout!
     def export_fasta(self, group):
+        """Export all regions held in the CandidateList in FASTA format."""
         for region in self:
             print(">%s|Chr%s|Pos%d:%d" % (group, region["chr"], region["pos_start"], region["pos_end"]))
             print(self.__goldilocks.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1])
@@ -32,13 +36,14 @@ class CandidateList(list):
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
 class Goldilocks(object):
-    """A class for reading Variant Query files and locating regions on a genome
-    with particular variant density properties."""
-    def load_chromosome(self, arr, data, track):
+    """Facade class responsible for conducting a census of provided genomic regions
+    using the given strategy and provides an interface via _filter to query results
+    for given criteria and return a CandidateList."""
+
+    def __load_chromosome(self, arr, data, track):
         return self.strategy.prepare(arr, data, track)
 
     def __init__(self, strategy, data, is_seq=True, length=None, stride=1, med_window=12.5):
-        """Initialise the internal structures and set arguments based on user input."""
 
         self.strategy = strategy# Search strategy
 
@@ -120,7 +125,7 @@ class Goldilocks(object):
                 chros[group] = {}
                 for track in self.strategy.TRACKS:
                     chro = np.zeros(size+1, np.int8)
-                    chros[group][track] = self.load_chromosome(chro, self.groups[group][chrno], track)
+                    chros[group][track] = self.__load_chromosome(chro, self.groups[group][chrno], track)
 
             print("[SRCH] Chr:%s" % str(chrno))
             # Ignore 0 position
@@ -364,6 +369,8 @@ class Goldilocks(object):
         return filtered
 
     def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None):
+        """Represent censused regions in a plot using matplotlib."""
+
         import matplotlib.pyplot as plt
 
         if group is None:
@@ -422,6 +429,10 @@ class Goldilocks(object):
 
     #TODO Export to file not stdout!
     def export_meta(self, group, sep=","):
+        """Export census metadata to stdout with the following header: id, track1,
+        [track2 ... trackN], chr, pos_start, pos_end. Accepts a seperator but
+        defaults to a comma-delimited table."""
+
         tracks = sorted(self.strategy.TRACKS)
         tracks_header = sep.join(tracks)
 

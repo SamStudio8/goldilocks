@@ -1,10 +1,33 @@
 import numpy as np
 
-class KMerCounterStrategy(object):
+class BaseStrategy(object):
+    """ """
+    def __init__(self, tracks=None, title=""):
+        if tracks is None:
+            tracks = ["default"]
+
+        self.TRACKS = tracks
+        self.AXIS_TITLE = title
+
+    def prepare(self, arr, data, track):
+        """Populate elements in a given iterable 'arr' (typically a numpy
+        array) following some processing strategy on genomic sequence 'data'.
+        Tracks can be used to further inform the strategy on what
+        behaviour to use (for example a nucleotide counting strategy would need
+        a 'track' for each base to be counted)."""
+        raise NotImplementedError("strategy.prepare")
+
+    def evaluate(self, region, track):
+        """Evaluate the contents of a given iterable 'region' (typically a numpy
+        array) as prepared by this strategy. The simplest strategies will sum
+        the binary flags over the array."""
+        raise NotImplementedError("strategy.evaluate")
+
+
+class KMerCounterStrategy(BaseStrategy):
 
     def __init__(self, kmers):
-        self.TRACKS = kmers
-        self.AXIS_TITLE = "Motif Count"
+        super(KMerCounterStrategy, self).__init__(tracks=kmers, title="Motif Count")
 
     def prepare(self, arr, data, track):
         import re
@@ -21,11 +44,10 @@ class KMerCounterStrategy(object):
         # the first base of the desired K-mer
         return np.sum(region[:-(len(track)-1)])
 
-class VariantCounterStrategy(object):
+class VariantCounterStrategy(BaseStrategy):
 
     def __init__(self, tracks=None):
-        self.TRACKS = ["default"]
-        self.AXIS_TITLE = "Variant Count"
+        super(VariantCounterStrategy, self).__init__(title="Variant Count")
 
     def prepare(self, arr, data, track):
         """Return a NumPy array containing 1 for position elements where a variant
@@ -39,11 +61,10 @@ class VariantCounterStrategy(object):
         return np.sum(region)
 
 
-class GCRatioStrategy(object):
+class GCRatioStrategy(BaseStrategy):
 
     def __init__(self, tracks=None):
-        self.TRACKS = ["default"]
-        self.AXIS_TITLE = "GC Ratio"
+        super(GCRatioStrategy, self).__init__(title="GC Ratio")
 
     def prepare(self, arr, data, track):
         # Populate the region array with 1 for each position a GC base exists
@@ -61,11 +82,10 @@ class GCRatioStrategy(object):
         return float(np.sum(region))/len(region)
 
 
-class NCounterStrategy(object):
+class NCounterStrategy(BaseStrategy):
 
     def __init__(self, tracks=None):
-        self.TRACKS = ["default"]
-        self.AXIS_TITLE = "N Base Count"
+        super(NCounterStrategy, self).__init__(title="N Base Count")
 
     def prepare(self, arr, data, track):
         # Populate the region array with 1 for each position a missing base exists
