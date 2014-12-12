@@ -46,20 +46,16 @@ The strategy simply defines what is of interest to the user in a language that
 Goldilocks can understand. Goldilocks is currently packaged with the following
 strategies:
 
-============            =====
+============            ==================
 Strategy                Census Description
-============            =====
+============            ==================
 KMerCounterStrategy     Search for one or more particular k-mers of interest of
                         any and varying size in subregions across the genome.
-
 VariantCounterStrategy  Given a list of SNP locations, calculate variant density
                         of subregions over the genome.
-
 GCRatioStrategy         Calculate GC-ratio for subregions across the genome.
-
 NCounterStrategy        Count missing nucleotides for subregions across the genome.
-
-============            =====
+============            ==================
 
 Once all regions have been 'censused', the results may be sorted by one of four
 mathematical operations: `max`, `min`, `median` and `mean`. So you may be interested
