@@ -10,6 +10,9 @@ with the basics), skip to the end if you think you know what you're doing.
 Filtering Regions
 -----------------
 
+Group
+~~~~~~~~
+
 By default when returning region data the "total" group is used, in our running
 example of counting missing nucleotides, this would represent the total number
 of 'N' bases seen in sequence data across each sample in the same genomic region
@@ -18,6 +21,9 @@ on the same chromosome. But if you are more interested in a particular sample: :
     g._filter("max", group="my_sample")
 
 
+Track
+~~~~~~~~
+
 When using tracks (for strategies that calculate multiple distinct values for
 each genomic region - such as different nucleotide bases or k-mers), you may wish
 to extract regions based on scores for a certain track: ::
@@ -25,9 +31,16 @@ to extract regions based on scores for a certain track: ::
     g._filter("max", track="AAA")
 
 
+Absolute distance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 You may be interested in regions within some distance of the mean: ::
 
     g._filter("mean", acutal_distance=10)
+
+
+Percentile distance
+~~~~~~~~~~~~~~~~~~~~~
 
 Or perhaps the "top 10%", or the "middle 25%" around the mean: ::
 
@@ -43,6 +56,9 @@ falling within 25% above or below the mean respectively: ::
     g._filter("mean", percentile_distance=25, direction=-1)
 
 
+Multiple criteria
+~~~~~~~~~~~~~~~~~
+
 You can of course use these at the same time (though actual and percentile distances
 are mutually exclusive), let's fetch the top 10% of regions that contain the most
 "AAA" k-mers for all chromosomes in a hypothetical sample called "my_kmer_example": ::
@@ -55,11 +71,17 @@ Excluding Regions
 
 The filter function also allows users to specify a dictionary of exclusion criteria.
 
+Starting position
+~~~~~~~~~~~~~~~~~
+
 To filter regions based on the 1-indexed starting position greater than or equal to 3: ::
 
     g._filter("min", exclusions={
                                 "start_gte": 3,
                                 })
+
+Ending position
+~~~~~~~~~~~~~~~
 
 To filter regions based on the 1-indexed ending position less than or equal to 9: ::
 
@@ -67,11 +89,17 @@ To filter regions based on the 1-indexed ending position less than or equal to 9
                                 "end_lte": 9,
                                 })
 
+Chromosome
+~~~~~~~~~~
+
 You can filter regions that appear on particular chromosomes completely by providing a list: ::
 
     g._filter("min", exclusions={
                                 "chr": ["X", 6],
                                 })
+
+Multiple Criteria
+~~~~~~~~~~~~~~~~~
 
 You may want to use such exclusion criteria at the same time. Let's say we have
 a bunch of sequence data from a species whose chromosomes all feature centromeres
@@ -94,6 +122,9 @@ Note the use of `use_and=True`! [#]_ ::
                                  "chr": ['X', 'Y'],
                                  }, use_and=True)
 
+
+Chromosome specific criteria
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Finally applying exclusions across all chromosomes might seem quite naive, what
 if we want to ignore centromeres on a real species? Introducing chromosome
@@ -135,8 +166,8 @@ One may also limit the number of results returned by Goldilocks: ::
     g._filter("mean", limit=10)
 
 
-Example
--------
+Full Example
+------------
 
 Almost all of these options can be used together! Let's finish off our examples
 by finding the top 5 regions that are within an absolute distance of 1.0 from
