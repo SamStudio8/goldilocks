@@ -26,6 +26,7 @@ class CandidateList(list):
         return str_rep
 
     #TODO Export to file not stdout!
+    #TODO Support groupless requests - export each group to seperate file or all together
     def export_fasta(self, group):
         """Export all regions held in the CandidateList in FASTA format."""
         for region in self:
@@ -152,6 +153,7 @@ class Goldilocks(object):
                         regions[region_i]["group_counts"]["total"][track] += value
 
                         # TODO Should we be ignoring these regions if they are empty?
+                        # TODO Config option to include 0 in filter metrics
                         if value not in self.group_buckets[group]:
                             # Add this particular number of variants as a bucket
                             self.group_buckets[group][value] = []
@@ -163,7 +165,6 @@ class Goldilocks(object):
                         self.group_buckets[group][value].append(region_i)
                         self.group_buckets["total"][value].append(region_i)
 
-                    # TODO Config option to include 0 in filter metrics
 #                   if value > 0:
                         # Append the number of variants counted in this region
                         # for this group to a list
@@ -428,6 +429,7 @@ class Goldilocks(object):
             plt.show()
 
     #TODO Export to file not stdout!
+    #TODO Groupless output
     def export_meta(self, group, sep=","):
         """Export census metadata to stdout with the following header: id, track1,
         [track2 ... trackN], chr, pos_start, pos_end. Accepts a seperator but

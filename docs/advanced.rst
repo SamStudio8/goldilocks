@@ -13,8 +13,18 @@ Further Region Handling
 Filtering Regions
 ~~~~~~~~~~~~~~~~~
 
+...by group
+...by track
+...by absolute distance
+...by percentile difference
+
 Excluding Regions
 ~~~~~~~~~~~~~~~~~
+
+...by start
+...by end
+...by chromosome
+...or and and...
 
 Limiting Regions
 ~~~~~~~~~~~~~~~~
