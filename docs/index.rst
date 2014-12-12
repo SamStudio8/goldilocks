@@ -15,6 +15,8 @@ Contents:
    installation
    examples
    advanced
+   exporting
+   plotting
    contributing
    authors
    changelog
