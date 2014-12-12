@@ -1,6 +1,6 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.31"
+__version__ = "0.0.4"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
@@ -10,15 +10,19 @@ class CandidateList(list):
     """A list defining its own tab-delimited table string representation when
     printed by a user. Provides other utility methods for generating other useful
     outputs including exporting sequences to FASTA."""
-    def __init__(self, g, *args):
+    def __init__(self, g, group, *args):
         self.__goldilocks = g
+        if group is None:
+            self.__group = "total"
+        else:
+            self.__group = group
         list.__init__(self, *args)
 
     def __repr__(self):
         str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
         for region in self:
             str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
-                                            region["group_counts"]["total"],
+                                            region["group_counts"][self.__group],
                                             region["chr"],
                                             region["pos_start"],
                                             region["pos_end"],
@@ -158,12 +162,8 @@ class Goldilocks(object):
                             # Add this particular number of variants as a bucket
                             self.group_buckets[group][value] = []
 
-                        if value not in self.group_buckets["total"]:
-                            self.group_buckets["total"][value] = []
-
                         # Add the region id to the bucket
                         self.group_buckets[group][value].append(region_i)
-                        self.group_buckets["total"][value].append(region_i)
 
 #                   if value > 0:
                         # Append the number of variants counted in this region
@@ -181,8 +181,27 @@ class Goldilocks(object):
                             self.group_counts["total"][track].append(value)
 
                 region_i += 1
+
+        # Populate total group_buckets now census is complete
+        for track in self.group_counts["total"]:
+            totals = []
+            for region_id, value in enumerate(self.group_counts["total"][track]):
+                try:
+                    totals[region_id] += value
+                except IndexError:
+                    totals.append(value)
+
+            total_buckets = {}
+            for region_id, total in enumerate(totals):
+                if total not in total_buckets:
+                    total_buckets[total] = []
+                total_buckets[total].append(region_id)
+        self.group_buckets["total"] = total_buckets
+
         self.regions = regions
 
+    #TODO Check that doubling the window size for max and min works as expected
+    #TODO Is changing the behaviour (re: window) for different math ops a bad idea...
     def __apply_filter_func(self, func, lower_window, upper_window, group, actual, track):
         valid_funcs = [
                 "median",
@@ -224,16 +243,22 @@ class Goldilocks(object):
             target = q_low
         else:
             raise NotImplementedException("[FAIL] Function '%s' not supported" % func.lower())
-        return q_low, q_high, target
+        return float(q_low), float(q_high), float(target)
 
 
-    def __check_exclusions(self, exclusions, region_dict, use_and=False):
+    def __check_exclusions(self, exclusions, region_dict, use_and=False, use_chrom=False):
         if exclusions is None or len(exclusions) == 0:
             return False
 
-        def exclude_chro(region_dict, chr_bool):
-            if chr_bool is True:
-                return True
+        def exclude_chro(region_dict, chr_list_or_bool):
+            try:
+                if region_dict["chr"] in chr_list_or_bool:
+                    return True
+            except TypeError:
+                # It's probably a bool not a list (it could be an int if users
+                # have failed to read the documentation...)
+                if chr_list_or_bool is True:
+                    return True
             return False
 
         def exclude_start(region_dict, operand, position):
@@ -257,13 +282,16 @@ class Goldilocks(object):
             return False
 
         # Chrom specific exclusions override overall (might be unexpected)
-        if region_dict["chr"] in exclusions:
-            to_apply = exclusions[region_dict["chr"]]
-        elif 0 in exclusions:
-            to_apply = exclusions[0]
+        if use_chrom:
+            if region_dict["chr"] in exclusions:
+                to_apply = exclusions[region_dict["chr"]]
+            else:
+                # No exclusions to apply to this region
+                return False
         else:
-            # No exclusions to apply to this region
-            return False
+            if region_dict["chr"] in exclusions:
+                print("[WARN] Exclusions dictionary appears to contain the name of a chromosome. Did you forget to set use_chrom=True?")
+            to_apply = exclusions
 
         for name in to_apply:
             #TODO Could probably improve with a dict of funcs...
@@ -298,7 +326,7 @@ class Goldilocks(object):
 
     # TODO Pretty hacky at the moment... Just trying some things out!
     def _filter(self, func="median", track="default", actual_distance=None, percentile_distance=None,
-            direction=0, group=None, limit=0, exclusions=None, use_and=False):
+            direction=0, group=None, limit=0, exclusions=None, use_and=False, use_chrom=False):
         distance = None
         actual = False
         if actual_distance is not None and percentile_distance is not None:
@@ -316,8 +344,11 @@ class Goldilocks(object):
 
         candidates = []
         if distance is not None:
-            upper_window = float(distance) / 2
-            lower_window = float(distance) / 2
+            upper_window = float(distance)
+            lower_window = float(distance)
+            if func not in ["max", "min"]:
+                upper_window = float(distance) / 2
+                lower_window = float(distance) / 2
 
             if direction > 0:
                 upper_window = upper_window * 2
@@ -346,14 +377,14 @@ class Goldilocks(object):
         num_excluded = 0
         num_total = 0
 
-        filtered = CandidateList(self)
+        filtered = CandidateList(self, group)
         for region in sorted(self.regions,
                         key=lambda x: (abs(self.regions[x]["group_counts"][group][track] - target),
                             self.regions[x]["group_counts"][group][track])):
             num_total += 1
             if region in candidates:
                 num_selected += 1
-                if not self.__check_exclusions(exclusions, self.regions[region], use_and):
+                if not self.__check_exclusions(exclusions, self.regions[region], use_and, use_chrom):
                     self.regions[region]["id"] = region
                     filtered.append(self.regions[region])
                 else:
@@ -362,7 +393,7 @@ class Goldilocks(object):
         # Return the top N elements if desired
         # TODO Report total, selected, selected-excluded and selected-filtered
         if limit:
-            filtered = CandidateList(self, filtered[0:limit])
+            filtered = CandidateList(self, group, filtered[0:limit])
 
         print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
                 (num_total, num_selected, num_excluded, limit))

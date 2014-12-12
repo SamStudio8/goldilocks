@@ -17,6 +17,7 @@ Contents:
    advanced
    exporting
    plotting
+   custom
    contributing
    authors
    changelog
