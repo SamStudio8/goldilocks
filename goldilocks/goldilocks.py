@@ -1,6 +1,6 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
@@ -18,11 +18,14 @@ class CandidateList(list):
             self.__group = group
         list.__init__(self, *args)
 
+    #TODO I don't like how we're keeping a reference to the Goldilocks object
+    #     here, in future I'll add a method to populate some form of DataFrame
+    #     that contains all the data required without needing Goldilocks behind.
     def __repr__(self):
         str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
         for region in self:
             str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
-                                            region["group_counts"][self.__group],
+                                            self.__goldilocks.group_counts[self.__group]["default"][region["id"]],
                                             region["chr"],
                                             region["pos_start"],
                                             region["pos_end"],
@@ -138,7 +141,6 @@ class Goldilocks(object):
                 region_e = region_s + self.LENGTH - 1
                 regions[region_i] = {
                     "ichr": i,
-                    "group_counts": {"total": {}},
                     "chr": chrno,
                     "pos_start": region_s,
                     "pos_end": region_e
@@ -146,24 +148,19 @@ class Goldilocks(object):
 
                 for group in self.groups:
                     for track in self.strategy.TRACKS:
-                        value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track)
-
-                        if group not in regions[region_i]["group_counts"]:
-                            regions[region_i]["group_counts"][group] = {}
-                        if track not in regions[region_i]["group_counts"]["total"]:
-                            regions[region_i]["group_counts"]["total"][track] = 0
-
-                        regions[region_i]["group_counts"][group][track] = value
-                        regions[region_i]["group_counts"]["total"][track] += value
+                        value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track=track)
 
                         # TODO Should we be ignoring these regions if they are empty?
-                        # TODO Config option to include 0 in filter metrics
-                        if value not in self.group_buckets[group]:
+                        # TODO Config option to include 0 in flter metrics
+                        if track not in self.group_buckets[group]:
+                            self.group_buckets[group][track] = {}
+
+                        if value not in self.group_buckets[group][track]:
                             # Add this particular number of variants as a bucket
-                            self.group_buckets[group][value] = []
+                            self.group_buckets[group][track][value] = []
 
                         # Add the region id to the bucket
-                        self.group_buckets[group][value].append(region_i)
+                        self.group_buckets[group][track][value].append(region_i)
 
 #                   if value > 0:
                         # Append the number of variants counted in this region
@@ -180,10 +177,25 @@ class Goldilocks(object):
                         except IndexError:
                             self.group_counts["total"][track].append(value)
 
+                        # Initialise better...
+                        if (len(self.strategy.TRACKS) > 1
+                                or (len(self.strategy.TRACKS) == 1
+                                    and "default" not in self.strategy.TRACKS)):
+                            #TODO Halt when creating a strategy track called default
+                            if "default" not in self.group_counts["total"]:
+                                self.group_counts["total"]["default"] = []
+
+                            try:
+                                self.group_counts["total"]["default"][region_i] += value
+                            except IndexError:
+                                self.group_counts["total"]["default"].append(value)
+
                 region_i += 1
 
         # Populate total group_buckets now census is complete
-        for track in self.group_counts["total"]:
+        self.group_buckets["total"] = {}
+        super_totals = []
+        for track in self.strategy.TRACKS:
             totals = []
             for region_id, value in enumerate(self.group_counts["total"][track]):
                 try:
@@ -191,24 +203,33 @@ class Goldilocks(object):
                 except IndexError:
                     totals.append(value)
 
+                try:
+                    super_totals[region_id] += value
+                except IndexError:
+                    super_totals.append(value)
+
             total_buckets = {}
             for region_id, total in enumerate(totals):
                 if total not in total_buckets:
                     total_buckets[total] = []
                 total_buckets[total].append(region_id)
-        self.group_buckets["total"] = total_buckets
+
+            self.group_buckets["total"][track] = total_buckets
+
+        # Populate total-default group-track which sums the totals across
+        # all tracks...
+        total_buckets = {}
+        for region_id, total in enumerate(super_totals):
+            if total not in total_buckets:
+                total_buckets[total] = []
+            total_buckets[total].append(region_id)
+        self.group_buckets["total"]["default"] = total_buckets
 
         self.regions = regions
 
     #TODO Check that doubling the window size for max and min works as expected
     #TODO Is changing the behaviour (re: window) for different math ops a bad idea...
     def __apply_filter_func(self, func, lower_window, upper_window, group, actual, track):
-        valid_funcs = [
-                "median",
-                "mean",
-                "max",
-                "min"
-        ]
 
         target = None
         if func.lower() == "median":
@@ -219,7 +240,7 @@ class Goldilocks(object):
                 q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50 - lower_window)
                 q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50 + upper_window)
             target = np.percentile(np.asarray(self.group_counts[group][track]), 50)
-        if func.lower() == "mean":
+        elif func.lower() == "mean":
             if actual:
                 q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50) - lower_window
                 q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50) + upper_window
@@ -242,7 +263,7 @@ class Goldilocks(object):
                 q_high = np.percentile(np.asarray(self.group_counts[group][track]), 0 + upper_window)
             target = q_low
         else:
-            raise NotImplementedException("[FAIL] Function '%s' not supported" % func.lower())
+            raise NotImplementedError("[FAIL] Function '%s' not supported" % func.lower())
         return float(q_low), float(q_high), float(target)
 
 
@@ -307,8 +328,8 @@ class Goldilocks(object):
             elif name == "end_gte":
                 ret = exclude_end(region_dict, 1, to_apply["end_gte"])
             else:
-                #TODO Invalid option
-                pass
+                #TODO Better handling of invalid exclusion property
+                print("[WARN] Attempted to exclude on invalid property '%s'" % name)
 
             if use_and:
                 # Require all exclusions to be true...
@@ -367,11 +388,12 @@ class Goldilocks(object):
         # For each "number of variants" bucket: which map the number of variants
         # seen in a region, to all regions that contained that number of variants
         print("[NOTE] Filtering values between %.2f and %.2f (inclusive)" % (floor(q_low), ceil(q_high)))
-        for bucket in self.group_buckets[group]:
+
+        for bucket in self.group_buckets[group][track]:
             if bucket >= floor(q_low) and bucket <= ceil(q_high):
                 # Append all region data structures within the desired range
                 # to the list of candidates for enrichment
-                candidates += self.group_buckets[group][bucket]
+                candidates += self.group_buckets[group][track][bucket]
 
         num_selected = 0
         num_excluded = 0
@@ -379,8 +401,8 @@ class Goldilocks(object):
 
         filtered = CandidateList(self, group)
         for region in sorted(self.regions,
-                        key=lambda x: (abs(self.regions[x]["group_counts"][group][track] - target),
-                            self.regions[x]["group_counts"][group][track])):
+                        key=lambda x: (abs(self.group_counts[group][track][x] - target),
+                            self.group_counts[group][track][x])):
             num_total += 1
             if region in candidates:
                 num_selected += 1
@@ -410,7 +432,7 @@ class Goldilocks(object):
             fig = plt.subplot(1,1,1)
 
             num_regions = len(self.regions)
-            num_counts = [self.regions[x]["group_counts"][group][track] for x in sorted(self.regions)]
+            num_counts = [self.group_counts[group][track][x] for x in sorted(self.regions)]
 
             max_val = max(num_counts)
             plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker='o')
@@ -425,7 +447,7 @@ class Goldilocks(object):
             max_val = 0
             for i, chrom in enumerate(self.groups[group]):
 
-                num_counts = [self.regions[x]["group_counts"][group][track] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]
+                num_counts = [self.group_counts[group][track][x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]
                 num_regions = len(num_counts)
 
                 if max(num_counts) > max_val:
@@ -474,7 +496,7 @@ class Goldilocks(object):
             region = self.regions[r]
             values_string = ""
             for t in tracks:
-                values_string += str(region["group_counts"][group][t])
+                values_string += str(self.group_counts[group][t][r])
                 values_string += sep
             values_string = values_string[:-1]
             print(sep.join([

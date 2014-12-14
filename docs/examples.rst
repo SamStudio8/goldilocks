@@ -96,28 +96,28 @@ returned regions dictionary for the example data above: ::
     {
         0: {
             'chr': 2,
+            'ichr': 0,
+            'pos_end': 3,
+            'pos_start': 1,
             'group_counts': {
                 'my_sample': {'default': 2},
                 'my_other_sample': {'default': 1},
                 'total': {'default': 3}
             },
-            'ichr': 0,
-            'pos_end': 3,
-            'pos_start': 1,
         }
 
         ...
 
         27: {
             'chr': 'one',
+            'ichr': 6,
+            'pos_end': 9,
+            'pos_start': 7,
             'group_counts': {
                 'my_sample': {'default': 0},
                 'my_other_sample': {'default': 0},
                 'total': {'default': 0}
             },
-            'ichr': 6,
-            'pos_end': 9,
-            'pos_start': 7,
         }
     }
 
@@ -127,7 +127,7 @@ with values corresponding to a dictionary of metadata for that particular `id`.
 The `id` is assigned incrementally (starting at 0) as each region is encountered
 by Goldilocks during the census and isn't particularly important.
 
-Each region dictionary has the following metadata:
+Each region dictionary has the following metadata [#]_:
 
 ============    =====
 Key             Value
@@ -137,11 +137,14 @@ chr             The chromosome the region appeared on (as found in the input dat
 ichr            This region is the `ichr-th` to appear on this chromosome (0-indexed)
 pos_start       The 1-indexed base of the sequence where the region begins (inclusive)
 pos_end         The 1-indexed base of the sequence where the region ends (inclusive)
-group_counts    A dictionary mapping a sample name to the strategy result (in this case,
-                the number of N bases that appeared in the region), additionally a "total"
-                key is automatically added by Goldilocks which sums the results over all samples
-
 ============    =====
+
+.. [#] Goldilocks used to feature a group_counts dictionary as part of the region
+       metadata as shown in the example above, this was removed as it duplicated
+       data stored in the group_counts variable in the Goldilocks object needlessly.
+       It has not been removed in the example output above as it helps explain
+       what regions represent.
+
 
 In the example output above, the first (0th) censused region appears on
 chromosome 2 [#]_ and includes bases 1-3. It is the first (0th) region to appear on this

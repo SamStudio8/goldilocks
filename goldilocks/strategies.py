@@ -17,12 +17,26 @@ class BaseStrategy(object):
         a 'track' for each base to be counted)."""
         raise NotImplementedError("strategy.prepare")
 
-    def evaluate(self, region, track):
+    def evaluate(self, region, **kwargs):
         """Evaluate the contents of a given iterable 'region' (typically a numpy
         array) as prepared by this strategy. The simplest strategies will sum
         the binary flags over the array."""
         raise NotImplementedError("strategy.evaluate")
 
+
+class NucleotideCounterStrategy(BaseStrategy):
+
+    def __init__(self, bases):
+        super(NucleotideCounterStrategy, self).__init__(tracks=bases, title="Base Count")
+
+    def prepare(self, arr, data, current_track):
+        for location, base in enumerate(data):
+            if base.upper() == current_track:
+                arr[location] = 1
+        return arr
+
+    def evaluate(self, region, **kwargs):
+        return np.sum(region)
 
 class KMerCounterStrategy(BaseStrategy):
 
@@ -38,11 +52,11 @@ class KMerCounterStrategy(BaseStrategy):
             arr[location] = 1
         return arr
 
-    def evaluate(self, region, track):
+    def evaluate(self, region, **kwargs):
         # Need to allow for cases where the K-mer present flag has been placed
         # at the very end of the region (and thus the region merely contains only
         # the first base of the desired K-mer
-        return np.sum(region[:-(len(track)-1)])
+        return np.sum(region[:-(len(kwargs['track'])-1)])
 
 class VariantCounterStrategy(BaseStrategy):
 
@@ -57,7 +71,7 @@ class VariantCounterStrategy(BaseStrategy):
             arr[variant_loc] = 1
         return arr
 
-    def evaluate(self, region, track):
+    def evaluate(self, region, **kwargs):
         return np.sum(region)
 
 
@@ -78,7 +92,7 @@ class GCRatioStrategy(BaseStrategy):
             arr[location] = 1
         return arr
 
-    def evaluate(self, region, track):
+    def evaluate(self, region, **kwargs):
         return float(np.sum(region))/len(region)
 
 
@@ -94,6 +108,6 @@ class NCounterStrategy(BaseStrategy):
                 arr[location] = 1
         return arr
 
-    def evaluate(self, region, track):
+    def evaluate(self, region, **kwargs):
         return np.sum(region)
 

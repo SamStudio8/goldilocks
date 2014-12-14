@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from goldilocks.goldilocks import Goldilocks
-from goldilocks.strategies import NCounterStrategy
+from goldilocks.strategies import NucleotideCounterStrategy
 
 ################################################################################
 # NOTE Tests following are hard coded regression tests whose answers were      #
@@ -54,7 +54,7 @@ class TestGoldilocksRegression_NCounter(unittest.TestCase):
 #
     @classmethod
     def setUpClass(cls):
-        cls.g = Goldilocks(NCounterStrategy(), DATA, stride=STRIDE, length=LENGTH)
+        cls.g = Goldilocks(NucleotideCounterStrategy(["N"]), DATA, stride=STRIDE, length=LENGTH)
         cls.EXPECTED_REGIONS = {
             1: {
                 0: 0,
@@ -202,28 +202,28 @@ class TestGoldilocksRegression_NCounter(unittest.TestCase):
 # \/ NOTE Tests below depend only on GroupOne                              \/ #
 ###############################################################################
 
-    def test_content_regions(self):
+    def test_content_counters(self):
         number_comparisons = 0
         for region_i, region_data in self.g.regions.items():
             number_comparisons += 1
-            self.assertEqual(self.EXPECTED_REGIONS[region_data["chr"]][region_data["ichr"]], region_data["group_counts"]["GroupOne"]["default"])
+            self.assertEqual(self.EXPECTED_REGIONS[region_data["chr"]][region_data["ichr"]], self.g.group_counts["GroupOne"]["N"][region_i])
         self.assertEqual(self.EXPECTED_REGION_COUNT, number_comparisons)
 
     def test_number_buckets(self):
-        self.assertEqual(len(self.EXPECTED_BUCKETS), len(self.g.group_buckets["GroupOne"]))
+        self.assertEqual(len(self.EXPECTED_BUCKETS), len(self.g.group_buckets["GroupOne"]["N"]))
         total_in_bucket = 0
         total_in_bucket_g = 0
 
         for b in self.EXPECTED_BUCKETS:
             total_in_bucket += len(self.EXPECTED_BUCKETS[b])
-        for b in self.g.group_buckets["GroupOne"]:
-            total_in_bucket_g += len(self.g.group_buckets["GroupOne"][b])
+        for b in self.g.group_buckets["GroupOne"]["N"]:
+            total_in_bucket_g += len(self.g.group_buckets["GroupOne"]["N"][b])
 
         self.assertEqual(total_in_bucket, total_in_bucket_g)
 
     def test_content_buckets(self):
         number_comparisons = 0
-        for bucket, content in self.g.group_buckets["GroupOne"].items():
+        for bucket, content in self.g.group_buckets["GroupOne"]["N"].items():
             number_comparisons += 1
             self.assertEqual(sorted(self.EXPECTED_BUCKETS[bucket]), sorted(content))
         self.assertEqual(len(self.EXPECTED_BUCKETS), number_comparisons)
