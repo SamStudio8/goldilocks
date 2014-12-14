@@ -10,11 +10,11 @@ Importing
 ---------
 
 To use Goldilocks you will need to import the :class:`goldilocks.goldilocks.Goldilocks`
-class and your desired census strategy (e.g. NCounterStrategy) from
+class and your desired census strategy (e.g. NucleotideCounterStrategy) from
 :mod:`goldilocks.strategies` to your script: ::
 
     from goldilocks.goldilocks import Goldilocks
-    from goldilocks.strategies import NCounterStrategy
+    from goldilocks.strategies import NucleotideCounterStrategy
 
 
 Providing Sequence Data
@@ -60,10 +60,10 @@ Conducting a Census
 -------------------
 
 Once you have organised your sequence data in to the appropriate structure, you
-may conduct the census with Goldilocks by passing your strategy (e.g. NCounterStrategy)
+may conduct the census with Goldilocks by passing your strategy (e.g. NucleotideCounterStrategy)
 and sequence data to the imported :class:`goldilocks.goldilocks.Goldilocks` class: ::
 
-    g = Goldilocks(NCounterStrategy(), sequence_data, length=3, stride=1)
+    g = Goldilocks(NucleotideCounterStrategy(["N"]), sequence_data, length=3, stride=1)
 
 Make sure you add the brackets after the name of the imported strategy, this
 'creates' a usuable strategy for Goldilocks to work with.
@@ -81,7 +81,7 @@ For example, chromosome `"one"` of `"my_sample"` will be split as follows: ::
          NCA
           CAT
 
-In our example, the NCounterStrategy will then count the number of N bases that
+In our example, the NucleotideCounterStrategy will then count the number of N bases that
 appear in each split, for each sample, for each chromosome.
 
 
@@ -200,7 +200,7 @@ Full Example
 Census an example sequence for appearance of 'N' bases: ::
 
     from goldilocks.goldilocks import Goldilocks
-    from goldilocks.strategies import NCounterStrategy
+    from goldilocks.strategies import NucleotideCounterStrategy
 
     sequence_data = {
         "my_sample": {
@@ -215,7 +215,7 @@ Census an example sequence for appearance of 'N' bases: ::
         }
     }
 
-    g = Goldilocks(NCounterStrategy(), sequence_data, length=3, stride=1)
+    g = Goldilocks(NucleotideCounterStrategy(["N"]), sequence_data, length=3, stride=1)
 
     regions_max_n_bases = g._filter("max")
     regions_min_n_bases = g._filter("min")

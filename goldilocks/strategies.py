@@ -95,19 +95,3 @@ class GCRatioStrategy(BaseStrategy):
     def evaluate(self, region, **kwargs):
         return float(np.sum(region))/len(region)
 
-
-class NCounterStrategy(BaseStrategy):
-
-    def __init__(self, tracks=None):
-        super(NCounterStrategy, self).__init__(title="N Base Count")
-
-    def prepare(self, arr, data, track):
-        # Populate the region array with 1 for each position a missing base exists
-        for location, base in enumerate(data):
-            if base.upper() == "N":
-                arr[location] = 1
-        return arr
-
-    def evaluate(self, region, **kwargs):
-        return np.sum(region)
-
