@@ -21,7 +21,7 @@ class CandidateList(list):
     #TODO I don't like how we're keeping a reference to the Goldilocks object
     #     here, in future I'll add a method to populate some form of DataFrame
     #     that contains all the data required without needing Goldilocks behind.
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
         for region in self:
             str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
