@@ -38,7 +38,7 @@ class NucleotideCounterStrategy(BaseStrategy):
     def evaluate(self, region, **kwargs):
         return np.sum(region)
 
-class KMerCounterStrategy(BaseStrategy):
+class KMerCounterStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, kmers):
         super(KMerCounterStrategy, self).__init__(tracks=kmers, title="Motif Count")
@@ -58,7 +58,7 @@ class KMerCounterStrategy(BaseStrategy):
         # the first base of the desired K-mer
         return np.sum(region[:-(len(kwargs['track'])-1)])
 
-class VariantCounterStrategy(BaseStrategy):
+class VariantCounterStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, tracks=None):
         super(VariantCounterStrategy, self).__init__(title="Variant Count")
@@ -75,7 +75,7 @@ class VariantCounterStrategy(BaseStrategy):
         return np.sum(region)
 
 
-class GCRatioStrategy(BaseStrategy):
+class GCRatioStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, tracks=None):
         super(GCRatioStrategy, self).__init__(title="GC Ratio")

@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from goldilocks.goldilocks import Goldilocks
-from goldilocks.strategies import NucleotideCounterStrategy
+from goldilocks.strategies import BaseStrategy, NucleotideCounterStrategy
 
 ################################################################################
 # NOTE Tests following do not test the correctness of regions located by
@@ -98,6 +98,9 @@ class TestGoldilocks(unittest.TestCase):
     def test_invalid_sort_operation(self):
         for op in OPS:
             self.assertRaises(NotImplementedError, self.g._filter, "hoot")
+
+    def test_unimplemented_strategy(self):
+        self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data)
 
     def test_exclude_chr(self):
         EXCLUSIONS = {
