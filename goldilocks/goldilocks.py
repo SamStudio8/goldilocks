@@ -1,6 +1,6 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.5"
+__version__ = "0.0.51"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
@@ -127,7 +127,7 @@ class Goldilocks(object):
         # each group.
         regions = {}
         region_i = 0
-        for chrno, size in sorted(self.chr_max_len.items()):
+        for chrno, size in self.chr_max_len.items():
             chros = {}
             for group in self.groups:
                 chros[group] = {}
