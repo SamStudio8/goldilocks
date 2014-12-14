@@ -422,7 +422,7 @@ class Goldilocks(object):
 
         return filtered
 
-    def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None):
+    def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""
 
         import matplotlib.pyplot as plt

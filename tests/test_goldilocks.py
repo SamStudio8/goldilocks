@@ -91,6 +91,14 @@ class TestGoldilocks(unittest.TestCase):
         self.assertRaises(Exception, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1)
         self.assertRaises(Exception, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1000)
 
+    def test_invalid_filter_distance(self):
+        for op in OPS:
+            self.assertRaises(Exception, self.g._filter, op, actual_distance=1, percentile_distance=1)
+
+    def test_invalid_sort_operation(self):
+        for op in OPS:
+            self.assertRaises(NotImplementedError, self.g._filter, "hoot")
+
     def test_exclude_chr(self):
         EXCLUSIONS = {
             "simple_chr_str": {
@@ -253,6 +261,15 @@ class TestGoldilocks(unittest.TestCase):
 
             candidates = self.g._filter(op, limit=100)
             self.assertTrue(len(candidates) == self.TOTAL_REGIONS)
+
+    def test_distance_upper(self):
+        pass
+
+    def test_distance_lower(self):
+        pass
+
+    def test_distance_around(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
