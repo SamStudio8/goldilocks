@@ -63,7 +63,7 @@ You can of course use these at the same time (though actual and percentile dista
 are mutually exclusive), let's fetch the top 10% of regions that contain the most
 "AAA" k-mers for all chromosomes in a hypothetical sample called "my_kmer_example": ::
 
-    g._filter("max", group="my_kmer_example", track="AAA", percentile_distance=10)
+    g._filter("max", group="my_sample", track="N", percentile_distance=10)
 
 
 Excluding Regions

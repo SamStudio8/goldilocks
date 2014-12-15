@@ -122,12 +122,28 @@ class Goldilocks(object):
             raise Exception("[FAIL] Length must be at least 1 base wide.")
         self.LENGTH = length
 
+        # We'd like to try and do things in order, it can be useful to a user
+        # who'd like to extract and plot the lists stored in group_counts.
+        # Python3 dislikes us sorting lists with ints and strings, so they are
+        # ordered seperately and concatenated together.
+        #NOTE Using 'type' is considered a little naughty but I'm not expecting
+        #     use of subclassed ints, longs or anything overly complex here, but
+        #     just in case, the code falls back to the chr_max_len item list.
+        try:
+            chr_num = [chrom for chrom in self.chr_max_len.items() if type(chrom)=="int"]
+            chr_str = [chrom for chrom in self.chr_max_len.items() if type(chrom)!="int"]
+
+            chroms = sorted(chr_num)
+            chroms.extend(sorted(chr_str))
+        except:
+            chroms = self.chr_max_len.items()
+
         # Conduct a census of the regions on each chromosome using the user
         # defined length and stride. Counting the number of variants present for
         # each group.
         regions = {}
         region_i = 0
-        for chrno, size in self.chr_max_len.items():
+        for chrno, size in chroms:
             chros = {}
             for group in self.groups:
                 chros[group] = {}
