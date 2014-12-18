@@ -10,12 +10,15 @@ class CandidateList(list):
     """A list defining its own tab-delimited table string representation when
     printed by a user. Provides other utility methods for generating other useful
     outputs including exporting sequences to FASTA."""
-    def __init__(self, g, group, *args):
+    def __init__(self, g, group, track, *args):
         self.__goldilocks = g
         if group is None:
             self.__group = "total"
+        if track is None:
+            self.__track = "default"
         else:
             self.__group = group
+            self.__track = track
         list.__init__(self, *args)
 
     #TODO I don't like how we're keeping a reference to the Goldilocks object
@@ -25,7 +28,7 @@ class CandidateList(list):
         str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
         for region in self:
             str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
-                                            self.__goldilocks.group_counts[self.__group]["default"][region["id"]],
+                                            self.__goldilocks.group_counts[self.__group][self.__track][region["id"]],
                                             region["chr"],
                                             region["pos_start"],
                                             region["pos_end"],
@@ -417,7 +420,7 @@ class Goldilocks(object):
         num_excluded = 0
         num_total = 0
 
-        filtered = CandidateList(self, group)
+        filtered = CandidateList(self, group, track)
         for region in sorted(self.regions,
                         key=lambda x: (abs(self.group_counts[group][track][x] - target),
                             self.group_counts[group][track][x])):
@@ -433,7 +436,7 @@ class Goldilocks(object):
         # Return the top N elements if desired
         # TODO Report total, selected, selected-excluded and selected-filtered
         if limit:
-            filtered = CandidateList(self, group, filtered[0:limit])
+            filtered = CandidateList(self, group, track, filtered[0:limit])
 
         print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
                 (num_total, num_selected, num_excluded, limit))
