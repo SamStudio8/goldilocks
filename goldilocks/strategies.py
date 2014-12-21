@@ -106,7 +106,7 @@ class VariantCounterStrategy(BaseStrategy): # pragma: no cover
         return np.sum(region)
 
 
-class GCRatioStrategy(BaseStrategy): # pragma: no cover
+class GCRatioStrategy(BaseStrategy):
 
     def __init__(self, tracks=None):
         super(GCRatioStrategy, self).__init__(title="GC Ratio")
