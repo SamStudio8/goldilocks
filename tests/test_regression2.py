@@ -315,26 +315,24 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
 #      which is set to change in future releases... Use 'our' g for tests...  #
 ###############################################################################
     def test_max_candidates(self):
-        EXPECTED_RANK = {
-            "A": [4,3,6,7,5,0,1,2,8],
-            "N": [2,1,6,0,7,3,4,5,8],
-            "default": [6,2,4,7,1,3,0,5,8]
-        }
+        group = "total"
+        tracks = ["A", "N", "default"]
+
+        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("max", group, tracks)
         self.__test_sort_candidates("max", EXPECTED_RANK)
 
     def test_min_candidates(self):
-        EXPECTED_RANK = {
-            "A": [0,1,2,8,5,7,3,6,4],
-            "N": [3,4,5,8,0,7,1,6,2],
-            "default": [8,5,0,1,3,2,4,7,6]
-        }
+        group = "total"
+        tracks = ["A", "N", "default"]
+
+        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("min", group, tracks)
         self.__test_sort_candidates("min", EXPECTED_RANK)
 
     def test_mean_candidates(self):
         group = "total"
         tracks = ["A", "N", "default"]
 
-        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_non_minmax_sort("mean", group, tracks)
+        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("mean", group, tracks)
         self.__test_sort_candidates("mean", EXPECTED_RANK, targets=EXPECTED_TARGET)
 
     def test_median_candidates(self):
@@ -342,10 +340,10 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
         group = "total"
         tracks = ["A", "N", "default"]
 
-        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_non_minmax_sort("median", group, tracks)
+        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("median", group, tracks)
         self.__test_sort_candidates("median", EXPECTED_RANK, targets=EXPECTED_TARGET)
 
-    def __setup_non_minmax_sort(self, op, group, TRACKS):
+    def __setup_sort(self, op, group, TRACKS):
         EXPECTED_RANK = {}
         EXPECTED_TARGET = {}
 
@@ -361,6 +359,10 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
                 target = np.mean(scores)
             elif op == "median":
                 target = np.median(scores)
+            elif op == "max":
+                target = max(scores)
+            elif op == "min":
+                target = min(scores)
             else:
                 self.fail("Invalid op.")
 
