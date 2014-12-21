@@ -214,11 +214,18 @@ class Goldilocks(object):
                             #TODO Halt when creating a strategy track called default
                             if "default" not in self.group_counts["total"]:
                                 self.group_counts["total"]["default"] = []
+                            if "default" not in self.group_counts[group]:
+                                self.group_counts[group]["default"] = []
 
                             try:
                                 self.group_counts["total"]["default"][region_i] += value
                             except IndexError:
                                 self.group_counts["total"]["default"].append(value)
+
+                            try:
+                                self.group_counts[group]["default"][region_i] += value
+                            except IndexError:
+                                self.group_counts[group]["default"].append(value)
 
                 region_i += 1
 
@@ -226,29 +233,49 @@ class Goldilocks(object):
         #TODO += won't work for non-countable strategies like GC ratio!
         self.group_buckets["total"] = {}
         super_totals = []
-        for track in self.strategy.TRACKS:
-            totals = []
-            for region_id, value in enumerate(self.group_counts["total"][track]):
-                try:
-                    totals[region_id] += value
-                except IndexError:
-                    totals.append(value)
 
-                try:
-                    super_totals[region_id] += value
-                except IndexError:
-                    super_totals.append(value)
+        ggroups = list(self.groups.keys())
+        ggroups.append("total")
 
-            total_buckets = {}
-            for region_id, total in enumerate(totals):
-                if total not in total_buckets:
-                    total_buckets[total] = []
-                total_buckets[total].append(region_id)
+        for count_group in ggroups:
+            group_totals = []
+            for track in self.strategy.TRACKS:
+                totals = []
+                for region_id, value in enumerate(self.group_counts[count_group][track]):
+                    try:
+                        totals[region_id] += value
+                    except IndexError:
+                        totals.append(value)
 
-            self.group_buckets["total"][track] = total_buckets
+                    if count_group == "total":
+                    # Total track already stores sums, don't want to count
+                    # everything twice by using tracks in the non-total group
+                        try:
+                            super_totals[region_id] += value
+                        except IndexError:
+                            super_totals.append(value)
+                    else:
+                        try:
+                            group_totals[region_id] += value
+                        except IndexError:
+                            group_totals.append(value)
 
-        # Populate total-default group-track which sums the totals across
-        # all tracks...
+                total_buckets = {}
+                for region_id, total in enumerate(totals):
+                    if total not in total_buckets:
+                        total_buckets[total] = []
+                    total_buckets[total].append(region_id)
+                self.group_buckets[count_group][track] = total_buckets
+
+            group_total_buckets = {}
+            for region_id, total in enumerate(group_totals):
+                if total not in group_total_buckets:
+                    group_total_buckets[total] = []
+                group_total_buckets[total].append(region_id)
+            self.group_buckets[count_group]["default"] = group_total_buckets
+
+        # Populate super total-default group-track which sums the totals across
+        # all tracks in all groups
         total_buckets = {}
         for region_id, total in enumerate(super_totals):
             if total not in total_buckets:

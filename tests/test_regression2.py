@@ -28,24 +28,24 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
         cls.EXPECTED_REGIONS = {
                 2: {
                     "my_sample": {
-                        0: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 2},
-                        1: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1},
-                        2: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 2},
-                        3: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1},
-                        4: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 2},
-                        5: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1},
-                        6: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 2},
-                        7: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1},
+                        0: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 2, "default": 3},
+                        1: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 3},
+                        2: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 2, "default": 3},
+                        3: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 3},
+                        4: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 2, "default": 3},
+                        5: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 3},
+                        6: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 2, "default": 3},
+                        7: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 3},
                     },
                     "my_other_sample": {
-                        0: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1},
-                        1: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1},
-                        2: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1},
-                        3: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1},
-                        4: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1},
-                        5: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1},
-                        6: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1},
-                        7: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 1},
+                        0: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
+                        1: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
+                        2: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
+                        3: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
+                        4: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
+                        5: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
+                        6: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
+                        7: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 2},
                     },
                     "total": {
                         0: {'A': 2, 'C': 0, 'T': 0, 'G': 1, 'N': 3, "default": 6},
@@ -60,34 +60,34 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                 },
                 "X": {
                     "my_sample": {
-                        0: {'A': 1, 'C': 0, 'T': 1, 'G': 1, 'N': 0},
-                        1: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                        2: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                        3: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0},
-                        4: {'A': 2, 'C': 1, 'T': 0, 'G': 0, 'N': 0},
-                        5: {'A': 1, 'C': 1, 'T': 0, 'G': 1, 'N': 0},
-                        6: {'A': 2, 'C': 0, 'T': 0, 'G': 1, 'N': 0},
-                        7: {'A': 1, 'C': 0, 'T': 1, 'G': 1, 'N': 0},
-                        8: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                        9: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                        10: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0},
-                        11: {'A': 2, 'C': 1, 'T': 0, 'G': 0, 'N': 0},
-                        12: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1},
+                        0: {'A': 1, 'C': 0, 'T': 1, 'G': 1, 'N': 0, "default": 3},
+                        1: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                        2: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                        3: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0, "default": 3},
+                        4: {'A': 2, 'C': 1, 'T': 0, 'G': 0, 'N': 0, "default": 3},
+                        5: {'A': 1, 'C': 1, 'T': 0, 'G': 1, 'N': 0, "default": 3},
+                        6: {'A': 2, 'C': 0, 'T': 0, 'G': 1, 'N': 0, "default": 3},
+                        7: {'A': 1, 'C': 0, 'T': 1, 'G': 1, 'N': 0, "default": 3},
+                        8: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                        9: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                        10: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0, "default": 3},
+                        11: {'A': 2, 'C': 1, 'T': 0, 'G': 0, 'N': 0, "default": 3},
+                        12: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1, "default": 3},
                     },
                     "my_other_sample": {
-                        0: {'A': 1, 'C': 0, 'T': 1, 'G': 1, 'N': 0},
-                        1: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                        2: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                        3: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0},
-                        4: {'A': 2, 'C': 1, 'T': 0, 'G': 0, 'N': 0},
-                        5: {'A': 1, 'C': 1, 'T': 0, 'G': 1, 'N': 0},
-                        6: {'A': 2, 'C': 0, 'T': 0, 'G': 1, 'N': 0},
-                        7: {'A': 1, 'C': 0, 'T': 1, 'G': 1, 'N': 0},
-                        8: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                        9: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                        10: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0},
-                        11: {'A': 2, 'C': 1, 'T': 0, 'G': 0, 'N': 0},
-                        12: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1},
+                        0: {'A': 1, 'C': 0, 'T': 1, 'G': 1, 'N': 0, "default": 3},
+                        1: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                        2: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                        3: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0, "default": 3},
+                        4: {'A': 2, 'C': 1, 'T': 0, 'G': 0, 'N': 0, "default": 3},
+                        5: {'A': 1, 'C': 1, 'T': 0, 'G': 1, 'N': 0, "default": 3},
+                        6: {'A': 2, 'C': 0, 'T': 0, 'G': 1, 'N': 0, "default": 3},
+                        7: {'A': 1, 'C': 0, 'T': 1, 'G': 1, 'N': 0, "default": 3},
+                        8: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                        9: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                        10: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0, "default": 3},
+                        11: {'A': 2, 'C': 1, 'T': 0, 'G': 0, 'N': 0, "default": 3},
+                        12: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1, "default": 3},
                     },
                     "total": {
                         0: {'A': 2, 'C': 0, 'T': 2, 'G': 2, 'N': 0, "default": 6},
@@ -107,22 +107,22 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                 },
                 "one": {
                         "my_sample": {
-                            0: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0},
-                            1: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0},
-                            2: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0},
-                            3: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1},
-                            4: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1},
-                            5: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1},
-                            6: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0},
+                            0: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0, "default": 3},
+                            1: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0, "default": 3},
+                            2: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0, "default": 3},
+                            3: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1, "default": 3},
+                            4: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1, "default": 3},
+                            5: {'A': 1, 'C': 1, 'T': 0, 'G': 0, 'N': 1, "default": 3},
+                            6: {'A': 1, 'C': 1, 'T': 1, 'G': 0, 'N': 0, "default": 3},
                         },
                         "my_other_sample": {
-                            0: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                            1: {'A': 2, 'C': 0, 'T': 1, 'G': 0, 'N': 0},
-                            2: {'A': 1, 'C': 0, 'T': 1, 'G': 0, 'N': 1},
-                            3: {'A': 1, 'C': 0, 'T': 1, 'G': 0, 'N': 1},
-                            4: {'A': 1, 'C': 0, 'T': 1, 'G': 0, 'N': 1},
-                            5: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0},
-                            6: {'A': 2, 'C': 0, 'T': 1, 'G': 0, 'N': 0},
+                            0: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                            1: {'A': 2, 'C': 0, 'T': 1, 'G': 0, 'N': 0, "default": 3},
+                            2: {'A': 1, 'C': 0, 'T': 1, 'G': 0, 'N': 1, "default": 3},
+                            3: {'A': 1, 'C': 0, 'T': 1, 'G': 0, 'N': 1, "default": 3},
+                            4: {'A': 1, 'C': 0, 'T': 1, 'G': 0, 'N': 1, "default": 3},
+                            5: {'A': 1, 'C': 0, 'T': 2, 'G': 0, 'N': 0, "default": 3},
+                            6: {'A': 2, 'C': 0, 'T': 1, 'G': 0, 'N': 0, "default": 3},
                         },
                         "total": {
                             0: {'A': 2, 'C': 1, 'T': 3, 'G': 0, 'N': 0, "default": 6},
@@ -136,10 +136,10 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                 },
                 "three": {
                         "my_sample": {
-                            0: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 0},
+                            0: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 0, "default": 1},
                         },
                         "my_other_sample": {
-                            0: {'A': 0, 'C': 0, 'T': 0, 'G': 0, 'N': 1},
+                            0: {'A': 0, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 1},
                         },
                         "total": {
                             0: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 2},
@@ -151,8 +151,8 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
         cls.EXPECTED_NUM_REGION = 29
         cls.EXPECTED_REGION_COUNT = cls.EXPECTED_NUM_REGION*5*3
 
-        # Each region gets an additional counter in its total key (total-default)
-        cls.EXPECTED_COUNTERS_COUNT = cls.EXPECTED_REGION_COUNT + cls.EXPECTED_NUM_REGION
+        # Each region gets an additional counter
+        cls.EXPECTED_COUNTERS_COUNT = cls.EXPECTED_REGION_COUNT + cls.EXPECTED_NUM_REGION*3
 
     def test_group_track_counts_contents(self):
         """Ensure group_counts held by region metadata for each group-track
@@ -211,18 +211,20 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
                 }
         }
         cls.g = Goldilocks(NucleotideCounterStrategy(["A","N"]), cls.sequence_data, length=3, stride=3)
+        cls.GROUPS = ["my_sample", "my_other_sample", "total"]
+        cls.TRACKS = ["A", "N", "default"]
 
         cls.EXPECTED_REGIONS = {
                 1: {
                     "my_sample": {
-                        0: {'A': 0, 'N': 1},
-                        1: {'A': 0, 'N': 1},
-                        2: {'A': 0, 'N': 1},
+                        0: {'A': 0, 'N': 1, "default": 1},
+                        1: {'A': 0, 'N': 1, "default": 1},
+                        2: {'A': 0, 'N': 1, "default": 1},
                     },
                     "my_other_sample": {
-                        0: {'A': 0, 'N': 1},
-                        1: {'A': 0, 'N': 2},
-                        2: {'A': 0, 'N': 3},
+                        0: {'A': 0, 'N': 1, "default": 1},
+                        1: {'A': 0, 'N': 2, "default": 2},
+                        2: {'A': 0, 'N': 3, "default": 3},
                     },
                     "total": {
                         0: {'A': 0, 'N': 2, "default": 2},
@@ -232,14 +234,14 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
                 },
                 2: {
                     "my_sample": {
-                        0: {'A': 2, 'N': 0},
-                        1: {'A': 2, 'N': 0},
-                        2: {'A': 1, 'N': 0},
+                        0: {'A': 2, 'N': 0, "default": 2},
+                        1: {'A': 2, 'N': 0, "default": 2},
+                        2: {'A': 1, 'N': 0, "default": 1},
                     },
                     "my_other_sample": {
-                        0: {'A': 1, 'N': 0},
-                        1: {'A': 2, 'N': 0},
-                        2: {'A': 0, 'N': 0},
+                        0: {'A': 1, 'N': 0, "default": 1},
+                        1: {'A': 2, 'N': 0, "default": 2},
+                        2: {'A': 0, 'N': 0, "default": 0},
                     },
                     "total": {
                         0: {'A': 3, 'N': 0, "default": 3},
@@ -249,14 +251,14 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
                 },
                 3: {
                     "my_sample": {
-                        0: {'A': 0, 'N': 3},
-                        1: {'A': 0, 'N': 2},
-                        2: {'A': 0, 'N': 0},
+                        0: {'A': 0, 'N': 3, "default": 3},
+                        1: {'A': 0, 'N': 2, "default": 2},
+                        2: {'A': 0, 'N': 0, "default": 0},
                     },
                     "my_other_sample": {
-                        0: {'A': 3, 'N': 0},
-                        1: {'A': 2, 'N': 0},
-                        2: {'A': 0, 'N': 0},
+                        0: {'A': 3, 'N': 0, "default": 3},
+                        1: {'A': 2, 'N': 0, "default": 2},
+                        2: {'A': 0, 'N': 0, "default": 0},
                     },
                     "total": {
                         0: {'A': 3, 'N': 3, "default": 6},
@@ -270,8 +272,8 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
         cls.EXPECTED_NUM_REGION = 9
         cls.EXPECTED_REGION_COUNT = cls.EXPECTED_NUM_REGION*2*3
 
-        # Each region gets an additional counter in its total key (total-default)
-        cls.EXPECTED_COUNTERS_COUNT = cls.EXPECTED_REGION_COUNT + cls.EXPECTED_NUM_REGION
+        # Each region gets an additional default counter
+        cls.EXPECTED_COUNTERS_COUNT = cls.EXPECTED_REGION_COUNT + cls.EXPECTED_NUM_REGION*3
 
     def test_group_track_counts_contents(self):
         """Ensure group_counts held by region metadata for each group-track
@@ -315,33 +317,28 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
 #      which is set to change in future releases... Use 'our' g for tests...  #
 ###############################################################################
     def test_max_candidates(self):
-        group = "total"
-        tracks = ["A", "N", "default"]
-
-        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("max", group, tracks)
-        self.__test_sort_candidates("max", EXPECTED_RANK)
+        for group in self.GROUPS:
+            for track in self.TRACKS:
+                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("max", group, self.TRACKS)
+                self.__test_sort_candidates("max", group, track, EXPECTED_RANK)
 
     def test_min_candidates(self):
-        group = "total"
-        tracks = ["A", "N", "default"]
-
-        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("min", group, tracks)
-        self.__test_sort_candidates("min", EXPECTED_RANK)
+        for group in self.GROUPS:
+            for track in self.TRACKS:
+                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("min", group, self.TRACKS)
+                self.__test_sort_candidates("min", group, track, EXPECTED_RANK)
 
     def test_mean_candidates(self):
-        group = "total"
-        tracks = ["A", "N", "default"]
-
-        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("mean", group, tracks)
-        self.__test_sort_candidates("mean", EXPECTED_RANK, targets=EXPECTED_TARGET)
+        for group in self.GROUPS:
+            for track in self.TRACKS:
+                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("mean", group, self.TRACKS)
+                self.__test_sort_candidates("mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
     def test_median_candidates(self):
-
-        group = "total"
-        tracks = ["A", "N", "default"]
-
-        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("median", group, tracks)
-        self.__test_sort_candidates("median", EXPECTED_RANK, targets=EXPECTED_TARGET)
+        for group in self.GROUPS:
+            for track in self.TRACKS:
+                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("median", group, self.TRACKS)
+                self.__test_sort_candidates("median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
     def __setup_sort(self, op, group, TRACKS):
         EXPECTED_RANK = {}
@@ -388,60 +385,66 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
         return EXPECTED_RANK, EXPECTED_TARGET
 
     #TODO Test export_meta for FASTA of each list
-    def __test_sort_candidates(self, op, EXPECTED_RANK, targets=None):
-        TRACKS = ["A", "N"]
+    def __test_sort_candidates(self, op, group, track, EXPECTED_RANK, targets=None):
+        number_comparisons = 0
 
-        for group in ["total"]:
-            for track in EXPECTED_RANK:
-                number_comparisons = 0
+        candidates = self.g._filter(op, group=group, track=track)
+        last_seen = None
+        print(candidates) # Show some evidence the test is working...
+        for i, c in enumerate(candidates):
+            # Test value matches expecting region value
+            self.assertEqual(self.g.group_counts[group][track][c["id"]],
+                    self.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
 
-                candidates = self.g._filter(op, track=track)
-                last_seen = None
-                print(candidates) # Show some evidence the test is working...
-                for i, c in enumerate(candidates):
-                    # Test value matches expecting region value
-                    self.assertEqual(self.g.group_counts[group][track][c["id"]],
-                            self.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
-
-                    # Test region is actually correct
-                    total = 0
-                    for sample in self.sequence_data:
-                        if track == "default":
-                            for ttrack in TRACKS:
-                                total += self.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
-                        else:
-                            total += self.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
-                    self.assertEqual(self.g.group_counts[group][track][c["id"]], total)
-
-                    # Test expected rank
-                    self.assertEqual(EXPECTED_RANK[track][i], c["id"])
-
-                    # Test values are ordered
-                    if last_seen is None:
-                        last_seen = self.g.group_counts["total"][track][c["id"]]
-
-                    if op == "max":
-                        self.assertTrue(self.g.group_counts["total"][track][c["id"]] <= last_seen)
-                    elif op == "min":
-                        self.assertTrue(self.g.group_counts["total"][track][c["id"]] >= last_seen)
-                    elif op == "mean" or op == "median":
-                        self.assertTrue(targets[track], candidates._CandidateList__target)
-                        if targets is None:
-                            self.fail("Invalid test on op:mean|median using no target.")
-                        if track not in targets:
-                            self.fail("Invalid test on op:mean|median using no target.")
-
-                        delta_target = abs(self.g.group_counts["total"][track][c["id"]] - targets[track])
-                        last_delta_target = abs(last_seen - targets[track])
-                        self.assertTrue(delta_target >= last_delta_target)
+            # Test region is actually correct
+            total = 0
+            if group != "total":
+                if track == "default":
+                    for ttrack in self.TRACKS:
+                        if ttrack == "default":
+                            continue
+                        total += self.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
+                else:
+                    total += self.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
+            else:
+                for sample in self.sequence_data:
+                    if track == "default":
+                        for ttrack in self.TRACKS:
+                            if ttrack == "default":
+                                continue
+                            total += self.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
                     else:
-                        self.fail("Invalid op.")
-                    last_seen = self.g.group_counts["total"][track][c["id"]]
+                        total += self.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
+            self.assertEqual(self.g.group_counts[group][track][c["id"]], total)
 
-                    number_comparisons += 1
+            # Test expected rank
+            self.assertEqual(EXPECTED_RANK[track][i], c["id"])
 
-                self.assertEqual(self.EXPECTED_NUM_REGION, number_comparisons)
+            # Test values are ordered
+            if last_seen is None:
+                last_seen = self.g.group_counts[group][track][c["id"]]
 
+            if op == "max":
+                self.assertTrue(self.g.group_counts[group][track][c["id"]] <= last_seen)
+            elif op == "min":
+                self.assertTrue(self.g.group_counts[group][track][c["id"]] >= last_seen)
+            elif op == "mean" or op == "median":
+                self.assertEqual(targets[track], candidates._CandidateList__target)
+                if targets is None:
+                    self.fail("Invalid test on op:mean|median using no target.")
+                if track not in targets:
+                    self.fail("Invalid test on op:mean|median using no target.")
+
+                delta_target = abs(self.g.group_counts[group][track][c["id"]] - targets[track])
+                last_delta_target = abs(last_seen - targets[track])
+                self.assertTrue(delta_target >= last_delta_target)
+            else:
+                self.fail("Invalid op.")
+            last_seen = self.g.group_counts[group][track][c["id"]]
+
+            number_comparisons += 1
+
+        self.assertEqual(self.EXPECTED_NUM_REGION, number_comparisons)
 
 if __name__ == '__main__':
     unittest.main()
