@@ -62,6 +62,15 @@ class Goldilocks(object):
     def __load_chromosome(self, arr, data, track):
         return self.strategy.prepare(arr, data, track)
 
+    def __bucketize(self, scores_to_bucket):
+        buckets = {}
+        for region_id, total in enumerate(scores_to_bucket):
+            if total not in buckets:
+                buckets[total] = []
+            buckets[total].append(region_id)
+        return buckets
+
+
     def __init__(self, strategy, data, is_seq=True, length=None, stride=1, med_window=12.5):
 
         self.strategy = strategy# Search strategy
@@ -260,28 +269,13 @@ class Goldilocks(object):
                         except IndexError:
                             group_totals.append(value)
 
-                total_buckets = {}
-                for region_id, total in enumerate(totals):
-                    if total not in total_buckets:
-                        total_buckets[total] = []
-                    total_buckets[total].append(region_id)
-                self.group_buckets[count_group][track] = total_buckets
+                self.group_buckets[count_group][track] = self.__bucketize(totals)
 
-            group_total_buckets = {}
-            for region_id, total in enumerate(group_totals):
-                if total not in group_total_buckets:
-                    group_total_buckets[total] = []
-                group_total_buckets[total].append(region_id)
-            self.group_buckets[count_group]["default"] = group_total_buckets
+            self.group_buckets[count_group]["default"] = self.__bucketize(group_totals)
 
         # Populate super total-default group-track which sums the totals across
         # all tracks in all groups
-        total_buckets = {}
-        for region_id, total in enumerate(super_totals):
-            if total not in total_buckets:
-                total_buckets[total] = []
-            total_buckets[total].append(region_id)
-        self.group_buckets["total"]["default"] = total_buckets
+        self.group_buckets["total"]["default"] = self.__bucketize(super_totals)
 
         self.regions = regions
 
