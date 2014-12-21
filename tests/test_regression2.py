@@ -190,6 +190,10 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                         number_comparisons += 1
         self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
 
+#TODO Test export_meta
+#TODO Test percentile_distance around ops
+#TODO Test actual_distance around ops
+#TODO Test ops on each sample too
 class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
 
     @classmethod
@@ -310,7 +314,6 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
 # TODO CandidateLists no longer store values in group_count but do expose g   #
 #      which is set to change in future releases... Use 'our' g for tests...  #
 ###############################################################################
-    """
     def test_max_candidates(self):
         EXPECTED_RANK = {
             "A": [4,3,6,7,5,0,1,2,8],
@@ -326,7 +329,61 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
             "default": [8,5,0,1,3,2,4,7,6]
         }
         self.__test_sort_candidates("min", EXPECTED_RANK)
-    """
+
+    def test_mean_candidates(self):
+        group = "total"
+        tracks = ["A", "N", "default"]
+
+        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_non_minmax_sort("mean", group, tracks)
+        self.__test_sort_candidates("mean", EXPECTED_RANK, targets=EXPECTED_TARGET)
+
+    def test_median_candidates(self):
+
+        group = "total"
+        tracks = ["A", "N", "default"]
+
+        EXPECTED_RANK, EXPECTED_TARGET = self.__setup_non_minmax_sort("median", group, tracks)
+        self.__test_sort_candidates("median", EXPECTED_RANK, targets=EXPECTED_TARGET)
+
+    def __setup_non_minmax_sort(self, op, group, TRACKS):
+        EXPECTED_RANK = {}
+        EXPECTED_TARGET = {}
+
+        for track in TRACKS:
+            total = 0
+            count = 0
+            scores = []
+            for chrom in self.EXPECTED_REGIONS:
+                for region in self.EXPECTED_REGIONS[chrom][group]:
+                    scores.append(self.EXPECTED_REGIONS[chrom][group][region][track])
+
+            if op == "mean":
+                target = np.mean(scores)
+            elif op == "median":
+                target = np.median(scores)
+            else:
+                self.fail("Invalid op.")
+
+            self.assertEqual(self.EXPECTED_NUM_REGION, len(scores))
+
+            count = 0
+            delta_buckets = {}
+            for chrom in sorted(self.EXPECTED_REGIONS):
+                for region in sorted(self.EXPECTED_REGIONS[chrom][group]):
+                    delta_target = abs(self.EXPECTED_REGIONS[chrom][group][region][track] - target)
+                    if delta_target not in delta_buckets:
+                        delta_buckets[delta_target] = []
+                    delta_buckets[delta_target].append(count)
+                    count += 1
+            self.assertEqual(self.EXPECTED_NUM_REGION, count)
+
+            regions_sorted = []
+            for bucket in sorted(delta_buckets):
+                regions_sorted.extend(delta_buckets[bucket])
+            EXPECTED_RANK[track] = regions_sorted
+            EXPECTED_TARGET[track] = target
+
+        return EXPECTED_RANK, EXPECTED_TARGET
 
     #TODO Test export_meta for FASTA of each list
     def __test_sort_candidates(self, op, EXPECTED_RANK, targets=None):
@@ -338,6 +395,7 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
 
                 candidates = self.g._filter(op, track=track)
                 last_seen = None
+                print(candidates) # Show some evidence the test is working...
                 for i, c in enumerate(candidates):
                     # Test value matches expecting region value
                     self.assertEqual(self.g.group_counts[group][track][c["id"]],
@@ -364,16 +422,16 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
                         self.assertTrue(self.g.group_counts["total"][track][c["id"]] <= last_seen)
                     elif op == "min":
                         self.assertTrue(self.g.group_counts["total"][track][c["id"]] >= last_seen)
-                    elif op == "mean":
+                    elif op == "mean" or op == "median":
                         self.assertTrue(targets[track], candidates._CandidateList__target)
                         if targets is None:
-                            self.fail("Invalid test on op:mean using no target.")
+                            self.fail("Invalid test on op:mean|median using no target.")
                         if track not in targets:
-                            self.fail("Invalid test on op:mean using no target.")
+                            self.fail("Invalid test on op:mean|median using no target.")
 
-                        delta_mean = abs(self.g.group_counts["total"][track][c["id"]] - targets[track])
-                        last_delta_mean = abs(last_seen - targets[track])
-                        self.assertTrue(delta_mean >= last_delta_mean)
+                        delta_target = abs(self.g.group_counts["total"][track][c["id"]] - targets[track])
+                        last_delta_target = abs(last_seen - targets[track])
+                        self.assertTrue(delta_target >= last_delta_target)
                     else:
                         self.fail("Invalid op.")
                     last_seen = self.g.group_counts["total"][track][c["id"]]
@@ -382,43 +440,6 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
 
                 self.assertEqual(self.EXPECTED_NUM_REGION, number_comparisons)
 
-
-    def test_mean_candidates(self):
-        group = "total"
-        EXPECTED_RANK = {}
-        EXPECTED_TARGET = {}
-
-        for track in ["A", "N", "default"]:
-            total = 0
-            count = 0
-            for chrom in self.EXPECTED_REGIONS:
-                for region in self.EXPECTED_REGIONS[chrom][group]:
-                    total += self.EXPECTED_REGIONS[chrom][group][region][track]
-                    count += 1
-            mean = float(total)/count
-            self.assertEqual(self.EXPECTED_NUM_REGION, count)
-
-            count = 0
-            delta_mean_buckets = {}
-            for chrom in sorted(self.EXPECTED_REGIONS):
-                for region in sorted(self.EXPECTED_REGIONS[chrom][group]):
-                    delta_mean = abs(self.EXPECTED_REGIONS[chrom][group][region][track] - mean)
-                    if delta_mean not in delta_mean_buckets:
-                        delta_mean_buckets[delta_mean] = []
-                    delta_mean_buckets[delta_mean].append(count)
-                    count += 1
-            self.assertEqual(self.EXPECTED_NUM_REGION, count)
-
-            argsort_from_mean = []
-            for bucket in sorted(delta_mean_buckets):
-                argsort_from_mean.extend(delta_mean_buckets[bucket])
-            EXPECTED_RANK[track] = argsort_from_mean
-            EXPECTED_TARGET[track] = mean
-
-        self.__test_sort_candidates("mean", EXPECTED_RANK, targets=EXPECTED_TARGET)
-
-    def test_median_candidates(self):
-        pass
 
 if __name__ == '__main__':
     unittest.main()
