@@ -1,6 +1,6 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.51"
+__version__ = "0.0.52"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
@@ -10,15 +10,23 @@ class CandidateList(list):
     """A list defining its own tab-delimited table string representation when
     printed by a user. Provides other utility methods for generating other useful
     outputs including exporting sequences to FASTA."""
-    def __init__(self, g, group, track, *args):
+    def __init__(self, g, group, track, target, *args):
         self.__goldilocks = g
         if group is None:
             self.__group = "total"
+        else:
+            self.__group = group
+
         if track is None:
             self.__track = "default"
         else:
-            self.__group = group
             self.__track = track
+
+        if target is None:
+            self.__target = 0
+        else:
+            self.__target = target
+
         list.__init__(self, *args)
 
     #TODO I don't like how we're keeping a reference to the Goldilocks object
@@ -193,6 +201,7 @@ class Goldilocks(object):
 
                         self.group_counts[group][track].append(value)
 
+                        #TODO += won't work for non-countable strategies like GC ratio!
                         try:
                             self.group_counts["total"][track][region_i] += value
                         except IndexError:
@@ -214,6 +223,7 @@ class Goldilocks(object):
                 region_i += 1
 
         # Populate total group_buckets now census is complete
+        #TODO += won't work for non-countable strategies like GC ratio!
         self.group_buckets["total"] = {}
         super_totals = []
         for track in self.strategy.TRACKS:
@@ -262,13 +272,27 @@ class Goldilocks(object):
                 q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50 + upper_window)
             target = np.percentile(np.asarray(self.group_counts[group][track]), 50)
         elif func.lower() == "mean":
+            mean = np.mean(np.asarray(self.group_counts[group][track]))
             if actual:
-                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50) - lower_window
-                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50) + upper_window
+                q_low  = mean - lower_window
+                q_high = mean + upper_window
             else:
-                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50 - lower_window)
-                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50 + upper_window)
-            target = np.percentile(np.asarray(self.group_counts[group][track]), 50)
+                # A crude (but probably 'close enough') calculation for the
+                # mean's percentile standing.
+                track_scores = np.asarray(self.group_counts[group][track])
+
+                # Center scores around the mean
+                track_scores = track_scores - mean
+
+                # Divide number of scores <= 0 (the mean) by n
+                #TODO Should probably be interpolating for cases where the mean
+                #     is not contained in track_scores...?
+                mean_percentile = (len(track_scores[track_scores <= 0]) / float(len(track_scores))) * 100
+
+                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), mean_percentile - lower_window)
+                q_high = np.percentile(np.asarray(self.group_counts[group][track]), mean_percentile + upper_window)
+
+            target = mean
         elif func.lower() == "max":
             q_high = np.percentile(np.asarray(self.group_counts[group][track]), 100)
             if actual:
@@ -420,10 +444,10 @@ class Goldilocks(object):
         num_excluded = 0
         num_total = 0
 
-        filtered = CandidateList(self, group, track)
+        filtered = CandidateList(self, group, track, target)
         for region in sorted(self.regions,
-                        key=lambda x: (abs(self.group_counts[group][track][x] - target),
-                            self.group_counts[group][track][x])):
+                    key=lambda x: (abs(self.group_counts[group][track][x] - target))):
+
             num_total += 1
             if region in candidates:
                 num_selected += 1
@@ -436,7 +460,7 @@ class Goldilocks(object):
         # Return the top N elements if desired
         # TODO Report total, selected, selected-excluded and selected-filtered
         if limit:
-            filtered = CandidateList(self, group, track, filtered[0:limit])
+            filtered = CandidateList(self, group, track, target, filtered[0:limit])
 
         print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
                 (num_total, num_selected, num_excluded, limit))
