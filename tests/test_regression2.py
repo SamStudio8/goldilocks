@@ -5,6 +5,119 @@ import numpy as np
 from goldilocks.goldilocks import Goldilocks
 from goldilocks.strategies import NucleotideCounterStrategy
 
+def _setup_sort(suite, op, group, TRACKS):
+    EXPECTED_RANK = {}
+    EXPECTED_TARGET = {}
+
+    for track in TRACKS:
+        total = 0
+        count = 0
+        scores = []
+        for chrom in suite.EXPECTED_REGIONS:
+            for region in suite.EXPECTED_REGIONS[chrom][group]:
+                scores.append(suite.EXPECTED_REGIONS[chrom][group][region][track])
+
+        if op == "mean":
+            target = np.mean(scores)
+        elif op == "median":
+            target = np.median(scores)
+        elif op == "max":
+            target = max(scores)
+        elif op == "min":
+            target = min(scores)
+        else:
+            suite.fail("Invalid op.")
+
+        suite.assertEqual(suite.EXPECTED_NUM_REGION, len(scores))
+
+        count = 0
+        delta_buckets = {}
+
+        # Use sorting in a Python3 friendly fashion...
+        chr_num = [chrom for chrom in suite.EXPECTED_REGIONS if type(chrom)==int]
+        chr_str = [chrom for chrom in suite.EXPECTED_REGIONS if type(chrom)!=int]
+        chroms = sorted(chr_num)
+        chroms.extend(sorted(chr_str))
+
+        for chrom in chroms:
+            for region in sorted(suite.EXPECTED_REGIONS[chrom][group]):
+                delta_target = abs(suite.EXPECTED_REGIONS[chrom][group][region][track] - target)
+                if delta_target not in delta_buckets:
+                    delta_buckets[delta_target] = []
+                delta_buckets[delta_target].append(count)
+                count += 1
+        suite.assertEqual(suite.EXPECTED_NUM_REGION, count)
+
+        regions_sorted = []
+        for bucket in sorted(delta_buckets):
+            regions_sorted.extend(delta_buckets[bucket])
+        EXPECTED_RANK[track] = regions_sorted
+        EXPECTED_TARGET[track] = target
+
+    return EXPECTED_RANK, EXPECTED_TARGET
+
+#TODO Test export_meta for FASTA of each list
+def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
+    number_comparisons = 0
+
+    candidates = suite.g._filter(op, group=group, track=track)
+    last_seen = None
+    print(candidates) # Show some evidence the test is working...
+    for i, c in enumerate(candidates):
+        # Test value matches expecting region value
+        suite.assertEqual(suite.g.group_counts[group][track][c["id"]],
+                suite.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
+
+        # Test region is actually correct
+        total = 0
+        if group != "total":
+            if track == "default":
+                for ttrack in suite.TRACKS:
+                    if ttrack == "default":
+                        continue
+                    total += suite.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
+            else:
+                total += suite.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
+        else:
+            for sample in suite.sequence_data:
+                if track == "default":
+                    for ttrack in suite.TRACKS:
+                        if ttrack == "default":
+                            continue
+                        total += suite.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
+                else:
+                    total += suite.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
+        suite.assertEqual(suite.g.group_counts[group][track][c["id"]], total)
+
+        # Test expected rank
+        suite.assertEqual(EXPECTED_RANK[track][i], c["id"])
+
+        # Test values are ordered
+        if last_seen is None:
+            last_seen = suite.g.group_counts[group][track][c["id"]]
+
+        if op == "max":
+            suite.assertTrue(suite.g.group_counts[group][track][c["id"]] <= last_seen)
+        elif op == "min":
+            suite.assertTrue(suite.g.group_counts[group][track][c["id"]] >= last_seen)
+        elif op == "mean" or op == "median":
+            suite.assertEqual(targets[track], candidates._CandidateList__target)
+            if targets is None:
+                suite.fail("Invalid test on op:mean|median using no target.")
+            if track not in targets:
+                suite.fail("Invalid test on op:mean|median using no target.")
+
+            delta_target = abs(suite.g.group_counts[group][track][c["id"]] - targets[track])
+            last_delta_target = abs(last_seen - targets[track])
+            suite.assertTrue(delta_target >= last_delta_target)
+        else:
+            suite.fail("Invalid op.")
+        last_seen = suite.g.group_counts[group][track][c["id"]]
+
+        number_comparisons += 1
+
+    suite.assertEqual(suite.EXPECTED_NUM_REGION, number_comparisons)
+
 # TODO Test expected results for max, min, mean, median
 class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
 
@@ -196,132 +309,27 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
     def test_max_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
-                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("max", group, self.TRACKS)
-                self.__test_sort_candidates("max", group, track, EXPECTED_RANK)
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "max", group, self.TRACKS)
+                _test_sort_candidates(self, "max", group, track, EXPECTED_RANK)
 
     def test_min_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
-                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("min", group, self.TRACKS)
-                self.__test_sort_candidates("min", group, track, EXPECTED_RANK)
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "min", group, self.TRACKS)
+                _test_sort_candidates(self, "min", group, track, EXPECTED_RANK)
 
     def test_mean_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
-                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("mean", group, self.TRACKS)
-                self.__test_sort_candidates("mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "mean", group, self.TRACKS)
+                _test_sort_candidates(self, "mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
     def test_median_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
-                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("median", group, self.TRACKS)
-                self.__test_sort_candidates("median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "median", group, self.TRACKS)
+                _test_sort_candidates(self, "median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
-    def __setup_sort(self, op, group, TRACKS):
-        EXPECTED_RANK = {}
-        EXPECTED_TARGET = {}
-
-        for track in TRACKS:
-            total = 0
-            count = 0
-            scores = []
-            for chrom in self.EXPECTED_REGIONS:
-                for region in self.EXPECTED_REGIONS[chrom][group]:
-                    scores.append(self.EXPECTED_REGIONS[chrom][group][region][track])
-
-            if op == "mean":
-                target = np.mean(scores)
-            elif op == "median":
-                target = np.median(scores)
-            elif op == "max":
-                target = max(scores)
-            elif op == "min":
-                target = min(scores)
-            else:
-                self.fail("Invalid op.")
-
-            self.assertEqual(self.EXPECTED_NUM_REGION, len(scores))
-
-            count = 0
-            delta_buckets = {}
-            for chrom in sorted(self.EXPECTED_REGIONS):
-                for region in sorted(self.EXPECTED_REGIONS[chrom][group]):
-                    delta_target = abs(self.EXPECTED_REGIONS[chrom][group][region][track] - target)
-                    if delta_target not in delta_buckets:
-                        delta_buckets[delta_target] = []
-                    delta_buckets[delta_target].append(count)
-                    count += 1
-            self.assertEqual(self.EXPECTED_NUM_REGION, count)
-
-            regions_sorted = []
-            for bucket in sorted(delta_buckets):
-                regions_sorted.extend(delta_buckets[bucket])
-            EXPECTED_RANK[track] = regions_sorted
-            EXPECTED_TARGET[track] = target
-
-        return EXPECTED_RANK, EXPECTED_TARGET
-
-    #TODO Test export_meta for FASTA of each list
-    def __test_sort_candidates(self, op, group, track, EXPECTED_RANK, targets=None):
-        number_comparisons = 0
-
-        candidates = self.g._filter(op, group=group, track=track)
-        last_seen = None
-        print(candidates) # Show some evidence the test is working...
-        for i, c in enumerate(candidates):
-            # Test value matches expecting region value
-            self.assertEqual(self.g.group_counts[group][track][c["id"]],
-                    self.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
-
-            # Test region is actually correct
-            total = 0
-            if group != "total":
-                if track == "default":
-                    for ttrack in self.TRACKS:
-                        if ttrack == "default":
-                            continue
-                        total += self.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
-                else:
-                    total += self.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
-            else:
-                for sample in self.sequence_data:
-                    if track == "default":
-                        for ttrack in self.TRACKS:
-                            if ttrack == "default":
-                                continue
-                            total += self.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
-                    else:
-                        total += self.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
-            self.assertEqual(self.g.group_counts[group][track][c["id"]], total)
-
-            # Test expected rank
-            self.assertEqual(EXPECTED_RANK[track][i], c["id"])
-
-            # Test values are ordered
-            if last_seen is None:
-                last_seen = self.g.group_counts[group][track][c["id"]]
-
-            if op == "max":
-                self.assertTrue(self.g.group_counts[group][track][c["id"]] <= last_seen)
-            elif op == "min":
-                self.assertTrue(self.g.group_counts[group][track][c["id"]] >= last_seen)
-            elif op == "mean" or op == "median":
-                self.assertEqual(targets[track], candidates._CandidateList__target)
-                if targets is None:
-                    self.fail("Invalid test on op:mean|median using no target.")
-                if track not in targets:
-                    self.fail("Invalid test on op:mean|median using no target.")
-
-                delta_target = abs(self.g.group_counts[group][track][c["id"]] - targets[track])
-                last_delta_target = abs(last_seen - targets[track])
-                self.assertTrue(delta_target >= last_delta_target)
-            else:
-                self.fail("Invalid op.")
-            last_seen = self.g.group_counts[group][track][c["id"]]
-
-            number_comparisons += 1
-
-        self.assertEqual(self.EXPECTED_NUM_REGION, number_comparisons)
 
 #TODO Test export_meta
 #TODO Test percentile_distance around ops
@@ -447,132 +455,26 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
     def test_max_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
-                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("max", group, self.TRACKS)
-                self.__test_sort_candidates("max", group, track, EXPECTED_RANK)
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "max", group, self.TRACKS)
+                _test_sort_candidates(self, "max", group, track, EXPECTED_RANK)
 
     def test_min_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
-                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("min", group, self.TRACKS)
-                self.__test_sort_candidates("min", group, track, EXPECTED_RANK)
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "min", group, self.TRACKS)
+                _test_sort_candidates(self, "min", group, track, EXPECTED_RANK)
 
     def test_mean_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
-                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("mean", group, self.TRACKS)
-                self.__test_sort_candidates("mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "mean", group, self.TRACKS)
+                _test_sort_candidates(self, "mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
     def test_median_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
-                EXPECTED_RANK, EXPECTED_TARGET = self.__setup_sort("median", group, self.TRACKS)
-                self.__test_sort_candidates("median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
-
-    def __setup_sort(self, op, group, TRACKS):
-        EXPECTED_RANK = {}
-        EXPECTED_TARGET = {}
-
-        for track in TRACKS:
-            total = 0
-            count = 0
-            scores = []
-            for chrom in self.EXPECTED_REGIONS:
-                for region in self.EXPECTED_REGIONS[chrom][group]:
-                    scores.append(self.EXPECTED_REGIONS[chrom][group][region][track])
-
-            if op == "mean":
-                target = np.mean(scores)
-            elif op == "median":
-                target = np.median(scores)
-            elif op == "max":
-                target = max(scores)
-            elif op == "min":
-                target = min(scores)
-            else:
-                self.fail("Invalid op.")
-
-            self.assertEqual(self.EXPECTED_NUM_REGION, len(scores))
-
-            count = 0
-            delta_buckets = {}
-            for chrom in sorted(self.EXPECTED_REGIONS):
-                for region in sorted(self.EXPECTED_REGIONS[chrom][group]):
-                    delta_target = abs(self.EXPECTED_REGIONS[chrom][group][region][track] - target)
-                    if delta_target not in delta_buckets:
-                        delta_buckets[delta_target] = []
-                    delta_buckets[delta_target].append(count)
-                    count += 1
-            self.assertEqual(self.EXPECTED_NUM_REGION, count)
-
-            regions_sorted = []
-            for bucket in sorted(delta_buckets):
-                regions_sorted.extend(delta_buckets[bucket])
-            EXPECTED_RANK[track] = regions_sorted
-            EXPECTED_TARGET[track] = target
-
-        return EXPECTED_RANK, EXPECTED_TARGET
-
-    #TODO Test export_meta for FASTA of each list
-    def __test_sort_candidates(self, op, group, track, EXPECTED_RANK, targets=None):
-        number_comparisons = 0
-
-        candidates = self.g._filter(op, group=group, track=track)
-        last_seen = None
-        print(candidates) # Show some evidence the test is working...
-        for i, c in enumerate(candidates):
-            # Test value matches expecting region value
-            self.assertEqual(self.g.group_counts[group][track][c["id"]],
-                    self.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
-
-            # Test region is actually correct
-            total = 0
-            if group != "total":
-                if track == "default":
-                    for ttrack in self.TRACKS:
-                        if ttrack == "default":
-                            continue
-                        total += self.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
-                else:
-                    total += self.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
-            else:
-                for sample in self.sequence_data:
-                    if track == "default":
-                        for ttrack in self.TRACKS:
-                            if ttrack == "default":
-                                continue
-                            total += self.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
-                    else:
-                        total += self.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
-            self.assertEqual(self.g.group_counts[group][track][c["id"]], total)
-
-            # Test expected rank
-            self.assertEqual(EXPECTED_RANK[track][i], c["id"])
-
-            # Test values are ordered
-            if last_seen is None:
-                last_seen = self.g.group_counts[group][track][c["id"]]
-
-            if op == "max":
-                self.assertTrue(self.g.group_counts[group][track][c["id"]] <= last_seen)
-            elif op == "min":
-                self.assertTrue(self.g.group_counts[group][track][c["id"]] >= last_seen)
-            elif op == "mean" or op == "median":
-                self.assertEqual(targets[track], candidates._CandidateList__target)
-                if targets is None:
-                    self.fail("Invalid test on op:mean|median using no target.")
-                if track not in targets:
-                    self.fail("Invalid test on op:mean|median using no target.")
-
-                delta_target = abs(self.g.group_counts[group][track][c["id"]] - targets[track])
-                last_delta_target = abs(last_seen - targets[track])
-                self.assertTrue(delta_target >= last_delta_target)
-            else:
-                self.fail("Invalid op.")
-            last_seen = self.g.group_counts[group][track][c["id"]]
-
-            number_comparisons += 1
-
-        self.assertEqual(self.EXPECTED_NUM_REGION, number_comparisons)
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "median", group, self.TRACKS)
+                _test_sort_candidates(self, "median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
 if __name__ == '__main__':
     unittest.main()
