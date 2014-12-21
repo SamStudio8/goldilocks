@@ -1,7 +1,39 @@
 import numpy as np
 
+class StrategyValue(float):
+
+    def __new__(cls, value, *args, **kwargs):
+        return float.__new__(cls, value)
+
+    def __init__(self, value, k=None):
+        # Initialise default weight if one has not been provided by the user
+        # Any non-zero value is weighted 1 otherwise it is 0 so as to prevent
+        # StrategyValue's initialised to 0 from having any weighting.
+        if k is None:
+            if value == 0.0:
+                k = 0.0
+            else:
+                k = 1.0
+
+        self.k = k
+
+    def __add__(self, other):
+        #NOTE Catch AttributeError for 'other' objects that have no k
+        #     In these cases, new_k is always 1, i.e. there is no weighting
+        try:
+            current_total = self * self.k
+            other_total = other * other.k
+
+            new_k = self.k + other.k
+            new_average = (current_total + other_total) / new_k
+        except AttributeError:
+            new_k = 1
+            new_average = (float(self) + float(other)) / new_k
+
+        return StrategyValue(new_average, new_k)
+
 class BaseStrategy(object):
-    """ """
+
     def __init__(self, tracks=None, title=""):
         if tracks is None:
             tracks = ["default"]
@@ -22,7 +54,6 @@ class BaseStrategy(object):
         array) as prepared by this strategy. The simplest strategies will sum
         the binary flags over the array."""
         raise NotImplementedError("strategy.evaluate")
-
 
 class NucleotideCounterStrategy(BaseStrategy):
 
@@ -93,5 +124,4 @@ class GCRatioStrategy(BaseStrategy): # pragma: no cover
         return arr
 
     def evaluate(self, region, **kwargs):
-        return float(np.sum(region))/len(region)
-
+        return StrategyValue(float(np.sum(region))/len(region), len(region))

@@ -4,6 +4,8 @@ import numpy as np
 
 from goldilocks.goldilocks import Goldilocks
 from goldilocks.strategies import NucleotideCounterStrategy
+from goldilocks.strategies import GCRatioStrategy
+from goldilocks.strategies import StrategyValue
 
 def _setup_sort(suite, op, group, TRACKS):
     EXPECTED_RANK = {}
@@ -69,24 +71,33 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                 suite.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
 
         # Test region is actually correct
-        total = 0
+        total = StrategyValue(0)
         if group != "total":
             if track == "default":
                 for ttrack in suite.TRACKS:
-                    if ttrack == "default":
+                    if ttrack == "default" and len(suite.TRACKS) > 1:
                         continue
-                    total += suite.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
+                    region = np.zeros(suite.g.LENGTH, np.int8)
+                    prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1], ttrack)
+                    total += suite.g.strategy.evaluate(prepared, track=ttrack)
             else:
-                total += suite.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
+                region = np.zeros(suite.g.LENGTH, np.int8)
+                prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1], track)
+                total += suite.g.strategy.evaluate(prepared, track=track)
         else:
             for sample in suite.sequence_data:
                 if track == "default":
                     for ttrack in suite.TRACKS:
-                        if ttrack == "default":
+                        if ttrack == "default" and len(suite.TRACKS) > 1:
                             continue
-                        total += suite.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(ttrack)
+                        region = np.zeros(suite.g.LENGTH, np.int8)
+                        prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1], ttrack)
+                        total += suite.g.strategy.evaluate(prepared, track=ttrack)
                 else:
-                    total += suite.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1].count(track)
+                    region = np.zeros(suite.g.LENGTH, np.int8)
+                    prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1], track)
+                    total += suite.g.strategy.evaluate(prepared, track=track)
+
         suite.assertEqual(suite.g.group_counts[group][track][c["id"]], total)
 
         # Test expected rank
@@ -118,7 +129,6 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
 
     suite.assertEqual(suite.EXPECTED_NUM_REGION, number_comparisons)
 
-# TODO Test expected results for max, min, mean, median
 class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
 
     @classmethod
@@ -330,11 +340,9 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "median", group, self.TRACKS)
                 _test_sort_candidates(self, "median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
-
 #TODO Test export_meta
 #TODO Test percentile_distance around ops
 #TODO Test actual_distance around ops
-#TODO Test ops on each sample too
 class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
 
     @classmethod
@@ -415,6 +423,112 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
 
         # Each region gets an additional default counter
         cls.EXPECTED_COUNTERS_COUNT = cls.EXPECTED_REGION_COUNT + cls.EXPECTED_NUM_REGION*3
+
+    def test_group_track_counts_contents(self):
+        """Ensure group_counts held by region metadata for each group-track
+        combination (including the total-default group-track) match the
+        expected number of bases.
+        This test is somewhat cheating in that it fetches region metadata from
+        the regions dictionary."""
+
+        number_comparisons = 0
+        for group in self.g.group_counts:
+            for track in self.g.group_counts[group]:
+                for region_i, value in enumerate(self.g.group_counts[group][track]):
+                    # Get this region_i's chrom and ichr from the region data
+                    chrom = self.g.regions[region_i]["chr"]
+                    ichr = self.g.regions[region_i]["ichr"]
+                    self.assertEqual(self.EXPECTED_REGIONS[chrom][group][ichr][track], value)
+
+                    number_comparisons += 1
+                    ichr += 1
+        self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
+
+    def test_group_track_bucket_contents(self):
+        """Check that regions appear in the correct group_buckets for each
+        group-track combination (including the total-default group-track).
+        The test is somewhat of a cheat in that it assumes the contents of the
+        group_counts counters are correct as tested in
+        test_group_track_counts_contents."""
+
+        number_comparisons = 0
+        for group in self.g.group_buckets:
+            for track in self.g.group_buckets[group]:
+                for bucket in self.g.group_buckets[group][track]:
+                    for region_id in self.g.group_buckets[group][track][bucket]:
+                        self.assertEqual(self.g.group_counts[group][track][region_id], bucket)
+                        number_comparisons += 1
+        self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
+
+    def test_max_candidates(self):
+        for group in self.GROUPS:
+            for track in self.TRACKS:
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "max", group, self.TRACKS)
+                _test_sort_candidates(self, "max", group, track, EXPECTED_RANK)
+
+    def test_min_candidates(self):
+        for group in self.GROUPS:
+            for track in self.TRACKS:
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "min", group, self.TRACKS)
+                _test_sort_candidates(self, "min", group, track, EXPECTED_RANK)
+
+    def test_mean_candidates(self):
+        for group in self.GROUPS:
+            for track in self.TRACKS:
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "mean", group, self.TRACKS)
+                _test_sort_candidates(self, "mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
+
+    def test_median_candidates(self):
+        for group in self.GROUPS:
+            for track in self.TRACKS:
+                EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "median", group, self.TRACKS)
+                _test_sort_candidates(self, "median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
+
+
+class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sequence_data = {
+                "my_sample": {
+                    1: "GCGCGCGC..GCGCGC....GCGC......GC",
+                },
+                "my_other_sample": {
+                    1: "GC......GCGC....GCGCGC..GCGCGCGC",
+                }
+        }
+        cls.g = Goldilocks(GCRatioStrategy(), cls.sequence_data, length=8, stride=8)
+        cls.GROUPS = ["my_sample", "my_other_sample", "total"]
+        cls.TRACKS = ["default"]
+
+        cls.EXPECTED_REGIONS = {
+                1: {
+                    "my_sample": {
+                        0: {"default": 1.0},
+                        1: {"default": 0.75},
+                        2: {"default": 0.5},
+                        3: {"default": 0.25},
+                    },
+                    "my_other_sample": {
+                        0: {"default": 0.25},
+                        1: {"default": 0.5},
+                        2: {"default": 0.75},
+                        3: {"default": 1.0},
+                    },
+                    "total": {
+                        0: {"default": 0.625},
+                        1: {"default": 0.625},
+                        2: {"default": 0.625},
+                        3: {"default": 0.625},
+                    },
+                },
+        }
+
+        cls.EXPECTED_NUM_REGION = 4
+        cls.EXPECTED_REGION_COUNT = cls.EXPECTED_NUM_REGION*3
+
+        # Each region gets an additional default counter
+        cls.EXPECTED_COUNTERS_COUNT = cls.EXPECTED_REGION_COUNT
 
     def test_group_track_counts_contents(self):
         """Ensure group_counts held by region metadata for each group-track

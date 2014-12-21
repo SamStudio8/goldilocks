@@ -1,6 +1,6 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.52"
+__version__ = "0.0.53"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
@@ -200,18 +200,15 @@ class Goldilocks(object):
                         # Add the region id to the bucket
                         self.group_buckets[group][track][value].append(region_i)
 
-#                   if value > 0:
-                        # Append the number of variants counted in this region
-                        # for this group to a list
-                        if track not in self.group_counts["total"]:
-                            self.group_counts["total"][track] = []
                         if track not in self.group_counts[group]:
                             self.group_counts[group][track] = []
-
                         self.group_counts[group][track].append(value)
 
-                        #TODO += won't work for non-countable strategies like GC ratio!
+                        if track not in self.group_counts["total"]:
+                            self.group_counts["total"][track] = []
+
                         try:
+
                             self.group_counts["total"][track][region_i] += value
                         except IndexError:
                             self.group_counts["total"][track].append(value)
@@ -239,7 +236,6 @@ class Goldilocks(object):
                 region_i += 1
 
         # Populate total group_buckets now census is complete
-        #TODO += won't work for non-countable strategies like GC ratio!
         self.group_buckets["total"] = {}
         super_totals = []
 
