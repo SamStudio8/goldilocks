@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from goldilocks.goldilocks import Goldilocks
+from goldilocks.strategies import StrategyValue
 from goldilocks.strategies import BaseStrategy, NucleotideCounterStrategy
 
 ################################################################################
@@ -273,6 +274,103 @@ class TestGoldilocks(unittest.TestCase):
 
     def test_distance_around(self):
         pass
+
+class TestStrategyValue(unittest.TestCase):
+
+    def test_default_k_0(self):
+        number_comparisons = 0
+        values = [0, 0.1, 1.0, -1.0, 10.0, 100.0]
+        for value in values:
+            sv = StrategyValue(value)
+            self.assertEquals(value, sv)
+            self.assertEquals(0.0, sv.k)
+            number_comparisons += 1
+        self.assertEqual(len(values), number_comparisons)
+
+    def test_k(self):
+        number_comparisons = 0
+        values = [0.1, 1.0, -1.0, 10.0, 100.0, 0, 0.0]
+        weights = [0, 1, 10, 100]
+        for value in values:
+            for k in weights:
+                sv = StrategyValue(value, k)
+                self.assertEquals(value, sv)
+                self.assertEquals(k, sv.k)
+                number_comparisons += 1
+        self.assertEqual(len(values) * len(weights), number_comparisons)
+
+    def test_invalid_k(self):
+        number_comparisons = 0
+        values = [0.1, 1.0, -1.0, 10.0, 100.0, 0, 0.0]
+        weights = [-1, -1.0, -0.1, -100, -10.0, 0.1, 0.5, 0.999]
+        for value in values:
+            for k in weights:
+                self.assertRaises(ValueError, StrategyValue, value, k)
+                number_comparisons += 1
+        self.assertEqual(len(values) * len(weights), number_comparisons)
+
+    def test_weighted_add(self):
+        cascade_3 = StrategyValue(82, 180)
+        cascade_2 = StrategyValue(70.25, 120)
+        cascade_1 = StrategyValue(72.5, 60)
+        self.assertEqual(76.5, cascade_3 + cascade_2 + cascade_1)
+
+        values_a = [-10, -1, 0, 1, 3, 5, 7, 9, 15, 50, 100, 1000]
+        weights_a = [1, 3, 5, 10, 25, 100]
+        values_b = [-50, -5, 0, 0.1, 11, 22, 33, 44, 55, 1000000]
+        weights_b = [1, 2, 9, 15, 50, 1000]
+
+        number_comparisons = 0
+        for a in values_a:
+            for b in values_b:
+                for w_a in weights_a:
+                    for w_b in weights_b:
+                        sv = StrategyValue(a, w_a) + StrategyValue(b, w_b)
+                        total_a = a * w_a
+                        total_b = b * w_b
+                        expected = (total_a + total_b) / float(w_a + w_b)
+                        self.assertEqual(expected, sv)
+                        number_comparisons += 1
+        self.assertEqual(len(values_a) * len(values_b) * len(weights_a) * len(weights_b), number_comparisons)
+
+    def test_weight(self):
+        self.assertEqual(-49.9, 1 + StrategyValue(-50, 10))
+        self.assertEqual(50, StrategyValue(0, 100) + StrategyValue(100, 100))
+
+    def test_weighted_radd(self):
+        values_a = [-10, -1, 0, 1, 3, 5, 7, 9, 15, 50, 100, 1000]
+        values_b = [-50, -5, 0, 0.1, 11, 22, 33, 44, 55, 1000000]
+        weights_b = [1, 2, 9, 15, 50, 1000]
+
+        number_comparisons = 0
+        for a in values_a:
+            for b in values_b:
+                for w_b in weights_b:
+                    sv = a + StrategyValue(b, w_b)
+                    total_a = a
+                    total_b = b * w_b
+                    expected = (total_a + total_b) / float(0 + w_b)
+                    self.assertEqual(expected, sv)
+                    number_comparisons += 1
+        self.assertEqual(len(values_a) * len(values_b) * len(weights_b), number_comparisons)
+
+    def test_unweighted_add(self):
+        number_comparisons = 0
+        values_a = [-10, -1, 0, 1, 3, 5, 7, 9, 15, 50, 100, 1000]
+        values_b = [-50, -5, 0, 0.1, 11, 22, 33, 44, 55, 1000000]
+        for a in values_a:
+            for b in values_b:
+                sv = StrategyValue(a, 0) + StrategyValue(b, 0)
+                self.assertEqual(float(a) + b, float(sv))
+                number_comparisons += 1
+        self.assertEqual(len(values_a) * len(values_b), number_comparisons)
+
+    def test_non_sv_add(self):
+        pass
+
+    def test_non_sv_radd(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

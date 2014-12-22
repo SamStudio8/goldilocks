@@ -5,32 +5,58 @@ class StrategyValue(float):
     def __new__(cls, value, *args, **kwargs):
         return float.__new__(cls, value)
 
-    def __init__(self, value, k=None):
-        # Initialise default weight if one has not been provided by the user
-        # Any non-zero value is weighted 1 otherwise it is 0 so as to prevent
-        # StrategyValue's initialised to 0 from having any weighting.
-        if k is None:
-            if value == 0.0:
-                k = 0.0
-            else:
-                k = 1.0
+    def __init__(self, value, k=0, weighted=None):
+        if k != 0:
+            if k < 1:
+                raise ValueError("k must be == 0 or >= 1")
+
+        if k >= 1 and weighted == None:
+            weighted = True
 
         self.k = k
+        self.weighted = weighted
 
     def __add__(self, other):
-        #NOTE Catch AttributeError for 'other' objects that have no k
-        #     In these cases, new_k is always 1, i.e. there is no weighting
+
         try:
-            current_total = self * self.k
-            other_total = other * other.k
-
-            new_k = self.k + other.k
-            new_average = (current_total + other_total) / new_k
+            if other.weighted:
+                other_total = other * other.k
+                other_k = other.k
+                other_weighted = True
+            else:
+                other_total = float(other)
+                other_k = 0
+                other_weighted = False
         except AttributeError:
-            new_k = 1
-            new_average = (float(self) + float(other)) / new_k
+            other_total = float(other)
+            other_k = 0
+            other_weighted = False
 
-        return StrategyValue(new_average, new_k)
+        if other_total == 0:
+            other_weighted = True
+
+        if self.weighted:
+            current_total = self * self.k
+            self_k = self.k
+        else:
+            current_total = float(self)
+            if current_total == 0 and self.k == 0:
+                self.weighted = True
+            self_k = 0
+
+        new_k = self_k + other_k
+        if new_k == 0:
+            new_k = 1
+
+        new_average = (current_total + other_total) / new_k
+
+        if self.weighted and other_weighted:
+            return StrategyValue(new_average, new_k)
+        else:
+            return StrategyValue(new_average, new_k, weighted=False)
+
+    def __radd__(self, other):
+        return self.__add__(other)
 
 class BaseStrategy(object):
 
