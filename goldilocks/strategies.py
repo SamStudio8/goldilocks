@@ -13,31 +13,34 @@ class StrategyValue(float):
 
     def __add__(self, other):
 
+        # Try to check weight of other, floats and the like will
+        # raise an AttributeError
         try:
             other_k = other.k
-            if other_k >= 1:
-                other_total = other * other.k
-            else:
-                other_total = float(other)
         except AttributeError:
             other_total = float(other)
             other_k = 0
 
+        # Weight other
+        if other_k >= 1:
+            other_total = other * other.k
+        else:
+            other_total = float(other)
+
+        # Weight self
         if self.k >= 1:
             current_total = self * self.k
         else:
             current_total = float(self)
 
+        # New weight k
         new_k = self.k + other_k
         if new_k == 0:
-            new_k = 1
-
-        new_average = (current_total + other_total) / new_k
-
-        if self.k > 0 or other_k > 0:
-            return StrategyValue(new_average, new_k)
+            new_average = (current_total + other_total)
         else:
-            return StrategyValue(new_average)
+            new_average = (current_total + other_total) / new_k
+
+        return StrategyValue(new_average, new_k)
 
     def __radd__(self, other):
         return self.__add__(other)

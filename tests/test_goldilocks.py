@@ -313,7 +313,12 @@ class TestStrategyValue(unittest.TestCase):
         cascade_3 = StrategyValue(82, 180)
         cascade_2 = StrategyValue(70.25, 120)
         cascade_1 = StrategyValue(72.5, 60)
-        self.assertEqual(76.5, cascade_3 + cascade_2 + cascade_1)
+        self.assertEqual(76.5, 0 + cascade_3 + cascade_2 + cascade_1)
+        self.assertEqual(76.5, cascade_3 + cascade_2 + cascade_1 + 0)
+        self.assertEqual(76.5, 1 + cascade_3 + cascade_2 + cascade_1 + (-1))
+        self.assertEqual(76.5, StrategyValue(1) + cascade_3 + cascade_2 + cascade_1 + (-1))
+        self.assertEqual(76.5, StrategyValue(1) + cascade_3 + cascade_2 + cascade_1 + StrategyValue(-1))
+        self.assertEqual(76.5, StrategyValue(0) + cascade_3 + cascade_2 + cascade_1)
 
         values_a = [-10, -1, 0, 1, 3, 5, 7, 9, 15, 50, 100, 1000]
         weights_a = [1, 3, 5, 10, 25, 100]
@@ -336,6 +341,25 @@ class TestStrategyValue(unittest.TestCase):
     def test_weight(self):
         self.assertEqual(-49.9, 1 + StrategyValue(-50, 10))
         self.assertEqual(50, StrategyValue(0, 100) + StrategyValue(100, 100))
+
+        self.assertEqual(2, StrategyValue(1, 0) + StrategyValue(1, 0))
+        self.assertEqual(2, 1 + StrategyValue(1, 0))
+        self.assertEqual(2, StrategyValue(1, 0) + 1)
+
+        self.assertEqual(1, StrategyValue(0.5, 0) + StrategyValue(0.5, 0))
+        self.assertEqual(1, 0.5 + StrategyValue(0.5, 0))
+        self.assertEqual(1, StrategyValue(0.5, 0) + 0.5)
+
+        self.assertEqual(2, 1 + StrategyValue(1, 1))
+        self.assertEqual(2, StrategyValue(1, 1) + 1)
+        self.assertEqual(2, StrategyValue(1, 0) + StrategyValue(1, 1))
+
+        self.assertEqual(1, StrategyValue(1, 1) + StrategyValue(1, 1))
+        self.assertEqual(2, StrategyValue(2, 1) + StrategyValue(2, 1))
+
+        self.assertEqual(10.0, StrategyValue(0) + StrategyValue(10, 100))
+        self.assertEqual(10.0, 0 + StrategyValue(10, 100))
+        self.assertEqual(10.01, 1 + StrategyValue(10, 100))
 
     def test_weighted_radd(self):
         values_a = [-10, -1, 0, 1, 3, 5, 7, 9, 15, 50, 100, 1000]
