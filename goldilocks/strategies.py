@@ -5,55 +5,39 @@ class StrategyValue(float):
     def __new__(cls, value, *args, **kwargs):
         return float.__new__(cls, value)
 
-    def __init__(self, value, k=0, weighted=None):
+    def __init__(self, value, k=0):
         if k != 0:
             if k < 1:
                 raise ValueError("k must be == 0 or >= 1")
-
-        if k >= 1 and weighted == None:
-            weighted = True
-
         self.k = k
-        self.weighted = weighted
 
     def __add__(self, other):
 
         try:
-            if other.weighted:
+            other_k = other.k
+            if other_k >= 1:
                 other_total = other * other.k
-                other_k = other.k
-                other_weighted = True
             else:
                 other_total = float(other)
-                other_k = 0
-                other_weighted = False
         except AttributeError:
             other_total = float(other)
             other_k = 0
-            other_weighted = False
 
-        if other_total == 0:
-            other_weighted = True
-
-        if self.weighted:
+        if self.k >= 1:
             current_total = self * self.k
-            self_k = self.k
         else:
             current_total = float(self)
-            if current_total == 0 and self.k == 0:
-                self.weighted = True
-            self_k = 0
 
-        new_k = self_k + other_k
+        new_k = self.k + other_k
         if new_k == 0:
             new_k = 1
 
         new_average = (current_total + other_total) / new_k
 
-        if self.weighted and other_weighted:
+        if self.k > 0 or other_k > 0:
             return StrategyValue(new_average, new_k)
         else:
-            return StrategyValue(new_average, new_k, weighted=False)
+            return StrategyValue(new_average)
 
     def __radd__(self, other):
         return self.__add__(other)
