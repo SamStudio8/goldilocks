@@ -101,7 +101,7 @@ class Goldilocks(object):
         return buckets
 
 
-    def __init__(self, strategy, data, is_seq=True, length=None, stride=1, med_window=12.5):
+    def __init__(self, strategy, data, is_seq=True, length=None, stride=1):
 
         self.strategy = strategy# Search strategy
 
@@ -119,8 +119,6 @@ class Goldilocks(object):
                                 # group for calculating quantiles etc.
 
         self.regions = {}       # Stores information on each region checked
-
-        self.MED_WINDOW = med_window # Middle 25%, can also be overriden later
 
         # Read data
         self.groups = data
