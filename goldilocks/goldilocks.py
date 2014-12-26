@@ -90,63 +90,65 @@ class Goldilocks(object):
     using the given strategy and provides an interface via _filter to query results
     for given criteria and return a CandidateList.
 
-    Attributes:
-        * strategy
-            An instantiated search strategy
+    Attributes
+    ----------
 
-        * LENGTH
-            Desired region length, all censused regions will be of this many bases
+    strategy : Strategy object
+        An instantiated search strategy
 
-        * STRIDE
-            Number of bases to add to the start of the last region before the
-            start of the next. If LENGTH==STRIDE, there will be no overlap and
-            regions will begin on the base following where the previous region ended.
+    length : int
+        Desired region length, all censused regions will be of this many bases
 
-        * chr_max_len
-            Maps names of chromosomes to the largest size encountered for that
-            chromosome across all samples
+    stride : int
+        Number of bases to add to the start of the last region before the
+        start of the next. If LENGTH==STRIDE, there will be no overlap and
+        regions will begin on the base following where the previous region ended.
 
-        * groups
-            Stores a reference to the input sequence data in the format:
+    chr_max_len : dict
+        Maps names of chromosomes to the largest size encountered for that
+        chromosome across all samples
 
-                "my_sample": {
-                    "chrom_name_or_number": "SEQUENCE",
-                }
+    groups : dict{sample, dict{chromosome, sequence}}
+        Stores a reference to the input sequence data in the format: ::
 
-            A sample will typically be referred to as a group.
+            "my_sample": {
+                "chrom_name_or_number": "SEQUENCE",
+            }
 
-        * group_counts
-            Each group contains a dictionary of track-counter lists.
-            For each group-track pair, a list stores the values returned from
-            strategy evaluation for each subregion encountered by the census
-            function. Each value is appended to the relevant group-track list.
+        A sample will typically be referred to as a group.
 
-            When a strategy uses multiple groups and tracks, the region id is
-            used to update the corresponding elements in these lists.
+    group_counts : dict{sample, dict{track, value_list}}
+        Each group contains a dictionary of track-counter lists.
+        For each group-track pair, a list stores the values returned from
+        strategy evaluation for each subregion encountered by the census
+        function. Each value is appended to the relevant group-track list.
 
-            Once the census is complete the data stored in these counters are
-            used for calculating a target value such as the maximum, minimum,
-            mean or median.
+        When a strategy uses multiple groups and tracks, the region id is
+        used to update the corresponding elements in these lists.
 
-        * group_buckets
-            Each group contains a dictionary of track-bucket dicts.
-            For each group-track, a dict maps values returned from strategy evaluation
-            to a list of region ids that was evaluated to that value.
+        Once the census is complete the data stored in these counters are
+        used for calculating a target value such as the maximum, minimum,
+        mean or median.
 
-            In a very basic example where a census is conducted for 'A' nucleotides
-            over one sample (group) which features one chromosome of length 16:
+    group_buckets : dict{sample, dict{track, dict{bucket, region_id_list}}}
+        Each group contains a dictionary of track-bucket dicts.
+        For each group-track, a dict maps values returned from strategy evaluation
+        to a list of region ids that was evaluated to that value.
 
-                                    1|AAAA..AA.AA.AAAA|16
+        In a very basic example where a census is conducted for 'A' nucleotides
+        over one sample (group) which features one chromosome of length 16: ::
 
-            With a length of 4 and a stride of 4 (ie. an overlap of 0):
+            1|AAAA..AA.AA.AAAA|16
 
-                            ID - Start|SEQ |End - Value
-                            0 -     1|AAAA|4   - 4
-                            1 -     5|..AA|8   - 2
-                            2 -     9|.AA.|12  - 2
-                            3 -    13|AAAA|16  - 4
+        With a length of 4 and a stride of 4 (ie. an overlap of 0):
 
-            The buckets would be organised as thus:
+                        ID - Start|SEQ |End - Value
+                        0 -     1|AAAA|4   - 4
+                        1 -     5|..AA|8   - 2
+                        2 -     9|.AA.|12  - 2
+                        3 -    13|AAAA|16  - 4
+
+        The buckets would be organised as thus: ::
 
             \ 2 /\ 4 /
               |    |
@@ -154,32 +156,32 @@ class Goldilocks(object):
               |
               > [1,2]
 
-            Once the desired 'target' value has been calculated (max, min, mean
-            or median), these buckets are used to selected regions (by their ID)
-            that fall inside the desired distance from the target without
-            requiring iteration over all censused regions again.
+        Once the desired 'target' value has been calculated (max, min, mean
+        or median), these buckets are used to selected regions (by their ID)
+        that fall inside the desired distance from the target without
+        requiring iteration over all censused regions again.
 
-        * regions
-            A dict mapping automatically assigned ascending (from 0) integer ids
-            to censused region metadata including the following keys:
+    regions : dict{region_id, dict{metakey, metavalue}}
+        A dict mapping automatically assigned ascending (from 0) integer ids
+        to censused region metadata including the following keys:
 
-                Key          Value
-                ------------------------------------------------------------
-                chr          Chromosome on which this region appears
-                ichr         Region is the i'th to appear on this chromosome
-                pos_start    1-indexed base this region starts on (incl.)
-                pos_end      1-indexed base this region ends on (incl.)
+            Key          Value
+            ------------------------------------------------------------
+            chr          Chromosome on which this region appears
+            ichr         Region is the i'th to appear on this chromosome
+            pos_start    1-indexed base this region starts on (incl.)
+            pos_end      1-indexed base this region ends on (incl.)
 
-            The region id can be used to access the corresponding counter
-            information from the lists stored in group_counts.
+        The region id can be used to access the corresponding counter
+        information from the lists stored in group_counts.
 
-            These ids are also the same ids saved in relevant group_buckets.
+        These ids are also the same ids saved in relevant group_buckets.
 
-        * MULTI_TRACKED
-            Whether or not the selected search strategy is using more than
-            one 'default' track. If this is true, the group_counts and group_buckets
-            attributes will hold extra keys to summarise data over the various
-            samples and tracks.
+    MULTI_TRACKED : boolean
+        Whether or not the selected search strategy is using more than
+        one 'default' track. If this is true, the group_counts and group_buckets
+        attributes will hold extra keys to summarise data over the various
+        samples and tracks.
 
     """
 
