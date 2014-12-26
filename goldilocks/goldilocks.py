@@ -6,6 +6,8 @@ __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 import numpy as np
 from math import floor, ceil
 
+import os
+
 class CandidateList(list):
     """A list defining its own tab-delimited table string representation when
     printed by a user. Provides other utility methods for generating other useful
@@ -43,17 +45,45 @@ class CandidateList(list):
             ))
         return str_rep
 
-    #TODO Export to file not stdout!
-    #TODO Support groupless requests - export each group to seperate file or all together
-    def export_fasta(self, group):
+    def export_fasta(self, groups=None, filename="out", divide=False):
         """Export all regions held in the CandidateList in FASTA format."""
+
+        if not filename.endswith(".fa"):
+            filename += ".fa"
+
+        if divide:
+            handles = {}
+        else:
+            current_file = open(filename, "w")
+
         for region in self:
-            print(">%s|Chr%s|Pos%d:%d" % (group, region["chr"], region["pos_start"], region["pos_end"]))
-            print(self.__goldilocks.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1])
+            if groups is None:
+                groups = list(self.__goldilocks.groups.keys())
+            for group in groups:
+                try:
+                    self.__goldilocks.groups[group]
+                except KeyError:
+                    # Perhaps the user provided a string by mistake...
+                    group = groups
+
+                if divide:
+                    if group not in handles:
+                        handles[group] = open(group + "_" + filename, "w")
+                    current_file = handles[group]
+
+                current_file.write(">%s|Chr%s|Pos%d:%d\n" % (group, region["chr"], region["pos_start"], region["pos_end"]))
+                current_file.write(self.__goldilocks.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]+"\n")
+        if divide:
+            for h in handles:
+                handles[h].close()
+        else:
+            current_file.close()
 
 
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
+# TODO Support more interesting sequence formats? FASTQ reading?
+#      - Read FASTQ quality data but still output sequences (read both Q and SEQ)
 class Goldilocks(object):
     """Facade class responsible for conducting a census of provided genomic regions
     using the given strategy and provides an interface via _filter to query results

@@ -1,5 +1,5 @@
 from goldilocks.goldilocks import Goldilocks
-from goldilocks.strategies import VariantCounterStrategy, GCRatioStrategy, NCounterStrategy, KMerCounterStrategy
+from goldilocks.strategies import VariantCounterStrategy, GCRatioStrategy, NucleotideCounterStrategy, KMerCounterStrategy
 
 #TODO Methods may take a list of locations or may need to actually analyze
 #     a proper genomic sequence
@@ -19,7 +19,7 @@ candidates = g._filter("max", actual_distance=1)
 
 print candidates
 
-candidates.export_fasta("ONE")
+candidates.export_fasta(["ONE"])
 
 #########################################
 data = {"ONE": {1: "AAACCCGGGCCCGGGAGAAAAAAA"}}
@@ -38,9 +38,19 @@ data = {
         1: "ANAGGGANACAN",
         2: "ANAGGGANACAN",
         3: "ANANNNANACAN"
+    },
+    "TWO": {
+        1: "ANAGGGANACAN",
+        2: "ANAGGGANACAN",
+        3: "ANANNNANACAN"
     }
 }
-g = Goldilocks(NCounterStrategy(), data, stride=1, length=3)
+g = Goldilocks(NucleotideCounterStrategy(["N"]), data, stride=1, length=3)
+print g.groups
+candidates = g._filter("max")
+
+candidates.export_fasta(["ONE", "TWO"], filename="example", divide=True)
+candidates.export_fasta()
 
 candidates = g._filter("min", limit=0,
         exclusions={
