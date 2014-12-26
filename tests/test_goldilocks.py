@@ -33,7 +33,7 @@ class TestGoldilocks(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), sequence_data, length=3, stride=1)
+        cls.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), sequence_data, 3, 1)
         cls.TOTAL_REGIONS = 29
 
     def __test_simple_exclusions(self, EXCLUSIONS, limit=0):
@@ -101,7 +101,7 @@ class TestGoldilocks(unittest.TestCase):
             self.assertRaises(NotImplementedError, self.g._filter, "hoot")
 
     def test_unimplemented_strategy(self):
-        self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data)
+        self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data, 1, 1)
 
     def test_exclude_chr(self):
         EXCLUSIONS = {

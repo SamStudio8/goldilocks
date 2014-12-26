@@ -13,7 +13,7 @@ print candidates
 
 #########################################
 data = {"ONE": {1: "CCCGGGAGATTT"}}
-g = Goldilocks(GCRatioStrategy(), data, stride=1, length=3)
+g = Goldilocks(GCRatioStrategy(), data, 3, 1)
 
 candidates = g._filter("max", actual_distance=1)
 
@@ -23,7 +23,7 @@ candidates.export_fasta(["ONE"])
 
 #########################################
 data = {"ONE": {1: "AAACCCGGGCCCGGGAGAAAAAAA"}}
-g = Goldilocks(KMerCounterStrategy(["AAA", "CCC"]), data, stride=1, length=6)
+g = Goldilocks(KMerCounterStrategy(["AAA", "CCC"]), data, 6, 1)
 
 candidates = g._filter("max", actual_distance=1, track="AAA")
 
@@ -45,7 +45,7 @@ data = {
         3: "ANANNNANACAN"
     }
 }
-g = Goldilocks(NucleotideCounterStrategy(["N"]), data, stride=1, length=3)
+g = Goldilocks(NucleotideCounterStrategy(["N"]), data, 3, 1)
 print g.groups
 candidates = g._filter("max")
 
@@ -82,7 +82,7 @@ data = {
         4: "GCGCGCGCGCGCGCGCGGGGGGGGGCGCCGCCNNNNNNNNNNNNNNNNGCGCGCGCGCGCGCGNNNNNNNNN"
     }
 }
-g = Goldilocks(GCRatioStrategy(), data, stride=1, length=3)
+g = Goldilocks(GCRatioStrategy(), data, 3, 1)
 
 candidates = g._filter("min")
 
@@ -101,7 +101,7 @@ data = {
 
 # Will assume that files follow the recommendation that sequence lines
 # are no longer than 80 characters
-g = Goldilocks(GCRatioStrategy(), data, stride=500000, length=1000000)
+g = Goldilocks(GCRatioStrategy(), data, 1000000, 500000)
 
 # Avoid human leukocyte antigen loci on chr6
 candidates = g._filter("max", percentile_distance=10, limit=10, exclusions={"chr": [6]})
@@ -122,7 +122,7 @@ data = {
 
 # Will assume that files follow the recommendation that sequence lines
 # are no longer than 80 characters
-g = Goldilocks(KMerCounterStrategy(["AAA", "TTT", "GATTACA"]), data, stride=500000, length=1000000)
+g = Goldilocks(KMerCounterStrategy(["AAA", "TTT", "GATTACA"]), data, 1000000, 500000)
 candidates = g._filter("max", track="AAA")
 
 print candidates

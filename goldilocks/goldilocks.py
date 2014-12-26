@@ -194,7 +194,7 @@ class Goldilocks(object):
             buckets[total].append(region_id)
         return buckets
 
-    def __init__(self, strategy, data, is_seq=True, length=None, stride=1):
+    def __init__(self, strategy, data, length, stride, is_seq=True):
 
         self.strategy = strategy
 
@@ -239,11 +239,6 @@ class Goldilocks(object):
                 if len_current_seq > self.chr_max_len[chrom]:
                     self.chr_max_len[chrom] = len_current_seq
 
-                if self.max_chr_max_len is None:
-                    self.max_chr_max_len = len_current_seq
-                elif len_current_seq > self.max_chr_max_len:
-                    self.max_chr_max_len = len_current_seq
-
         # Initialise group-track counts and buckets
         for group in self.groups:
             self.group_buckets[group] = {}
@@ -263,15 +258,10 @@ class Goldilocks(object):
         if self.MULTI_TRACKED:
             self.group_counts["total"]["default"] = []
 
-        # Ensure stride and length are valid, is a length has not been provided
-        # use the size of the largest chromosome divided by 10.
+        # Ensure stride and length are valid (>1)
         if stride < 1:
             raise Exception("[FAIL] Stride must be at least 1 base wide.")
         self.STRIDE = stride
-
-        # TODO Somewhat arbitrary...
-        if length is None:
-            length = self.max_chr_max_len / 10
 
         if length < 1:
             raise Exception("[FAIL] Length must be at least 1 base wide.")
