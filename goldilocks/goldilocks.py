@@ -8,78 +8,6 @@ from math import floor, ceil
 
 import os
 
-class CandidateList(list):
-    """A list defining its own tab-delimited table string representation when
-    printed by a user. Provides other utility methods for generating other useful
-    outputs including exporting sequences to FASTA."""
-    def __init__(self, g, group, track, target, *args):
-        self.__goldilocks = g
-        if group is None:
-            self.__group = "total"
-        else:
-            self.__group = group
-
-        if track is None:
-            self.__track = "default"
-        else:
-            self.__track = track
-
-        if target is None:
-            self.__target = 0
-        else:
-            self.__target = target
-
-        list.__init__(self, *args)
-
-    def __repr__(self): # pragma: no cover
-        #TODO I don't like how we're keeping a reference to the Goldilocks object
-        #     here, in future I'll add a method to populate some form of DataFrame
-        #     that contains all the data required without needing Goldilocks behind.
-        str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
-        for region in self:
-            str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
-                                            self.__goldilocks.group_counts[self.__group][self.__track][region["id"]],
-                                            region["chr"],
-                                            region["pos_start"],
-                                            region["pos_end"],
-            ))
-        return str_rep
-
-    def export_fasta(self, groups=None, filename="out", divide=False):
-        """Export all regions held in the CandidateList in FASTA format."""
-
-        if not filename.endswith(".fa"):
-            filename += ".fa"
-
-        if divide:
-            handles = {}
-        else:
-            current_file = open(filename, "w")
-
-        for region in self:
-            if groups is None:
-                groups = list(self.__goldilocks.groups.keys())
-            for group in groups:
-                try:
-                    self.__goldilocks.groups[group]
-                except KeyError:
-                    # Perhaps the user provided a string by mistake...
-                    group = groups
-
-                if divide:
-                    if group not in handles:
-                        handles[group] = open(group + "_" + filename, "w")
-                    current_file = handles[group]
-
-                current_file.write(">%s|Chr%s|Pos%d:%d\n" % (group, region["chr"], region["pos_start"], region["pos_end"]))
-                current_file.write(self.__goldilocks.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]+"\n")
-        if divide:
-            for h in handles:
-                handles[h].close()
-        else:
-            current_file.close()
-
-
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
 # TODO Support more interesting sequence formats? FASTQ reading?
@@ -93,33 +21,62 @@ class Goldilocks(object):
     length and overlap and provides an interface to query results for a given
     criteria.
 
-    Attributes
+    Parameters
     ----------
     strategy : Strategy object
-        An instantiated search strategy
+        An instantiated :mod:`goldilocks.strategies` search strategy.
+
+    data : dict{str, dict{[str|int], str}}
+        Data on which to conduct a census, in a nested dict.
+
+        Top level keys represent individual samples whose value is another
+        dict using str or int chromosome keys and sequence data as values.
+        As an example: ::
+
+            "my_sample": {
+                "chrom_name_or_number": "SEQUENCE",
+            },
+            "my_other_sample": {
+                "chrom_name_or_number": "SEQUENCE",
+            }
 
     length : int
-        Desired region length, all censused regions will be of this many bases
+        Desired region length, all censused regions will be of this many bases.
+        If a region will end such that it would end beyond the end of a chromosome,
+        it will not be added to the census.
 
     stride : int
         Number of bases to add to the start of the last region before the
         start of the next. If LENGTH==STRIDE, there will be no overlap and
         regions will begin on the base following where the previous region ended.
 
-    chr_max_len : dict
+    Keyword Arguments
+    -----------------
+    is_seq : boolean, optional(default=True)
+        Whether or not the data stored in `data` is sequence data.
+        If `is_seq` is False, Goldilocks will expect a list of base positions.
+
+    Attributes
+    ----------
+    strategy : Strategy object
+        The desired :mod:`goldilocks.strategies` search strategy as selected by
+        the user upon initialisation. Goldilocks will use the exposed `prepare`
+        and `evaluate` functions of `stategy` to conduct the census.
+
+    data : dict{str, dict{[str|int], str}}
+        Data on which to conduct a census, in a nested dict.
+
+    length : int
+        Desired region length, as provided by the user.
+
+    stride : int
+        Desired region stride, as provided by the user.
+
+    chr_max_len : dict{str, int}
         Maps names of chromosomes to the largest size encountered for that
         chromosome across all samples
 
-    groups : dict{sample, dict{chromosome, sequence}}
-        Stores a reference to the input sequence data in the format: ::
-
-            "my_sample": {
-                "chrom_name_or_number": "SEQUENCE",
-            }
-
-        A sample will typically be referred to as a group.
-
-    group_counts : dict{sample, dict{track, value_list}}
+    group_counts : dict{str, dict{str, list}}
         Each group contains a dictionary of track-counter lists.
         For each group-track pair, a list stores the values returned from
         strategy evaluation for each subregion encountered by the census
@@ -132,7 +89,7 @@ class Goldilocks(object):
         used for calculating a target value such as the maximum, minimum,
         mean or median.
 
-    group_buckets : dict{sample, dict{track, dict{bucket, region_id_list}}}
+    group_buckets : dict{str, dict{str, dict{[int|float], list}}}
         Each group contains a dictionary of track-bucket dicts.
         For each group-track, a dict maps values returned from strategy evaluation
         to a list of region ids that was evaluated to that value.
@@ -163,16 +120,18 @@ class Goldilocks(object):
         that fall inside the desired distance from the target without
         requiring iteration over all censused regions again.
 
-    regions : dict{region_id, dict{metakey, metavalue}}
+    regions : dict{int, dict{str, int}}
         A dict mapping automatically assigned ascending (from 0) integer ids
         to censused region metadata including the following keys:
 
+            =========    ===============================================
             Key          Value
-            ------------------------------------------------------------
+            =========    ===============================================
             chr          Chromosome on which this region appears
             ichr         Region is the i'th to appear on this chromosome
             pos_start    1-indexed base this region starts on (incl.)
             pos_end      1-indexed base this region ends on (incl.)
+            =========    ===============================================
 
         The region id can be used to access the corresponding counter
         information from the lists stored in group_counts.
@@ -185,19 +144,16 @@ class Goldilocks(object):
         attributes will hold extra keys to summarise data over the various
         samples and tracks.
 
+    Raises
+    ------
+    ValueError
+        If either `length` or `stride` are less than one.
+
+    Notes
+    -----
+    * Setting `is_seq` to False may currently be incompatible with some strategy types.
+
     """
-
-    def __load_chromosome(self, arr, data, track):
-        return self.strategy.prepare(arr, data, track)
-
-    def __bucketize(self, scores_to_bucket):
-        buckets = {}
-        for region_id, total in enumerate(scores_to_bucket):
-            if total not in buckets:
-                buckets[total] = []
-            buckets[total].append(region_id)
-        return buckets
-
     def __init__(self, strategy, data, length, stride, is_seq=True):
 
         self.strategy = strategy
@@ -273,6 +229,17 @@ class Goldilocks(object):
 
         # Automatically conduct census
         self.census()
+
+    def __bucketize(self, scores_to_bucket):
+        buckets = {}
+        for region_id, total in enumerate(scores_to_bucket):
+            if total not in buckets:
+                buckets[total] = []
+            buckets[total].append(region_id)
+        return buckets
+
+    def __load_chromosome(self, arr, data, track):
+        return self.strategy.prepare(arr, data, track)
 
     def census(self):
         """Conduct a census of genomic subregions of a given size and overlap over
@@ -686,3 +653,76 @@ class Goldilocks(object):
                 str(region["pos_start"]),
                 str(region["pos_end"])]
             ))
+
+class CandidateList(list):
+    """A list defining its own tab-delimited table string representation when
+    printed by a user. Provides other utility methods for generating other useful
+    outputs including exporting sequences to FASTA."""
+    def __init__(self, g, group, track, target, *args):
+        self.__goldilocks = g
+        if group is None:
+            self.__group = "total"
+        else:
+            self.__group = group
+
+        if track is None:
+            self.__track = "default"
+        else:
+            self.__track = track
+
+        if target is None:
+            self.__target = 0
+        else:
+            self.__target = target
+
+        list.__init__(self, *args)
+
+    def __repr__(self): # pragma: no cover
+        #TODO I don't like how we're keeping a reference to the Goldilocks object
+        #     here, in future I'll add a method to populate some form of DataFrame
+        #     that contains all the data required without needing Goldilocks behind.
+        str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
+        for region in self:
+            str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
+                                            self.__goldilocks.group_counts[self.__group][self.__track][region["id"]],
+                                            region["chr"],
+                                            region["pos_start"],
+                                            region["pos_end"],
+            ))
+        return str_rep
+
+    def export_fasta(self, groups=None, filename="out", divide=False):
+        """Export all regions held in the CandidateList in FASTA format."""
+
+        if not filename.endswith(".fa"):
+            filename += ".fa"
+
+        if divide:
+            handles = {}
+        else:
+            current_file = open(filename, "w")
+
+        for region in self:
+            if groups is None:
+                groups = list(self.__goldilocks.groups.keys())
+            for group in groups:
+                try:
+                    self.__goldilocks.groups[group]
+                except KeyError:
+                    # Perhaps the user provided a string by mistake...
+                    group = groups
+
+                if divide:
+                    if group not in handles:
+                        handles[group] = open(group + "_" + filename, "w")
+                    current_file = handles[group]
+
+                current_file.write(">%s|Chr%s|Pos%d:%d\n" % (group, region["chr"], region["pos_start"], region["pos_end"]))
+                current_file.write(self.__goldilocks.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]+"\n")
+        if divide:
+            for h in handles:
+                handles[h].close()
+        else:
+            current_file.close()
+
+
