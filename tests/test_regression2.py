@@ -147,7 +147,7 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                     "three": ".N.",
                 }
         }
-        cls.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), cls.sequence_data, 3, 1)
+        cls.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), cls.sequence_data, length=3, stride=1)
         cls.GROUPS = ["my_sample", "my_other_sample", "total"]
         cls.TRACKS = ["A", "C", "G", "T", "N", "default"]
 
@@ -359,7 +359,7 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
                     3: "AAA.AA...",
                 }
         }
-        cls.g = Goldilocks(NucleotideCounterStrategy(["A","N"]), cls.sequence_data, 3, 3)
+        cls.g = Goldilocks(NucleotideCounterStrategy(["A","N"]), cls.sequence_data, length=3, stride=3)
         cls.GROUPS = ["my_sample", "my_other_sample", "total"]
         cls.TRACKS = ["A", "N", "default"]
 
@@ -497,7 +497,7 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
                     1: "GC......GCGC....GCGCGC..GCGCGCGC",
                 }
         }
-        cls.g = Goldilocks(GCRatioStrategy(), cls.sequence_data, 8, 8)
+        cls.g = Goldilocks(GCRatioStrategy(), cls.sequence_data, length=8, stride=8)
         cls.GROUPS = ["my_sample", "my_other_sample", "total"]
         cls.TRACKS = ["default"]
 

@@ -260,11 +260,11 @@ class Goldilocks(object):
 
         # Ensure stride and length are valid (>1)
         if stride < 1:
-            raise Exception("[FAIL] Stride must be at least 1 base wide.")
+            raise ValueError("[FAIL] Stride must be at least 1 base wide.")
         self.STRIDE = stride
 
         if length < 1:
-            raise Exception("[FAIL] Length must be at least 1 base wide.")
+            raise ValueError("[FAIL] Length must be at least 1 base wide.")
         self.LENGTH = length
 
         # Automatically conduct census

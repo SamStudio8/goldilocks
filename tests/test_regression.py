@@ -54,7 +54,7 @@ class TestGoldilocksRegression_NCounter(unittest.TestCase):
 #
     @classmethod
     def setUpClass(cls):
-        cls.g = Goldilocks(NucleotideCounterStrategy(["N"]), DATA, LENGTH, STRIDE)
+        cls.g = Goldilocks(NucleotideCounterStrategy(["N"]), DATA, length=LENGTH, stride=STRIDE)
         cls.EXPECTED_REGIONS = {
             1: {
                 0: 0,

@@ -33,7 +33,7 @@ class TestGoldilocks(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), sequence_data, 3, 1)
+        cls.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), sequence_data, length=3, stride=1)
         cls.TOTAL_REGIONS = 29
 
     def __test_simple_exclusions(self, EXCLUSIONS, limit=0):
@@ -82,15 +82,21 @@ class TestGoldilocks(unittest.TestCase):
                     else:
                         self.assertEqual(0, len(candidates))
 
+    def test_missing_length(self):
+        self.assertRaises(TypeError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, stride=1)
+
+    def test_missing_stride(self):
+        self.assertRaises(TypeError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=1)
+
     def test_invalid_stride(self):
-        self.assertRaises(Exception, Goldilocks, NucleotideCounterStrategy([]), sequence_data, stride=0)
-        self.assertRaises(Exception, Goldilocks, NucleotideCounterStrategy([]), sequence_data, stride=-1)
-        self.assertRaises(Exception, Goldilocks, NucleotideCounterStrategy([]), sequence_data, stride=-1000)
+        self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=1, stride=0)
+        self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=1, stride=-1)
+        self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=1, stride=-1000)
 
     def test_invalid_length(self):
-        self.assertRaises(Exception, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=0)
-        self.assertRaises(Exception, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1)
-        self.assertRaises(Exception, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1000)
+        self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=0, stride=1)
+        self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1, stride=1)
+        self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1000, stride=1)
 
     def test_invalid_filter_distance(self):
         for op in OPS:
@@ -101,7 +107,7 @@ class TestGoldilocks(unittest.TestCase):
             self.assertRaises(NotImplementedError, self.g._filter, "hoot")
 
     def test_unimplemented_strategy(self):
-        self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data, 1, 1)
+        self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data, length=1, stride=1)
 
     def test_exclude_chr(self):
         EXCLUSIONS = {
