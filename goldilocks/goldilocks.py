@@ -418,7 +418,7 @@ class Goldilocks(object):
         if exclusions is None or len(exclusions) == 0:
             return False
 
-        def exclude_chro(region_dict, chr_list_or_bool):
+        def __exclude_chro(region_dict, chr_list_or_bool):
             try:
                 if region_dict["chr"] in chr_list_or_bool:
                     return True
@@ -429,7 +429,7 @@ class Goldilocks(object):
                     return True
             return False
 
-        def exclude_start(region_dict, operand, position):
+        def __exclude_start(region_dict, operand, position):
             if operand < 0:
                 if region_dict["pos_start"] <= position:
                     return True
@@ -439,7 +439,7 @@ class Goldilocks(object):
 
             return False
 
-        def exclude_end(region_dict, operand, position):
+        def __exclude_end(region_dict, operand, position):
             if operand < 0:
                 if region_dict["pos_end"] <= position:
                     return True
@@ -465,15 +465,15 @@ class Goldilocks(object):
             #TODO Could probably improve with a dict of funcs...
             ret = False
             if name == "chr":
-                ret = exclude_chro(region_dict, to_apply["chr"])
+                ret = __exclude_chro(region_dict, to_apply["chr"])
             elif name == "start_lte":
-                ret = exclude_start(region_dict, -1, to_apply["start_lte"])
+                ret = __exclude_start(region_dict, -1, to_apply["start_lte"])
             elif name == "start_gte":
-                ret = exclude_start(region_dict, 1, to_apply["start_gte"])
+                ret = __exclude_start(region_dict, 1, to_apply["start_gte"])
             elif name == "end_lte":
-                ret = exclude_end(region_dict, -1, to_apply["end_lte"])
+                ret = __exclude_end(region_dict, -1, to_apply["end_lte"])
             elif name == "end_gte":
-                ret = exclude_end(region_dict, 1, to_apply["end_gte"])
+                ret = __exclude_end(region_dict, 1, to_apply["end_gte"])
             else:
                 #TODO Better handling of invalid exclusion property
                 print("[WARN] Attempted to exclude on invalid property '%s'" % name)
