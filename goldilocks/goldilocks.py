@@ -31,10 +31,10 @@ class CandidateList(list):
 
         list.__init__(self, *args)
 
-    #TODO I don't like how we're keeping a reference to the Goldilocks object
-    #     here, in future I'll add a method to populate some form of DataFrame
-    #     that contains all the data required without needing Goldilocks behind.
     def __repr__(self): # pragma: no cover
+        #TODO I don't like how we're keeping a reference to the Goldilocks object
+        #     here, in future I'll add a method to populate some form of DataFrame
+        #     that contains all the data required without needing Goldilocks behind.
         str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
         for region in self:
             str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
@@ -84,10 +84,104 @@ class CandidateList(list):
 #      - Probably more of a wrapper script than core-functionality: goldib
 # TODO Support more interesting sequence formats? FASTQ reading?
 #      - Read FASTQ quality data but still output sequences (read both Q and SEQ)
+# TODO Replace 'group' nonclementure with 'sample'?
 class Goldilocks(object):
     """Facade class responsible for conducting a census of provided genomic regions
     using the given strategy and provides an interface via _filter to query results
-    for given criteria and return a CandidateList."""
+    for given criteria and return a CandidateList.
+
+    Attributes:
+        * strategy
+            An instantiated search strategy
+
+        * LENGTH
+            Desired region length, all censused regions will be of this many bases
+
+        * STRIDE
+            Number of bases to add to the start of the last region before the
+            start of the next. If LENGTH==STRIDE, there will be no overlap and
+            regions will begin on the base following where the previous region ended.
+
+        * chr_max_len
+            Maps names of chromosomes to the largest size encountered for that
+            chromosome across all samples
+
+        * groups
+            Stores a reference to the input sequence data in the format:
+
+                "my_sample": {
+                    "chrom_name_or_number": "SEQUENCE",
+                }
+
+            A sample will typically be referred to as a group.
+
+        * group_counts
+            Each group contains a dictionary of track-counter lists.
+            For each group-track pair, a list stores the values returned from
+            strategy evaluation for each subregion encountered by the census
+            function. Each value is appended to the relevant group-track list.
+
+            When a strategy uses multiple groups and tracks, the region id is
+            used to update the corresponding elements in these lists.
+
+            Once the census is complete the data stored in these counters are
+            used for calculating a target value such as the maximum, minimum,
+            mean or median.
+
+        * group_buckets
+            Each group contains a dictionary of track-bucket dicts.
+            For each group-track, a dict maps values returned from strategy evaluation
+            to a list of region ids that was evaluated to that value.
+
+            In a very basic example where a census is conducted for 'A' nucleotides
+            over one sample (group) which features one chromosome of length 16:
+
+                                    1|AAAA..AA.AA.AAAA|16
+
+            With a length of 4 and a stride of 4 (ie. an overlap of 0):
+
+                            ID - Start|SEQ |End - Value
+                            0 -     1|AAAA|4   - 4
+                            1 -     5|..AA|8   - 2
+                            2 -     9|.AA.|12  - 2
+                            3 -    13|AAAA|16  - 4
+
+            The buckets would be organised as thus:
+
+            \ 2 /\ 4 /
+              |    |
+              |    > [0,3]
+              |
+              > [1,2]
+
+            Once the desired 'target' value has been calculated (max, min, mean
+            or median), these buckets are used to selected regions (by their ID)
+            that fall inside the desired distance from the target without
+            requiring iteration over all censused regions again.
+
+        * regions
+            A dict mapping automatically assigned ascending (from 0) integer ids
+            to censused region metadata including the following keys:
+
+                Key          Value
+                ------------------------------------------------------------
+                chr          Chromosome on which this region appears
+                ichr         Region is the i'th to appear on this chromosome
+                pos_start    1-indexed base this region starts on (incl.)
+                pos_end      1-indexed base this region ends on (incl.)
+
+            The region id can be used to access the corresponding counter
+            information from the lists stored in group_counts.
+
+            These ids are also the same ids saved in relevant group_buckets.
+
+        * MULTI_TRACKED
+            Whether or not the selected search strategy is using more than
+            one 'default' track. If this is true, the group_counts and group_buckets
+            attributes will hold extra keys to summarise data over the various
+            samples and tracks.
+
+    """
 
     def __load_chromosome(self, arr, data, track):
         return self.strategy.prepare(arr, data, track)
@@ -100,35 +194,32 @@ class Goldilocks(object):
             buckets[total].append(region_id)
         return buckets
 
-
     def __init__(self, strategy, data, is_seq=True, length=None, stride=1):
 
-        self.strategy = strategy# Search strategy
+        self.strategy = strategy
 
-        self.chr_max_len = {}   # Map chromosomes to the largest variant position
-                                # seen across all files
+        self.chr_max_len = {}
 
-        self.groups = {}        # For each group stores a dict with chromosome
-                                # numbers as keys with lists of variant positions
-                                # as values
+        self.groups = {}
 
-        self.group_buckets = {} # For each group holds keys of region sizes with
-                                # values a list of region_i of that size
+        self.group_counts = {"total": {}}
+        self.group_buckets = {"total": {}}
 
-        self.group_counts = {}  # Holds a list of each region size seen for each
-                                # group for calculating quantiles etc.
-
-        self.regions = {}       # Stores information on each region checked
+        self.regions = {}
 
         # Read data
         self.groups = data
         self.max_chr_max_len = None
 
+        # Is this strategy multi-tracked?
+        self.MULTI_TRACKED = False
+        if (len(self.strategy.TRACKS) > 1
+                or (len(self.strategy.TRACKS) == 1 and "default" not in self.strategy.TRACKS)):
+            #TODO Warn if trying to use a track named strategy
+            self.MULTI_TRACKED = True
+
         for group in self.groups:
             #TODO Catch duplicates etc..
-            self.group_buckets[group] = {}
-            self.group_counts[group] = {}
-
             for chrom in self.groups[group]:
                 # Remember to exclude 0-index
                 if is_seq:
@@ -153,8 +244,24 @@ class Goldilocks(object):
                 elif len_current_seq > self.max_chr_max_len:
                     self.max_chr_max_len = len_current_seq
 
-        self.group_buckets["total"] = {}
-        self.group_counts["total"] = {}
+        # Initialise group-track counts and buckets
+        for group in self.groups:
+            self.group_buckets[group] = {}
+            self.group_counts[group] = {}
+
+            # Initialise storage for tracks
+            for track in self.strategy.TRACKS:
+                self.group_buckets[group][track] = {}
+
+                self.group_counts[group][track] = []
+                self.group_counts["total"][track] = []
+
+            # Populate additional group counters if using more than just the 'default' track
+            if self.MULTI_TRACKED:
+                self.group_counts[group]["default"] = []
+
+        if self.MULTI_TRACKED:
+            self.group_counts["total"]["default"] = []
 
         # Ensure stride and length are valid, is a length has not been provided
         # use the size of the largest chromosome divided by 10.
@@ -169,6 +276,15 @@ class Goldilocks(object):
         if length < 1:
             raise Exception("[FAIL] Length must be at least 1 base wide.")
         self.LENGTH = length
+
+        # Automatically conduct census
+        self.census()
+
+    def census(self):
+        """Conduct a census of genomic subregions of a given size and overlap over
+        chromosomes identified in each submitted sample. For each chromosome, each
+        sample is loaded and split in to regions of the correct size and overlap
+        which are then processed and evaluated by the desired strategy."""
 
         # We'd like to try and do things in order, it can be useful to a user
         # who'd like to extract and plot the lists stored in group_counts directly.
@@ -188,9 +304,6 @@ class Goldilocks(object):
         except TypeError:
             chroms = self.chr_max_len.items()
 
-        # Conduct a census of the regions on each chromosome using the user
-        # defined length and stride. Counting the number of variants present for
-        # each group.
         regions = {}
         region_i = 0
         for chrno, size in chroms:
@@ -214,13 +327,11 @@ class Goldilocks(object):
 
                 for group in self.groups:
                     for track in self.strategy.TRACKS:
+                        # Evaluate the prepared region using the selected strategy and track
                         value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track=track)
 
                         # TODO Should we be ignoring these regions if they are empty?
                         # TODO Config option to include 0 in flter metrics
-                        if track not in self.group_buckets[group]:
-                            self.group_buckets[group][track] = {}
-
                         if value not in self.group_buckets[group][track]:
                             # Add this particular number of variants as a bucket
                             self.group_buckets[group][track][value] = []
@@ -228,29 +339,14 @@ class Goldilocks(object):
                         # Add the region id to the bucket
                         self.group_buckets[group][track][value].append(region_i)
 
-                        if track not in self.group_counts[group]:
-                            self.group_counts[group][track] = []
                         self.group_counts[group][track].append(value)
 
-                        if track not in self.group_counts["total"]:
-                            self.group_counts["total"][track] = []
-
                         try:
-
                             self.group_counts["total"][track][region_i] += value
                         except IndexError:
                             self.group_counts["total"][track].append(value)
 
-                        # Initialise better...
-                        if (len(self.strategy.TRACKS) > 1
-                                or (len(self.strategy.TRACKS) == 1
-                                    and "default" not in self.strategy.TRACKS)):
-                            #TODO Halt when creating a strategy track called default
-                            if "default" not in self.group_counts["total"]:
-                                self.group_counts["total"]["default"] = []
-                            if "default" not in self.group_counts[group]:
-                                self.group_counts[group]["default"] = []
-
+                        if self.MULTI_TRACKED:
                             try:
                                 self.group_counts["total"]["default"][region_i] += value
                             except IndexError:
