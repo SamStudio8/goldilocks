@@ -86,13 +86,15 @@ class CandidateList(list):
 #      - Read FASTQ quality data but still output sequences (read both Q and SEQ)
 # TODO Replace 'group' nonclementure with 'sample'?
 class Goldilocks(object):
-    """Facade class responsible for conducting a census of provided genomic regions
-    using the given strategy and provides an interface via _filter to query results
-    for given criteria and return a CandidateList.
+    """Facade class responsible for conducting a census of genomic regions.
+
+    Given sequence data and a :mod:`goldilocks.strategies` search strategy,
+    Goldilocks is able to census regions along multiple genomes of a desired
+    length and overlap and provides an interface to query results for a given
+    criteria.
 
     Attributes
     ----------
-
     strategy : Strategy object
         An instantiated search strategy
 
@@ -140,7 +142,7 @@ class Goldilocks(object):
 
             1|AAAA..AA.AA.AAAA|16
 
-        With a length of 4 and a stride of 4 (ie. an overlap of 0):
+        With a length of 4 and a stride of 4 (ie. an overlap of 0): ::
 
                         ID - Start|SEQ |End - Value
                         0 -     1|AAAA|4   - 4
