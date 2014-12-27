@@ -100,11 +100,11 @@ class TestGoldilocks(unittest.TestCase):
 
     def test_invalid_filter_distance(self):
         for op in OPS:
-            self.assertRaises(Exception, self.g._filter, op, actual_distance=1, percentile_distance=1)
+            self.assertRaises(ValueError, self.g._filter, op, actual_distance=1, percentile_distance=1)
 
     def test_invalid_sort_operation(self):
         for op in OPS:
-            self.assertRaises(NotImplementedError, self.g._filter, "hoot")
+            self.assertRaises(TypeError, self.g._filter, "hoot")
 
     def test_unimplemented_strategy(self):
         self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data, length=1, stride=1)

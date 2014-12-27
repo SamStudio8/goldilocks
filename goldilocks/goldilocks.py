@@ -21,6 +21,13 @@ class Goldilocks(object):
     length and overlap and provides an interface to query results for a given
     criteria.
 
+    .. note:: Deprecated in Goldilocks 0.0.53
+        `_filter` will be removed in Goldilocks 1.0.0, it is replaced by a
+        more suitably named `query`. Underscores are traditionally used for
+        private class members and `_filter` was merely named to prevent
+        confusion with the built-in `filter`.
+        Until 1.0, `_filter` will pass all of its arguments to `query`.
+
     Parameters
     ----------
     strategy : Strategy object
@@ -50,8 +57,6 @@ class Goldilocks(object):
         start of the next. If LENGTH==STRIDE, there will be no overlap and
         regions will begin on the base following where the previous region ended.
 
-    Keyword Arguments
-    -----------------
     is_seq : boolean, optional(default=True)
         Whether or not the data stored in `data` is sequence data.
         If `is_seq` is False, Goldilocks will expect a list of base positions.
@@ -99,13 +104,16 @@ class Goldilocks(object):
 
             1|AAAA..AA.AA.AAAA|16
 
-        With a length of 4 and a stride of 4 (ie. an overlap of 0): ::
+        With a length of 4 and a stride of 4 (ie. an overlap of 0):
 
-                        ID - Start|SEQ |End - Value
-                        0 -     1|AAAA|4   - 4
-                        1 -     5|..AA|8   - 2
-                        2 -     9|.AA.|12  - 2
-                        3 -    13|AAAA|16  - 4
+            ===   =====   ========  ===   =====
+            ID    Start   Sequence  End   Value
+            ===   =====   ========  ===   =====
+            0     1       AAAA      4     4
+            1     5       ..AA      8     2
+            2     9       .AA.      12    2
+            3     13      AAAA      16    4
+            ===   =====   ========  ===   =====
 
         The buckets would be organised as thus: ::
 
@@ -410,7 +418,7 @@ class Goldilocks(object):
                 q_high = np.percentile(np.asarray(self.group_counts[group][track]), 0 + upper_window)
             target = q_low
         else:
-            raise NotImplementedError("[FAIL] Function '%s' not supported" % func.lower())
+            raise TypeError("[FAIL] Invalid sorting function: '%s'" % func.lower())
         return float(q_low), float(q_high), float(target)
 
 
@@ -492,13 +500,179 @@ class Goldilocks(object):
             return True
         return False
 
-    # TODO Pretty hacky at the moment... Just trying some things out!
-    def _filter(self, func="median", track="default", actual_distance=None, percentile_distance=None,
-            direction=0, group=None, limit=0, exclusions=None, use_and=False, use_chrom=False):
+    def query(self, func="median", track="default", actual_distance=None, percentile_distance=None,
+            direction=0, group="total", limit=0, exclusions=None, use_and=False, use_chrom=False):
+        """Query the Goldilocks census to retrieve regions that meet given criteria.
+
+        Parameters
+        ----------
+        func : str, options={"max", "min", "mean", "median"}
+            Sorting function to be applied when returning regions which meet
+            the input criteria and from which to calculate distances for use
+            with `actual_distance` or `percentile_distance`.
+
+        group : str, optional(default="total")
+            Sort and filter only using values evaluated by the strategy only from
+            data in the given sample `group`. Whilst it is possible to census
+            data from many different sample groups in the same census, you may
+            only be interested in isolating regions on a particular sample.
+
+            If a `group` is not provided, by default, the "total" `group` is used,
+            which represents the aggregate (but not necessarily `sum`) of values
+            seen at a region site across all samples.
+
+            For example, the "total" `group` for a nucleotide counting strategy
+            would contain the sum of all counted bases for all genomic
+            sub-sequences that lie on the given region for each track in the
+            strategy.
+
+        track : str, optional(default="default")
+            Sort and filter only using values evaluated by the strategy only from
+            data in the given `track`. In a simple nucleotide counting example,
+            whilst you can count for multiple bases in the same census, you may
+            wish to query based on data from just 'N' bases.
+
+            If a `track` is not provided, by default, the "default" `track` is used,
+            which represents the aggregate (but not necessarily `sum`) of values
+            seen at a region site across all tracks.
+
+            For example, the "default" `track` for a nucleotide counting strategy
+            would contain the sum of all counted bases over a given region for
+            a given group.
+
+            .. note:: Note
+                The "total" `group` contains a "default" `track` which for a simple
+                nucleotide counting strategy, would hold the sum of all bases of
+                interest seen across sub-sequences on all groups, over all tracks
+                that lie on the given region.
+
+            .. note:: Note
+                Ratio-based strategies that do not simply count instances of given
+                bases or motifs etc. will be correctly weighted by use of
+                :class:`goldilocks.strategies.StrategyValue` in aggregate groups
+                and tracks. No special handling for these sort of strategies is required.
+
+                However, if you are writing a custom strategy, be sure to return
+                a :class:`goldilocks.strategies.StrategyValue` from your `evaluate`
+                method.
+
+        actual_distance, percentile_distance : float, optional(default=None)
+            Filter regions whose value as returned from the selected strategy
+            falls outside the absolute or percentile distance from the target
+            as calculated by `func`.
+
+            `actual_distance` will filter regions whose difference from the
+            target falls outside the given value.
+
+            `percentile_distance` will filter regions whose value falls outside
+            the given number of percentiles.
+
+            When used with `direction` one may decide whether to look above,
+            below or around the target.
+
+            .. note:: Note
+                `actual_distance` and `percentile_distance` are mutually exclusive.
+
+        direction : int, optional(default=0)
+            When using `actual_distance` or `percentile_distance` one may select
+            whether to select regions that appear within the desired distance
+            above, below or around the target - as calculated by `func`.
+
+            Any positive value will set the direction to "upper", any negative
+            value will set the direction to "lower". By default `direction` is 0,
+            which will search around the target.
+
+            For example, to find the 25% of values that appear above the mean, set
+            `percentile_distance` to 25, `func` to "mean" and `direction` to one.
+            To find the 10% of values below the median, set `percentile_distance`
+            to 10, `func` to "median" and `direction` to -1.
+
+            To find regions within plus/minus 5.0 of the mean, set `func` to mean and
+            `direction` to 0 and `actual_distance` to 10.
+
+            .. note:: Note
+                If `func` is max or min, the direction will automatically
+                be changed to +1 or -1, respectively - as it doesn't make sense to
+                search "around" the maximum or minimum value.
+
+
+        limit : int, optional(default=0)
+            Maximum number of regions to return in the CandidateList.
+            By default, all regions that meet the specified criteria will be returned.
+
+        exclusions : [dict{str, dict{str, [int|str|list]}} | dict{[int|str], dict{str, [int|str|list|boolean]}}], optional(default=None)
+            A dict defining criteria with which to filter regions.
+
+            The dict may be specified in two ways: keys can either be
+            exclusion properties as found in the table below or match the names
+            or numbers of chromosomes provided to the constructor of Goldilocks
+            with dict values that specify exclusion properties to values.
+
+            The former method will apply specified exclusions to all regions
+            whereas the latter when `use_chrom` is set to True will apply
+            exclusions to particular chromosomes.
+
+            Currently the following excluding criteria are available:
+
+            =========   ==============================================================
+            Criterion   Purpose
+            =========   ==============================================================
+            start_lte   Region starts on 1-indexed base less than or equal to value
+            start_gte   Region starts on 1-indexed base greater than or equal to value
+            end_lte     Region ends on 1-indexed base less than or equal to value
+            end_gte     Region ends on 1-indexed base greater than or equal to value
+            chr         Region appears on chr in given list
+            =========   ==============================================================
+
+            Further information and examples on using these effectively can be
+            found in the documentation on sorting and filtering.
+
+        use_and : boolean, optional(default=False)
+            A flag to indicate whether a region must meet all exclusion criteria
+            defined in `exclusions` to be excluded. By default this is False and
+            a region will be excluded if it meets one or more exclusion criteria.
+
+        use_chrom : boolean, optional(default=False)
+            A flag to indicate that the keys of the `exclusions` dict are chromosome
+            identifiers and exclusion criteria within should be applied to particular
+            chromosomes. By default it is assumed that keys in the `exclusions`
+            dict are to be applied to all regions, regardless of the chromosome
+            on which they appear.
+
+            .. note:: Note
+                `use_chrom` can be used with `use_and`, all criteria in each block
+                of chromosome specific exclusions must be met for a region on that
+                chromosome to be excluded.
+
+            .. note:: Note
+                Goldilocks will print a warning to stdout if it encounters the name of a
+                chromosome in the `exclusions` dict without `use_chrom` being set
+                to true, but will continue to complete the query anyway.
+
+        Returns
+        -------
+        :class:`goldilocks.goldilocks.CandidateList`
+            A CandidateList containing ordered dicts of region metadata that
+            meet the criteria (were not excluded) and sorted descending from
+            absolute distance to the target as calculated by `func`.
+
+        Raises
+        ------
+        TypeError
+            When attempting to sort by an invalid `func`.
+        ValueError
+            If attempting to filter both by `actual_distance` and `percentile_distance`.
+
+        """
+        #TODO Raise error when setting use_and or use_chrom without exclusions?
+        #TODO Raise error when using direction without using a distance method?
+        #     Probably more suitable to just raise a warning?
+
         distance = None
         actual = False
+
         if actual_distance is not None and percentile_distance is not None:
-            raise Exception("[FAIL] Cannot filter by both actual_distance and percentile_difference. Select one.")
+            raise ValueError("[FAIL] Cannot filter by both actual_distance and percentile_difference. Select one.")
 
         if actual_distance is not None:
             distance = actual_distance
@@ -506,9 +680,6 @@ class Goldilocks(object):
 
         if percentile_distance is not None:
             distance = percentile_distance
-
-        if group is None:
-            group = "total"
 
         candidates = []
         if distance is not None:
@@ -518,6 +689,7 @@ class Goldilocks(object):
                 upper_window = float(distance) / 2
                 lower_window = float(distance) / 2
 
+            #TODO ValueError when trying to use + direction on max and - direction on min?
             if direction > 0:
                 upper_window = upper_window * 2
                 lower_window = 0.0
@@ -568,6 +740,20 @@ class Goldilocks(object):
                 (num_total, num_selected, num_excluded, limit))
 
         return filtered
+
+    #TODO Remove defaults
+    def _filter(self, func="median", track="default", actual_distance=None, percentile_distance=None,
+            direction=0, group="total", limit=0, exclusions=None, use_and=False, use_chrom=False): # pragma: no cover
+        return self.query(func=func,
+                          track=track,
+                          actual_distance=actual_distance,
+                          percentile_distance=percentile_distance,
+                          direction=direction,
+                          group=group,
+                          limit=limit,
+                          exclusions=exclusions,
+                          use_and=use_and,
+                          use_chrom=use_chrom)
 
     def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""
