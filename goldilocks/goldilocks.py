@@ -556,7 +556,8 @@ class Goldilocks(object):
                 a :class:`goldilocks.strategies.StrategyValue` from your `evaluate`
                 method.
 
-        actual_distance, percentile_distance : float, optional(default=None)
+        actual_distance : float, optional(default=None)
+        percentile_distance : float, optional(default=None)
             Filter regions whose value as returned from the selected strategy
             falls outside the absolute or percentile distance from the target
             as calculated by `func`.
@@ -594,7 +595,6 @@ class Goldilocks(object):
                 If `func` is max or min, the direction will automatically
                 be changed to +1 or -1, respectively - as it doesn't make sense to
                 search "around" the maximum or minimum value.
-
 
         limit : int, optional(default=0)
             Maximum number of regions to return in the CandidateList.
