@@ -510,6 +510,7 @@ class Goldilocks(object):
             Sorting function to be applied when returning regions which meet
             the input criteria and from which to calculate distances for use
             with `actual_distance` or `percentile_distance`.
+
         group : str, optional(default="total")
             Sort and filter only using values evaluated by the strategy only from
             data in the given sample `group`. Whilst it is possible to census
@@ -524,6 +525,7 @@ class Goldilocks(object):
             would contain the sum of all counted bases for all genomic
             sub-sequences that lie on the given region for each track in the
             strategy.
+
         track : str, optional(default="default")
             Sort and filter only using values evaluated by the strategy only from
             data in the given `track`. In a simple nucleotide counting example,
@@ -553,6 +555,7 @@ class Goldilocks(object):
                 However, if you are writing a custom strategy, be sure to return
                 a :class:`goldilocks.strategies.StrategyValue` from your `evaluate`
                 method.
+
         actual_distance : float, optional(default=None)
         percentile_distance : float, optional(default=None)
             Filter regions whose value as returned from the selected strategy
@@ -570,6 +573,7 @@ class Goldilocks(object):
 
             .. note:: Note
                 `actual_distance` and `percentile_distance` are mutually exclusive.
+
         direction : int, optional(default=0)
             When using `actual_distance` or `percentile_distance` one may select
             whether to select regions that appear within the desired distance
@@ -591,9 +595,11 @@ class Goldilocks(object):
                 If `func` is max or min, the direction will automatically
                 be changed to +1 or -1, respectively - as it doesn't make sense to
                 search "around" the maximum or minimum value.
+
         limit : int, optional(default=0)
             Maximum number of regions to return in the CandidateList.
             By default, all regions that meet the specified criteria will be returned.
+
         exclusions : [dict{str, dict{str, [int|str|list]}} | dict{[int|str], dict{str, [int|str|list|boolean]}}], optional(default=None)
             A dict defining criteria with which to filter regions.
 
@@ -620,10 +626,12 @@ class Goldilocks(object):
 
             Further information and examples on using these effectively can be
             found in the documentation on sorting and filtering.
+
         use_and : boolean, optional(default=False)
             A flag to indicate whether a region must meet all exclusion criteria
             defined in `exclusions` to be excluded. By default this is False and
             a region will be excluded if it meets one or more exclusion criteria.
+
         use_chrom : boolean, optional(default=False)
             A flag to indicate that the keys of the `exclusions` dict are chromosome
             identifiers and exclusion criteria within should be applied to particular
