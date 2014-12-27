@@ -21,8 +21,8 @@ class Goldilocks(object):
     length and overlap and provides an interface to query results for a given
     criteria.
 
-    .. note:: Deprecated in Goldilocks 0.0.53
-        `_filter` will be removed in Goldilocks 1.0.0, it is replaced by a
+    .. deprecated:: 0.0.53
+        `_filter` will be removed in Goldilocks 1.0.0, it is replaced by the
         more suitably named `query`. Underscores are traditionally used for
         private class members and `_filter` was merely named to prevent
         confusion with the built-in `filter`.
@@ -540,13 +540,13 @@ class Goldilocks(object):
             would contain the sum of all counted bases over a given region for
             a given group.
 
-            .. note:: Note
+            .. note::
                 The "total" `group` contains a "default" `track` which for a simple
                 nucleotide counting strategy, would hold the sum of all bases of
                 interest seen across sub-sequences on all groups, over all tracks
                 that lie on the given region.
 
-            .. note:: Note
+            .. note::
                 Ratio-based strategies that do not simply count instances of given
                 bases or motifs etc. will be correctly weighted by use of
                 :class:`goldilocks.strategies.StrategyValue` in aggregate groups
@@ -571,7 +571,7 @@ class Goldilocks(object):
             When used with `direction` one may decide whether to look above,
             below or around the target.
 
-            .. note:: Note
+            .. note::
                 `actual_distance` and `percentile_distance` are mutually exclusive.
 
         direction : int, optional(default=0)
@@ -591,7 +591,7 @@ class Goldilocks(object):
             To find regions within plus/minus 5.0 of the mean, set `func` to mean and
             `direction` to 0 and `actual_distance` to 10.
 
-            .. note:: Note
+            .. note::
                 If `func` is max or min, the direction will automatically
                 be changed to +1 or -1, respectively - as it doesn't make sense to
                 search "around" the maximum or minimum value.
@@ -639,12 +639,12 @@ class Goldilocks(object):
             dict are to be applied to all regions, regardless of the chromosome
             on which they appear.
 
-            .. note:: Note
+            .. note::
                 `use_chrom` can be used with `use_and`, all criteria in each block
                 of chromosome specific exclusions must be met for a region on that
                 chromosome to be excluded.
 
-            .. note:: Note
+            .. note::
                 Goldilocks will print a warning to stdout if it encounters the name of a
                 chromosome in the `exclusions` dict without `use_chrom` being set
                 to true, but will continue to complete the query anyway.
