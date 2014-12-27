@@ -21,7 +21,7 @@ class Goldilocks(object):
     length and overlap and provides an interface to query results for a given
     criteria.
 
-    .. rubric:: Deprecated in 0.0.53
+    .. admonition:: Deprecated in 0.0.53
         `_filter` will be removed in Goldilocks 1.0.0, it is replaced by the
         more suitably named `query`. Underscores are traditionally used for
         private class members and `_filter` was merely named to prevent
@@ -651,7 +651,7 @@ class Goldilocks(object):
 
         Returns
         -------
-        :class:`goldilocks.goldilocks.CandidateList`
+        CandidateList object : :class:`goldilocks.goldilocks.CandidateList`
             A CandidateList containing ordered dicts of region metadata that
             meet the criteria (were not excluded) and sorted descending from
             absolute distance to the target as calculated by `func`.
