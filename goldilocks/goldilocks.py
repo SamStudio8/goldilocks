@@ -82,7 +82,7 @@ class Goldilocks(object):
         Maps names of chromosomes to the largest size encountered for that
         chromosome across all samples
 
-    group_counts : dict{str, dict{str, list}}
+    group_counts : dict{str, dict{str, list{int}}}
         Each group contains a dictionary of track-counter lists.
         For each group-track pair, a list stores the values returned from
         strategy evaluation for each subregion encountered by the census
@@ -95,7 +95,7 @@ class Goldilocks(object):
         used for calculating a target value such as the maximum, minimum,
         mean or median.
 
-    group_buckets : dict{str, dict{str, dict{[int|float], list}}}
+    group_buckets : dict{str, dict{str, dict{[int|float], list{int}}}}
         Each group contains a dictionary of track-bucket dicts.
         For each group-track, a dict maps values returned from strategy evaluation
         to a list of region ids that was evaluated to that value.
