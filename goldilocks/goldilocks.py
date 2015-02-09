@@ -844,7 +844,7 @@ class Goldilocks(object):
                 for x in self.group_buckets[group][track]:
                     bin_contents[find_bin(x, bins)] = len(self.group_buckets[group][track][x])
             else:
-                print "Unbinned profile not yet supported."
+                print("Unbinned profile not yet supported.")
                 import sys
                 sys.exit(1)
 
@@ -868,7 +868,7 @@ class Goldilocks(object):
                     for x in [self.group_counts[group][track][x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]:
                         bin_contents[find_bin(x, bins)] += 1
                 else:
-                    print "Unbinned profile not yet supported."
+                    print("Unbinned profile not yet supported.")
                     import sys
                     sys.exit(1)
 
