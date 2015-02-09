@@ -815,6 +815,91 @@ class Goldilocks(object):
         else:
             plt.show()
 
+    # TODO Copies a lot of plot's functionality
+    # TODO Need to alter x ticks to show bin names
+    def profile(self, group=None, track="default", ylim=None, save_to=None, annotation=None, bins=None): # pragma: no cover
+        """Represent profiled regions in a plot using matplotlib."""
+
+        import matplotlib.pyplot as plt
+
+        #TODO Check this!
+        def find_bin(x, bins):
+            for i, b in enumerate(sorted(bins)):
+                if x < b:
+                    if i > 0:
+                        return i - 1
+                    else:
+                        # first bin
+                        return 0
+            # else last bin
+            return len(bins) - 1
+
+        if group is None:
+            group = "total"
+            fig = plt.subplot(1,1,1)
+
+            if bins:
+                num_bins = len(bins)
+                bin_contents = np.zeros(len(bins))
+                for x in self.group_buckets[group][track]:
+                    bin_contents[find_bin(x, bins)] = len(self.group_buckets[group][track][x])
+            else:
+                print "Unbinned profile not yet supported."
+                import sys
+                sys.exit(1)
+
+            max_val = max(bin_contents)
+            plt.bar(range(0, num_bins), bin_contents)
+            plt.axis([0, num_bins, 0, max_val])
+            plt.ylabel("Region Count")
+
+
+            if ylim:
+                plt.ylim(ylim)
+        else:
+            fig, ax = plt.subplots(len(self.groups[group]),1, sharex=True, squeeze=False)
+
+            for i, chrom in enumerate(self.groups[group]):
+
+                if bins:
+                    num_bins = len(bins)
+                    bin_contents = np.zeros(len(bins))
+
+                    for x in [self.group_counts[group][track][x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]:
+                        bin_contents[find_bin(x, bins)] += 1
+                else:
+                    print "Unbinned profile not yet supported."
+                    import sys
+                    sys.exit(1)
+
+                ax[i,0].plot(range(0, num_bins), bin_contents, label="g"+str(chrom))
+                ax[i,0].text(
+                    1.05, 0.5, ("Chr#"+str(chrom)), transform=ax[i,0].transAxes,
+                    rotation=270, fontsize=12, va='top',
+                    horizontalalignment='center', verticalalignment='center'
+                )
+
+                if ylim:
+                    ax[i,0].set_ylim(ylim)
+
+            # Y axis label
+            fig.text(
+                .05, 0.5, "Region Count", rotation='vertical',
+                horizontalalignment='center', verticalalignment='center'
+            )
+
+        plt.xlabel("Bin")
+        plt.suptitle('%s-%s' % (group, track), fontsize=16)
+
+        if annotation:
+            plt.annotate(annotation, xy=(.5, 1.03),  xycoords='axes fraction', ha='center', va='center', fontsize=11)
+
+        if save_to:
+            plt.savefig(save_to)
+            plt.close()
+        else:
+            plt.show()
+
     #TODO Export to file not stdout!
     #TODO Groupless output
     def export_meta(self, group, sep=","):
