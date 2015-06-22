@@ -88,11 +88,31 @@ candidates = g._filter("min")
 
 print candidates
 g.plot("ONE")
+g.profile("ONE", bins=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+
+#########################################
+data = {
+    "ONE": {
+        1: "GGCCNNNNNNNNNNNNNNNNNNNNNNNNGGGNNNNNNNNNCCCNNNNNNNNNNCCGGSSCCNSNDNSSSCCC"*1500,
+        2: "ANAGGCGCGCNANAGGGANACGCGGGGCCCGACANANAGGGANACANANAGGGACGCGCGCGCGCCCGACAN"*1500,
+        3: "ANAGGCGCGCNANAGGGANACGCGGGGCCCGACANANAGGGANACANANAGGGACGCGCGCGCGCCCGACAN"*1500,
+        4: "GCGCGCGCGCGCGCGCGGGGGGGGGCGCCGCCNNNNNNNNNNNNNNNNGCGCGCGCGCGCGCGNNNNNNNNN"*1500
+    }
+}
+g = Goldilocks(GCRatioStrategy(), data, 100, 10)
+
+candidates = g._filter("min")
+
+print candidates
+g.plot("ONE")
+g.profile("ONE", bins=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+g.profile(bins=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+import sys
+sys.exit()
 
 #########################################
 from Mountain.IO import fastareaders
 f = fastareaders.FASTA_Library("/store/sanger/ref/hs37d5.fa1")
-f.get_next()
 data = {
     "ONE": {
         1: f.get_next().seq,
@@ -109,6 +129,7 @@ candidates = g._filter("max", percentile_distance=10, limit=10, exclusions={"chr
 print candidates
 
 g.plot()
+g.profile(bins=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
 
 #########################################
 from Mountain.IO import fastareaders

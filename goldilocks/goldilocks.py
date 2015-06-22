@@ -963,6 +963,20 @@ class CandidateList(list):
             ))
         return str_rep
 
+    def _print(self, group): # pragma: no cover
+        #TODO I don't like how we're keeping a reference to the Goldilocks object
+        #     here, in future I'll add a method to populate some form of DataFrame
+        #     that contains all the data required without needing Goldilocks behind.
+        str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
+        for region in self:
+            str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
+                                            self.__goldilocks.group_counts[group][self.__track][region["id"]],
+                                            region["chr"],
+                                            region["pos_start"],
+                                            region["pos_end"],
+            ))
+        return str_rep
+
     def export_fasta(self, groups=None, filename="out", divide=False):
         """Export all regions held in the CandidateList in FASTA format."""
 
