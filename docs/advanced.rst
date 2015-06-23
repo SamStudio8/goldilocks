@@ -98,6 +98,17 @@ You can filter regions that appear on particular chromosomes completely by provi
                                 "chr": ["X", 6],
                                 })
 
+Value of another count group
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When using groups, one may wish to exclude results where the value of another group
+is less than the one selected by the query. For example, for each region the following
+would result in regions where the count for `my-other-sample` is greater than `my-sample`: ::
+
+    g._filter("min", group="my-sample", exclusions={
+                                "region_group_lte": "my-other-sample",
+                                })
+
 Multiple Criteria
 ~~~~~~~~~~~~~~~~~
 
