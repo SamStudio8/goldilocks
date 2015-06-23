@@ -234,7 +234,7 @@ class TestGoldilocksRegression_NCounter(unittest.TestCase):
 
     def test_sort_min(self):
         number_comparisons = 0
-        regions_min = self.g._filter("min")
+        regions_min = self.g._filter("min").candidates
 
         # Merge sort required for stability
         EXPECTED_MIN_REGION_ORDER = np.argsort(self.EXPECTED_REGION_TOTALS, kind="mergesort")

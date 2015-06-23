@@ -31,10 +31,9 @@ OPS = ["median", "max", "min", "mean"]
 
 class TestGoldilocks(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), sequence_data, length=3, stride=1)
-        cls.TOTAL_REGIONS = 29
+    def setUp(self):
+        self.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), sequence_data, length=3, stride=1)
+        self.TOTAL_REGIONS = 29
 
     def __test_simple_exclusions(self, EXCLUSIONS, limit=0):
 
@@ -51,11 +50,11 @@ class TestGoldilocks(unittest.TestCase):
                 if limit > 0:
                     candidates = self.g._filter(op, exclusions={
                         exclusion["filter"]: exclusion["value"]
-                    }, limit=limit)
+                    }, limit=limit).candidates
                 else:
                     candidates = self.g._filter(op, exclusions={
                         exclusion["filter"]: exclusion["value"]
-                    })
+                    }).candidates
 
                 for c in candidates:
                     cproperty = FILTER_TO_PROPERTY[exclusion["filter"]][0]
@@ -225,7 +224,7 @@ class TestGoldilocks(unittest.TestCase):
             candidates = self.g._filter(op, exclusions={
                                                         "start_gte": 5,
                                                         "end_lte": 9,
-                                                        }, use_and=True)
+                                                        }, use_and=True).candidates
             for c in candidates:
                 self.assertFalse(c["pos_start"] >= 5 and c["pos_end"] <= 9)
 
@@ -237,7 +236,7 @@ class TestGoldilocks(unittest.TestCase):
                                                         "start_gte": 5,
                                                         "end_lte": 9,
                                                         "chr": ["X"],
-                                                        }, use_and=True)
+                                                        }, use_and=True).candidates
             non_x_count = 0
             for c in candidates:
                 if c["chr"] == "X":
@@ -263,13 +262,13 @@ class TestGoldilocks(unittest.TestCase):
 
     def test_limit(self):
         for op in OPS:
-            candidates = self.g._filter(op, limit=1)
+            candidates = self.g.query(op, limit=1).candidates
             self.assertTrue(len(candidates) == 1)
 
-            candidates = self.g._filter(op, limit=10)
+            candidates = self.g.query(op, limit=10).candidates
             self.assertTrue(len(candidates) == 10)
 
-            candidates = self.g._filter(op, limit=100)
+            candidates = self.g.query(op, limit=100).candidates
             self.assertTrue(len(candidates) == self.TOTAL_REGIONS)
 
     def test_distance_upper(self):

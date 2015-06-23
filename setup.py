@@ -19,7 +19,7 @@ test_requirements = [
 
 setuptools.setup(
     name="goldilocks",
-    version="0.0.53",
+    version="0.0.6",
     url="https://github.com/samstudio8/goldilocks",
 
     description="Locating genomic regions that are \"just right\".",

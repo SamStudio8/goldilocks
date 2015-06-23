@@ -1,11 +1,12 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.53"
+__version__ = "0.0.6"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
 from math import floor, ceil
 
+import copy
 import os
 
 # TODO Generate database of regions with stats... SQL/SQLite
@@ -147,6 +148,10 @@ class Goldilocks(object):
 
         These ids are also the same ids saved in relevant group_buckets.
 
+    sorted_regions : list{int}
+        A list of region ids representing the result of a sorting operation
+        after a call to `query`.
+
     MULTI_TRACKED : boolean
         Whether or not the selected search strategy is using more than
         one 'default' track. If this is true, the group_counts and group_buckets
@@ -175,6 +180,8 @@ class Goldilocks(object):
         self.group_buckets = {"total": {}}
 
         self.regions = {}
+        self.sorted_regions = []
+        self.target = None
 
         # Read data
         self.groups = data
@@ -289,6 +296,7 @@ class Goldilocks(object):
             for i, region_s in enumerate(range(1, size+1-self.LENGTH+1, self.STRIDE)):
                 region_e = region_s + self.LENGTH - 1
                 regions[region_i] = {
+                    "id": region_i,
                     "ichr": i,
                     "chr": chrno,
                     "pos_start": region_s,
@@ -423,7 +431,7 @@ class Goldilocks(object):
         return float(q_low), float(q_high), float(target)
 
 
-    def __check_exclusions(self, exclusions, region_dict, use_and=False, use_chrom=False):
+    def __check_exclusions(self, exclusions, region_dict, group, track, use_and=False, use_chrom=False):
         if exclusions is None or len(exclusions) == 0:
             return False
 
@@ -434,28 +442,30 @@ class Goldilocks(object):
             except TypeError:
                 # It's probably a bool not a list (it could be an int if users
                 # have failed to read the documentation...)
-                if chr_list_or_bool is True:
+                if chr_list_or_bool:
                     return True
             return False
 
         def __exclude_start(region_dict, operand, position):
             if operand < 0:
-                if region_dict["pos_start"] <= position:
-                    return True
+                return region_dict["pos_start"] <= position
             elif operand > 0:
-                if region_dict["pos_start"] >= position:
-                    return True
-
+                return region_dict["pos_start"] >= position
             return False
 
         def __exclude_end(region_dict, operand, position):
             if operand < 0:
-                if region_dict["pos_end"] <= position:
-                    return True
+                return region_dict["pos_end"] <= position
             elif operand > 0:
-                if region_dict["pos_end"] >= position:
-                    return True
+                return region_dict["pos_end"] >= position
+            return False
 
+        #TODO A bit pointless
+        def __exclude_val(threshold, operand, other_val):
+            if operand < 0:
+                return other_val <= threshold
+            elif operand > 0:
+                return other_val >= threshold
             return False
 
         # Chrom specific exclusions override overall (might be unexpected)
@@ -483,17 +493,22 @@ class Goldilocks(object):
                 ret = __exclude_end(region_dict, -1, to_apply["end_lte"])
             elif name == "end_gte":
                 ret = __exclude_end(region_dict, 1, to_apply["end_gte"])
+            elif name == "region_group_lte":
+                ret = __exclude_val(self.group_counts[group][track][region_dict["id"]], -1, self.group_counts[to_apply["region_group_lte"]][track][region_dict["id"]])
+            elif name == "region_group_gte":
+                ret = __exclude_val(self.group_counts[group][track][region_dict["id"]], 1, self.group_counts[to_apply["region_group_lte"]][track][region_dict["id"]])
+
             else:
                 #TODO Better handling of invalid exclusion property
                 print("[WARN] Attempted to exclude on invalid property '%s'" % name)
 
             if use_and:
                 # Require all exclusions to be true...
-                if ret is False:
+                if not ret:
                     return False
             else:
                 # If we're not waiting on all conditions, we can exclude on the first
-                if ret is True:
+                if ret:
                     return True
 
         if use_and:
@@ -598,7 +613,7 @@ class Goldilocks(object):
                 search "around" the maximum or minimum value.
 
         limit : int, optional(default=0)
-            Maximum number of regions to return in the CandidateList.
+            Maximum number of regions to return.
             By default, all regions that meet the specified criteria will be returned.
 
         exclusions : [dict{str, dict{str, [int|str|list]}} | dict{[int|str], dict{str, [int|str|list|boolean]}}], optional(default=None)
@@ -652,10 +667,11 @@ class Goldilocks(object):
 
         Returns
         -------
-        CandidateList object : :class:`goldilocks.goldilocks.CandidateList`
-            A CandidateList containing ordered dicts of region metadata that
-            meet the criteria (were not excluded) and sorted descending from
-            absolute distance to the target as calculated by `func`.
+        Goldilocks object : :class:`goldilocks.goldilocks.Goldilocks`
+            Returns a new instance of Goldilocks where the regions are filtered
+            and the result of any sorting operation is stored in sorted_regions.
+            Sorts are descending from absolute distance to the target as calculated
+            by `func`. The target is also stored as `target`.
 
         Raises
         ------
@@ -719,28 +735,46 @@ class Goldilocks(object):
         num_excluded = 0
         num_total = 0
 
-        filtered = CandidateList(self, group, track, target)
+        to_delete = []
+        sorted_regions = []
         for region in sorted(self.regions,
                     key=lambda x: (abs(self.group_counts[group][track][x] - target))):
 
             num_total += 1
+            chosen = False
             if region in candidates:
                 num_selected += 1
-                if not self.__check_exclusions(exclusions, self.regions[region], use_and, use_chrom):
-                    self.regions[region]["id"] = region
-                    filtered.append(self.regions[region])
+                if not self.__check_exclusions(exclusions, self.regions[region], group, track, use_and, use_chrom):
+                    chosen = True
+                    sorted_regions.append(region)
                 else:
                     num_excluded += 1
 
+            if not chosen:
+                to_delete.append(region)
+
         # Return the top N elements if desired
         # TODO Report total, selected, selected-excluded and selected-filtered
-        if limit:
-            filtered = CandidateList(self, group, track, target, filtered[0:limit])
+        if limit > 0:
+            for r in sorted_regions[limit:]:
+                if r not in to_delete:
+                    to_delete.append(r)
+            sorted_regions = sorted_regions[0:limit]
 
         print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
                 (num_total, num_selected, num_excluded, limit))
 
-        return filtered
+        # TODO Pretty gross, it is probably worth brining back the CandidateList
+        # object as a @property that provides the query function and then returning
+        # frames from it for function chaining - rather than the Goldilocks instance...
+        new_g = copy.deepcopy(self)
+        for region in to_delete:
+            del new_g.regions[region]
+
+        print("[NOTE] %d regions pruned" % (len(to_delete)))
+        new_g.sorted_regions = sorted_regions
+        new_g.target = target
+        return new_g
 
     #TODO Remove defaults
     def _filter(self, func="median", track="default", actual_distance=None, percentile_distance=None,
@@ -900,23 +934,45 @@ class Goldilocks(object):
         else:
             plt.show()
 
+    @property
+    def candidates(self):
+        if not (len(self.regions) > 0 or len(self.sorted_regions) > 0):
+            print("[WARN] No candidates found.\n")
+
+        if self.sorted_regions:
+            return [self.regions[i] for i in self.sorted_regions]
+        else:
+            return self.regions
+
     #TODO Export to file not stdout!
     #TODO Groupless output
-    def export_meta(self, group, sep=","):
+    def export_meta(self, group=None, sep=","):
         """Export census metadata to stdout with the following header: id, track1,
         [track2 ... trackN], chr, pos_start, pos_end. Accepts a seperator but
         defaults to a comma-delimited table."""
 
         tracks = sorted(self.strategy.TRACKS)
-        tracks_header = sep.join(tracks)
 
-        print(sep.join(["id", tracks_header, "chr", "pos_start", "pos_end"]))
-        for r in self.regions:
+        tracks_headers = []
+        groups = sorted(self.groups)
+        groups_header = sep.join(groups)
+        for g in groups:
+            #tracks_headers.append([g + '_' + track for track in tracks])
+            tracks_headers.append(sep.join([g + '_' + track for track in tracks]))
+
+        print(sep.join(["id", sep.join(tracks_headers), "chr", "pos_start", "pos_end"]))
+
+        to_iter = self.regions.keys()
+        if self.sorted_regions:
+            to_iter = self.sorted_regions
+
+        for r in to_iter:
             region = self.regions[r]
             values_string = ""
-            for t in tracks:
-                values_string += str(self.group_counts[group][t][r])
-                values_string += sep
+            for g in groups:
+                for t in tracks:
+                    values_string += str(self.group_counts[g][t][r])
+                    values_string += sep
             values_string = values_string[:-1]
             print(sep.join([
                 str(r),
@@ -926,59 +982,8 @@ class Goldilocks(object):
                 str(region["pos_end"])]
             ))
 
-class CandidateList(list):
-    """A list defining its own tab-delimited table string representation when
-    printed by a user. Provides other utility methods for generating other useful
-    outputs including exporting sequences to FASTA."""
-    def __init__(self, g, group, track, target, *args):
-        self.__goldilocks = g
-        if group is None:
-            self.__group = "total"
-        else:
-            self.__group = group
-
-        if track is None:
-            self.__track = "default"
-        else:
-            self.__track = track
-
-        if target is None:
-            self.__target = 0
-        else:
-            self.__target = target
-
-        list.__init__(self, *args)
-
-    def __repr__(self): # pragma: no cover
-        #TODO I don't like how we're keeping a reference to the Goldilocks object
-        #     here, in future I'll add a method to populate some form of DataFrame
-        #     that contains all the data required without needing Goldilocks behind.
-        str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
-        for region in self:
-            str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
-                                            self.__goldilocks.group_counts[self.__group][self.__track][region["id"]],
-                                            region["chr"],
-                                            region["pos_start"],
-                                            region["pos_end"],
-            ))
-        return str_rep
-
-    def _print(self, group): # pragma: no cover
-        #TODO I don't like how we're keeping a reference to the Goldilocks object
-        #     here, in future I'll add a method to populate some form of DataFrame
-        #     that contains all the data required without needing Goldilocks behind.
-        str_rep = "ID\tVAL\tCHR\tPOSITIONS (INC.)\n"
-        for region in self:
-            str_rep += ("%d\t%s\t%s\t%10d - %10d\n" % (region["id"],
-                                            self.__goldilocks.group_counts[group][self.__track][region["id"]],
-                                            region["chr"],
-                                            region["pos_start"],
-                                            region["pos_end"],
-            ))
-        return str_rep
-
     def export_fasta(self, groups=None, filename="out", divide=False):
-        """Export all regions held in the CandidateList in FASTA format."""
+        """Export all regions held in FASTA format."""
 
         if not filename.endswith(".fa"):
             filename += ".fa"

@@ -62,7 +62,8 @@ def _setup_sort(suite, op, group, TRACKS):
 def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
     number_comparisons = 0
 
-    candidates = suite.g._filter(op, group=group, track=track)
+    new_g = suite.g._filter(op, group=group, track=track)
+    candidates = new_g.candidates
     last_seen = None
     print(candidates) # Show some evidence the test is working...
     for i, c in enumerate(candidates):
@@ -112,7 +113,7 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
         elif op == "min":
             suite.assertTrue(suite.g.group_counts[group][track][c["id"]] >= last_seen)
         elif op == "mean" or op == "median":
-            suite.assertEqual(targets[track], candidates._CandidateList__target)
+            suite.assertEqual(targets[track], new_g.target)
             if targets is None:
                 suite.fail("Invalid test on op:mean|median using no target.")
             if track not in targets:
