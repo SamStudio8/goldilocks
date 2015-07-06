@@ -14,6 +14,7 @@ import os
 # TODO Support more interesting sequence formats? FASTQ reading?
 #      - Read FASTQ quality data but still output sequences (read both Q and SEQ)
 # TODO Replace 'group' nonclementure with 'sample'?
+# TODO "chrno" should be chrom
 class Goldilocks(object):
     """Facade class responsible for conducting a census of genomic regions.
 
@@ -254,9 +255,6 @@ class Goldilocks(object):
             buckets[total].append(region_id)
         return buckets
 
-    def __load_chromosome(self, arr, data, track):
-        return self.strategy.prepare(arr, data, track)
-
     def census(self):
         """Conduct a census of genomic subregions of a given size and overlap over
         chromosomes identified in each submitted sample. For each chromosome, each
@@ -289,7 +287,7 @@ class Goldilocks(object):
                 chros[group] = {}
                 for track in self.strategy.TRACKS:
                     chro = np.zeros(size+1, np.int8)
-                    chros[group][track] = self.__load_chromosome(chro, self.groups[group][chrno], track)
+                    chros[group][track] = self.strategy.prepare(chro, self.groups[group][chrno], track, chrom=chrno)
 
             print("[SRCH] Chr:%s" % str(chrno))
             # Ignore 0 position
@@ -341,7 +339,7 @@ class Goldilocks(object):
         self.group_buckets["total"] = {}
         super_totals = []
 
-        ggroups = list(self.groups.keys())
+        ggroups = list(sorted(self.groups.keys()))
         ggroups.append("total")
 
         for count_group in ggroups:
@@ -737,6 +735,8 @@ class Goldilocks(object):
 
         to_delete = []
         sorted_regions = []
+        #TODO Calculate distance and store it, then reserve sorting until
+        # returning results to save time
         for region in sorted(self.regions,
                     key=lambda x: (abs(self.group_counts[group][track][x] - target))):
 
@@ -790,7 +790,7 @@ class Goldilocks(object):
                           use_and=use_and,
                           use_chrom=use_chrom)
 
-    def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None): # pragma: no cover
+    def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None, title=None): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""
 
         import matplotlib.pyplot as plt
@@ -804,7 +804,7 @@ class Goldilocks(object):
 
             max_val = max(num_counts)
             plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker='o')
-            plt.plot(range(0, num_regions), num_counts, "black")
+            #plt.plot(range(0, num_regions), num_counts, "black")
             plt.axis([0, num_regions, 0, max_val])
             plt.ylabel(self.strategy.AXIS_TITLE)
             if ylim:
@@ -837,8 +837,12 @@ class Goldilocks(object):
                 horizontalalignment='center', verticalalignment='center'
             )
 
-        plt.xlabel("Region# (150bp)")
-        plt.suptitle('%s-%s' % (group, track), fontsize=16)
+        plt.xlabel("Region#")
+
+        if title:
+            plt.suptitle(title, fontsize=16)
+        else:
+            plt.suptitle('%s-%s' % (group, track), fontsize=16)
 
         if annotation:
             plt.annotate(annotation, xy=(.5, 1.03),  xycoords='axes fraction', ha='center', va='center', fontsize=11)
@@ -945,8 +949,58 @@ class Goldilocks(object):
             return self.regions
 
     #TODO Export to file not stdout!
-    #TODO Groupless output
-    def export_meta(self, group=None, sep=","):
+    def print_melt(self, sep=",", continuous=False):
+
+        # Work out offset
+        to_skip = 0
+        skipped = 0
+        if continuous:
+            if self.LENGTH < self.STRIDE:
+                Exception("Cannot use continuous=True where stride > length...")
+            if self.LENGTH % self.STRIDE != 0:
+                Exception("Cannot use continuous=True where length/stride > 0...")
+
+            to_skip = (self.LENGTH / self.STRIDE) - 1
+            skipped = to_skip
+
+        tracks = sorted(self.strategy.TRACKS)
+        groups = sorted(self.groups)
+
+        print(sep.join([
+            "c",
+            "id",
+            "group_track",
+            "chr",
+            "i",
+            "value"
+        ]))
+
+        count = 0
+        last_chr = None
+        for r in sorted(self.regions.keys()):
+            region = self.regions[r]
+            if region["chr"] != last_chr:
+                skipped = to_skip
+
+            if skipped != to_skip:
+                skipped += 1
+                continue
+            skipped = 0
+
+            for g in groups:
+                for t in tracks:
+                    print(sep.join([
+                        str(count),
+                        str(region["id"]),
+                        "%s-%s" % (g, t),
+                        str(region["chr"]),
+                        str(region["ichr"]),
+                        str(self.group_counts[g][t][r])
+                    ]))
+            count += 1
+
+    #TODO Export to file not stdout!
+    def export_meta(self, group=None, sep=",", divisible=None):
         """Export census metadata to stdout with the following header: id, track1,
         [track2 ... trackN], chr, pos_start, pos_end. Accepts a seperator but
         defaults to a comma-delimited table."""
@@ -954,20 +1008,29 @@ class Goldilocks(object):
         tracks = sorted(self.strategy.TRACKS)
 
         tracks_headers = []
-        groups = sorted(self.groups)
-        groups_header = sep.join(groups)
+        if not group:
+            groups = sorted(self.groups)
+        else:
+            groups = [group]
+
         for g in groups:
             #tracks_headers.append([g + '_' + track for track in tracks])
             tracks_headers.append(sep.join([g + '_' + track for track in tracks]))
 
-        print(sep.join(["id", sep.join(tracks_headers), "chr", "pos_start", "pos_end"]))
+        print(sep.join(["chr", "pos_start", "pos_end", sep.join(tracks_headers), "id"]))
 
-        to_iter = self.regions.keys()
+        to_iter = sorted(self.regions.keys())
         if self.sorted_regions:
             to_iter = self.sorted_regions
 
+        count = 0
         for r in to_iter:
             region = self.regions[r]
+
+            if divisible:
+                if (region["pos_start"]-1) % divisible != 0:
+                    continue
+
             values_string = ""
             for g in groups:
                 for t in tracks:
@@ -975,12 +1038,13 @@ class Goldilocks(object):
                     values_string += sep
             values_string = values_string[:-1]
             print(sep.join([
-                str(r),
-                values_string,
-                str(region["chr"]),
+                "hs"+str(region["chr"]),
                 str(region["pos_start"]),
-                str(region["pos_end"])]
+                str(region["pos_end"]),
+                values_string,
+                str(r)]
             ))
+            count += 1
 
     def export_fasta(self, groups=None, filename="out", divide=False):
         """Export all regions held in FASTA format."""
@@ -995,7 +1059,7 @@ class Goldilocks(object):
 
         for region in self:
             if groups is None:
-                groups = list(self.__goldilocks.groups.keys())
+                groups = list(sorted(self.__goldilocks.groups.keys()))
             for group in groups:
                 try:
                     self.__goldilocks.groups[group]

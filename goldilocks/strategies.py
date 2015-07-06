@@ -86,7 +86,7 @@ class BaseStrategy(object):
         self.TRACKS = tracks
         self.AXIS_TITLE = title
 
-    def prepare(self, arr, data, track):
+    def prepare(self, arr, data, track, **kwargs):
         """Parse genomic data and apply some algorithm ('strategy') to populate
         an array with values for later evaluation.
 
@@ -197,3 +197,38 @@ class GCRatioStrategy(BaseStrategy):
 
     def evaluate(self, region, **kwargs):
         return StrategyValue(float(np.sum(region))/len(region), len(region))
+
+
+class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover
+
+    def __init__(self, tracks=None, polarity=1, reference=None):
+        self.POLARITY = polarity
+        #TODO Assumes 1-index to match rest of Goldilocks?
+        self.REFERENCE = reference
+
+        title = "Reference Concordance"
+        if polarity > 0:
+            title = "Reference Matches"
+        elif polarity < 0:
+            title = "Reference Mismatches"
+
+        super(ReferenceConsensusStrategy, self).__init__(title=title)
+
+    def prepare(self, arr, data, current_track, **kwargs):
+        # Currently only handles global references (ie. not for group/track)
+        for location, base in enumerate(data):
+            if self.POLARITY > 0:
+                if base.upper() == self.REFERENCE[kwargs['chrom']][location].upper():
+                    arr[location] = 1
+            elif self.POLARITY < 0:
+                if base.upper() != self.REFERENCE[kwargs['chrom']][location].upper():
+                    arr[location] = 1
+            else:
+                if base.upper() == self.REFERENCE[kwargs['chrom']][location].upper():
+                    arr[location] = 1
+                else:
+                    arr[location] = -1
+        return arr
+
+    def evaluate(self, region, **kwargs):
+        return np.sum(region)
