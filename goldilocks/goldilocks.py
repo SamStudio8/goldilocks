@@ -60,9 +60,9 @@ class Goldilocks(object):
         start of the next. If LENGTH==STRIDE, there will be no overlap and
         regions will begin on the base following where the previous region ended.
 
-    is_seq : boolean, optional(default=True)
+    is_pos : boolean, optional(default=False)
         Whether or not the data stored in `data` is sequence data.
-        If `is_seq` is False, Goldilocks will expect a list of base positions.
+        If `is_pos` is True, Goldilocks will expect a list of base positions.
 
     Attributes
     ----------
@@ -164,14 +164,14 @@ class Goldilocks(object):
     ValueError
         If either `length` or `stride` are less than one.
 
-    Notes
-    -----
-    * Setting `is_seq` to False may currently be incompatible with some strategy types.
-
     """
-    def __init__(self, strategy, data, length, stride, is_seq=True):
+    def __init__(self, strategy, data, length, stride, is_pos=False):
 
         self.strategy = strategy
+        if is_pos:
+            from strategies import PositionCounterStrategy
+            print("[WARN] Positional data expected as input, forcing selection of PositionCounterStrategy.")
+            self.strategy = PositionCounterStrategy()
 
         self.chr_max_len = {}
 
@@ -198,16 +198,10 @@ class Goldilocks(object):
         for group in self.groups:
             #TODO Catch duplicates etc..
             for chrom in self.groups[group]:
-                # Remember to exclude 0-index
-                if is_seq:
-                    # TODO This is awful.
-                    # Prepend _ to sequence to force 1-index
-                    if self.groups[group][chrom][0] != "_":
-                        self.groups[group][chrom] = "_" + self.groups[group][chrom]
-
-                    len_current_seq = len(self.groups[group][chrom]) - 1
+                if is_pos:
+                    len_current_seq = max(self.groups[group][chrom])
                 else:
-                    len_current_seq = sorted(self.groups[group][chrom])[-1]
+                    len_current_seq = len(self.groups[group][chrom])
 
                 #TODO Should we not be looking for min length?
                 if chrom not in self.chr_max_len:
@@ -286,25 +280,27 @@ class Goldilocks(object):
             for group in self.groups:
                 chros[group] = {}
                 for track in self.strategy.TRACKS:
-                    chro = np.zeros(size+1, np.int8)
+                    chro = np.zeros(size, np.int8)
                     chros[group][track] = self.strategy.prepare(chro, self.groups[group][chrno], track, chrom=chrno)
 
             print("[SRCH] Chr:%s" % str(chrno))
-            # Ignore 0 position
-            for i, region_s in enumerate(range(1, size+1-self.LENGTH+1, self.STRIDE)):
-                region_e = region_s + self.LENGTH - 1
+            for i, zeropos_start in enumerate(range(0, size-self.LENGTH+1, self.STRIDE)):
+                onepos_start = zeropos_start + 1
+                zeropos_end = zeropos_start + self.LENGTH - 1
+                onepos_end = zeropos_end + 1
+
                 regions[region_i] = {
                     "id": region_i,
                     "ichr": i,
                     "chr": chrno,
-                    "pos_start": region_s,
-                    "pos_end": region_e
+                    "pos_start": onepos_start,
+                    "pos_end": onepos_end
                 }
 
                 for group in self.groups:
                     for track in self.strategy.TRACKS:
                         # Evaluate the prepared region using the selected strategy and track
-                        value = self.strategy.evaluate(chros[group][track][region_s:region_e+1], track=track)
+                        value = self.strategy.evaluate(chros[group][track][zeropos_start:onepos_end], track=track)
 
                         # TODO Should we be ignoring these regions if they are empty?
                         # TODO Config option to include 0 in flter metrics

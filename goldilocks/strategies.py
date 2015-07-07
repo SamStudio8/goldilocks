@@ -134,7 +134,7 @@ class NucleotideCounterStrategy(BaseStrategy):
     def __init__(self, bases):
         super(NucleotideCounterStrategy, self).__init__(tracks=bases, title="Base Count")
 
-    def prepare(self, arr, data, current_track):
+    def prepare(self, arr, data, current_track, **kwargs):
         for location, base in enumerate(data):
             if base.upper() == current_track:
                 arr[location] = 1
@@ -148,7 +148,7 @@ class KMerCounterStrategy(BaseStrategy): # pragma: no cover
     def __init__(self, kmers):
         super(KMerCounterStrategy, self).__init__(tracks=kmers, title="Motif Count")
 
-    def prepare(self, arr, data, track):
+    def prepare(self, arr, data, track, **kwargs):
         import re
 
         # Populate the region array with 1 for the start position of desired K-Mer
@@ -163,15 +163,16 @@ class KMerCounterStrategy(BaseStrategy): # pragma: no cover
         # the first base of the desired K-mer
         return np.sum(region[:-(len(kwargs['track'])-1)])
 
-class VariantCounterStrategy(BaseStrategy): # pragma: no cover
+class PositionCounterStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, tracks=None):
-        super(VariantCounterStrategy, self).__init__(title="Variant Count")
+        super(PositionCounterStrategy, self).__init__(title="Count")
 
-    def prepare(self, arr, data, track):
+    def prepare(self, arr, data, track, **kwargs):
         # Populate the chromosome array with 1 for each position a variant exists
+        #TODO Assuming 1-index, perhaps use a kwarg
         for variant_loc in data:
-            arr[variant_loc] = 1
+            arr[variant_loc-1] = 1
         return arr
 
     def evaluate(self, region, **kwargs):
@@ -183,7 +184,7 @@ class GCRatioStrategy(BaseStrategy):
     def __init__(self, tracks=None):
         super(GCRatioStrategy, self).__init__(title="GC Ratio")
 
-    def prepare(self, arr, data, track):
+    def prepare(self, arr, data, track, **kwargs):
         # Populate the region array with 1 for each position a GC base exists
         #for location, base in enumerate(data):
         #    base_u = base.upper()
@@ -203,7 +204,6 @@ class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, tracks=None, polarity=1, reference=None):
         self.POLARITY = polarity
-        #TODO Assumes 1-index to match rest of Goldilocks?
         self.REFERENCE = reference
 
         title = "Reference Concordance"

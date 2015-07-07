@@ -79,11 +79,11 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                     if ttrack == "default" and len(suite.TRACKS) > 1:
                         continue
                     region = np.zeros(suite.g.LENGTH, np.int8)
-                    prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1], ttrack)
+                    prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]-1:c["pos_end"]], ttrack)
                     total += suite.g.strategy.evaluate(prepared, track=ttrack)
             else:
                 region = np.zeros(suite.g.LENGTH, np.int8)
-                prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]:c["pos_end"]+1], track)
+                prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]-1:c["pos_end"]], track)
                 total += suite.g.strategy.evaluate(prepared, track=track)
         else:
             for sample in suite.sequence_data:
@@ -92,11 +92,11 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                         if ttrack == "default" and len(suite.TRACKS) > 1:
                             continue
                         region = np.zeros(suite.g.LENGTH, np.int8)
-                        prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1], ttrack)
+                        prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]], ttrack)
                         total += suite.g.strategy.evaluate(prepared, track=ttrack)
                 else:
                     region = np.zeros(suite.g.LENGTH, np.int8)
-                    prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]:c["pos_end"]+1], track)
+                    prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]], track)
                     total += suite.g.strategy.evaluate(prepared, track=track)
 
         suite.assertEqual(suite.g.group_counts[group][track][c["id"]], total)
