@@ -8,6 +8,7 @@ from math import floor, ceil
 
 import copy
 import os
+import sys
 
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
@@ -168,7 +169,9 @@ class Goldilocks(object):
     def __init__(self, strategy, data, length, stride, is_pos=False):
 
         self.strategy = strategy
+        self.IS_POS = False
         if is_pos:
+            self.IS_POS = True
             from strategies import PositionCounterStrategy
             print("[WARN] Positional data expected as input, forcing selection of PositionCounterStrategy.")
             self.strategy = PositionCounterStrategy()
@@ -425,6 +428,13 @@ class Goldilocks(object):
         return float(q_low), float(q_high), float(target)
 
 
+    def __check_exclude_minmax(self, val, gmin, gmax):
+        if gmin:
+            return val < gmin
+        if gmax:
+            return val > gmax
+        return False
+
     def __check_exclusions(self, exclusions, region_dict, group, track, use_and=False, use_chrom=False):
         if exclusions is None or len(exclusions) == 0:
             return False
@@ -465,10 +475,18 @@ class Goldilocks(object):
         # Chrom specific exclusions override overall (might be unexpected)
         if use_chrom:
             if region_dict["chr"] in exclusions:
-                to_apply = exclusions[region_dict["chr"]]
+                #TOOD A bit dirty, pulls out the chr-specific exclusions and
+                #     overwrites them in the to_apply dict if there is a clash.
+                # If 'chr' set to False, apply NO exclusions
+                chr_to_apply = exclusions[region_dict["chr"]]
+                if "chr" in chr_to_apply:
+                    if type(chr_to_apply["chr"]) is bool and not chr_to_apply["chr"]:
+                        return False
+
+                to_apply = exclusions.copy()
+                to_apply.update(exclusions[region_dict["chr"]])
             else:
-                # No exclusions to apply to this region
-                return False
+                to_apply = exclusions
         else:
             if region_dict["chr"] in exclusions:
                 print("[WARN] Exclusions dictionary appears to contain the name of a chromosome. Did you forget to set use_chrom=True?")
@@ -491,10 +509,13 @@ class Goldilocks(object):
                 ret = __exclude_val(self.group_counts[group][track][region_dict["id"]], -1, self.group_counts[to_apply["region_group_lte"]][track][region_dict["id"]])
             elif name == "region_group_gte":
                 ret = __exclude_val(self.group_counts[group][track][region_dict["id"]], 1, self.group_counts[to_apply["region_group_lte"]][track][region_dict["id"]])
-
             else:
-                #TODO Better handling of invalid exclusion property
-                print("[WARN] Attempted to exclude on invalid property '%s'" % name)
+                if name in self.chr_max_len:
+                    # It's probably a chromosome dict, do nothing.
+                    pass
+                else:
+                    #TODO Better handling of invalid exclusion property
+                    print("[WARN] Attempted to exclude on invalid property '%s'" % name)
 
             if use_and:
                 # Require all exclusions to be true...
@@ -511,7 +532,8 @@ class Goldilocks(object):
         return False
 
     def query(self, func="median", track="default", actual_distance=None, percentile_distance=None,
-            direction=0, group="total", limit=0, exclusions=None, use_and=False, use_chrom=False):
+            direction=0, group="total", limit=0, exclusions=None, use_and=False, use_chrom=False,
+            gmin=None, gmax=None):
         """Query the Goldilocks census to retrieve regions that meet given criteria.
 
         Parameters
@@ -740,7 +762,7 @@ class Goldilocks(object):
             chosen = False
             if region in candidates:
                 num_selected += 1
-                if not self.__check_exclusions(exclusions, self.regions[region], group, track, use_and, use_chrom):
+                if not self.__check_exclusions(exclusions, self.regions[region], group, track, use_and, use_chrom) and not self.__check_exclude_minmax(self.group_counts[group][track][self.regions[region]["id"]], gmin, gmax):
                     chosen = True
                     sorted_regions.append(region)
                 else:
@@ -906,7 +928,7 @@ class Goldilocks(object):
                     import sys
                     sys.exit(1)
 
-                ax[i,0].plot(range(0, num_bins), bin_contents, label="g"+str(chrom))
+                ax[i,0].bar(range(0, num_bins), bin_contents, label="g"+str(chrom))
                 ax[i,0].text(
                     1.05, 0.5, ("Chr#"+str(chrom)), transform=ax[i,0].transAxes,
                     rotation=270, fontsize=12, va='top',
@@ -996,12 +1018,15 @@ class Goldilocks(object):
             count += 1
 
     #TODO Export to file not stdout!
-    def export_meta(self, group=None, sep=",", divisible=None):
+    def export_meta(self, group=None, track="default", to=sys.stdout, sep=",", divisible=None):
         """Export census metadata to stdout with the following header: id, track1,
         [track2 ... trackN], chr, pos_start, pos_end. Accepts a seperator but
         defaults to a comma-delimited table."""
 
-        tracks = sorted(self.strategy.TRACKS)
+        if not track:
+            tracks = sorted(self.strategy.TRACKS)
+        else:
+            tracks = [track]
 
         tracks_headers = []
         if not group:
@@ -1013,7 +1038,7 @@ class Goldilocks(object):
             #tracks_headers.append([g + '_' + track for track in tracks])
             tracks_headers.append(sep.join([g + '_' + track for track in tracks]))
 
-        print(sep.join(["chr", "pos_start", "pos_end", sep.join(tracks_headers), "id"]))
+        to.write((sep.join(["chr", "pos_start", "pos_end", sep.join(tracks_headers)]))+"\n")
 
         to_iter = sorted(self.regions.keys())
         if self.sorted_regions:
@@ -1033,32 +1058,40 @@ class Goldilocks(object):
                     values_string += str(self.group_counts[g][t][r])
                     values_string += sep
             values_string = values_string[:-1]
-            print(sep.join([
-                "hs"+str(region["chr"]),
+            to.write((sep.join([
+                str(region["chr"]),
                 str(region["pos_start"]),
                 str(region["pos_end"]),
-                values_string,
-                str(r)]
-            ))
+                values_string]
+            ))+"\n")
             count += 1
 
-    def export_fasta(self, groups=None, filename="out", divide=False):
+    def export_fasta(self, groups=None, track="default", to=sys.stdout, divide=False):
         """Export all regions held in FASTA format."""
+        if self.IS_POS:
+            print("[FAIL] Cannot export FASTA without sequence data!")
+            sys.exit(1)
 
-        if not filename.endswith(".fa"):
-            filename += ".fa"
+        if to is not sys.stdout:
+            filename = to
+            if divide:
+                handles = {}
+            else:
+                if not filename.endswith(".fa"):
+                    filename += ".fa"
+                to = open(filename, "w")
 
-        if divide:
-            handles = {}
-        else:
-            current_file = open(filename, "w")
+        to_iter = sorted(self.regions.keys())
+        if self.sorted_regions:
+            to_iter = self.sorted_regions
 
-        for region in self:
+        for r in to_iter:
+            region = self.regions[r]
             if groups is None:
-                groups = list(sorted(self.__goldilocks.groups.keys()))
+                groups = list(sorted(self.groups.keys()))
             for group in groups:
                 try:
-                    self.__goldilocks.groups[group]
+                    self.groups[group]
                 except KeyError:
                     # Perhaps the user provided a string by mistake...
                     group = groups
@@ -1066,14 +1099,14 @@ class Goldilocks(object):
                 if divide:
                     if group not in handles:
                         handles[group] = open(group + "_" + filename, "w")
-                    current_file = handles[group]
+                    to = handles[group]
 
-                current_file.write(">%s|Chr%s|Pos%d:%d\n" % (group, region["chr"], region["pos_start"], region["pos_end"]))
-                current_file.write(self.__goldilocks.groups[group][region["chr"]][region["pos_start"]:region["pos_end"]+1]+"\n")
+                to.write(">%s|Chr%s|Pos%d:%d|%s\n" % (group, region["chr"], region["pos_start"], region["pos_end"], self.group_counts[group][track][region["id"]]))
+                to.write(self.groups[group][region["chr"]][region["pos_start"]-1:region["pos_end"]]+"\n")
         if divide:
             for h in handles:
                 handles[h].close()
-        else:
-            current_file.close()
+        elif to is not sys.stdout:
+            to.close()
 
 
