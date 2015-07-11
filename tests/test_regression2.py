@@ -62,7 +62,7 @@ def _setup_sort(suite, op, group, TRACKS):
 def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
     number_comparisons = 0
 
-    new_g = suite.g._filter(op, group=group, track=track)
+    new_g = suite.g.query(op, group=group, track=track)
     candidates = new_g.candidates
     last_seen = None
     print(candidates) # Show some evidence the test is working...

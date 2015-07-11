@@ -48,11 +48,11 @@ class TestGoldilocks(unittest.TestCase):
         for exclusion_name, exclusion in EXCLUSIONS.items():
             for op in OPS:
                 if limit > 0:
-                    candidates = self.g._filter(op, exclusions={
+                    candidates = self.g.query(op, exclusions={
                         exclusion["filter"]: exclusion["value"]
                     }, limit=limit).candidates
                 else:
-                    candidates = self.g._filter(op, exclusions={
+                    candidates = self.g.query(op, exclusions={
                         exclusion["filter"]: exclusion["value"]
                     }).candidates
 
@@ -97,13 +97,13 @@ class TestGoldilocks(unittest.TestCase):
         self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1, stride=1)
         self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1000, stride=1)
 
-    def test_invalid_filter_distance(self):
+    def test_invalidquery_distance(self):
         for op in OPS:
-            self.assertRaises(ValueError, self.g._filter, op, actual_distance=1, percentile_distance=1)
+            self.assertRaises(ValueError, self.g.query, op, actual_distance=1, percentile_distance=1)
 
     def test_invalid_sort_operation(self):
         for op in OPS:
-            self.assertRaises(TypeError, self.g._filter, "hoot")
+            self.assertRaises(TypeError, self.g.query, "hoot")
 
     def test_unimplemented_strategy(self):
         self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data, length=1, stride=1)
@@ -221,7 +221,7 @@ class TestGoldilocks(unittest.TestCase):
 
     def test_exclude_and(self):
         for op in OPS:
-            candidates = self.g._filter(op, exclusions={
+            candidates = self.g.query(op, exclusions={
                                                         "start_gte": 5,
                                                         "end_lte": 9,
                                                         }, use_and=True).candidates
@@ -232,7 +232,7 @@ class TestGoldilocks(unittest.TestCase):
 
     def test_exclude_and_with_chr(self):
         for op in OPS:
-            candidates = self.g._filter(op, exclusions={
+            candidates = self.g.query(op, exclusions={
                                                         "start_gte": 5,
                                                         "end_lte": 9,
                                                         "chr": ["X"],
