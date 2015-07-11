@@ -1,6 +1,28 @@
 History
 =======
 
+0.0.71 (2014-07-11)
+-------------------
+* Officially add MIT license to repository.
+* Deprecate `_filter`.
+* Update and tidy `examples.py`.
+* `is_seq` argument to initialisation removed and replaced with `is_pos`.
+* Use `is_pos` to indicate the expected input is positional, not sequence.
+* Force use of `PositionCounterStrategy` when `is_pos` is True.
+* Sequence data now read in to 0-indexed arrays to avoid the overhead of string
+    re-allocation by having to append a padding character to the beginning of very
+    long strings.
+* Region metadata continues to use 1-indexed positions for user output.
+* `VariantCounterStrategy` now `PositionCounterStrategy`.
+* `PositionCounterStrategy` expects 1-indexed lists of positions;
+    `prepare` populates the listed locations with 1 and then `evaluate`
+    returns the sum as before.
+* `test_regression2` updated to account for converting 1-index to 0-index when
+    manually handling the sequence for expected results.
+* `query` accepts `gmax` and `gmin` arguments to filter candidate regions by
+  the group-track value.
+* `CandidateList` removed and replaced with simply returning a new `Goldilocks`.
+
 0.0.6 (2014-06-23)
 ------------------
 * `Goldilocks.sorted_regions` stores a list of region ids to represent the result
