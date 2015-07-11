@@ -3,7 +3,7 @@ Exporting
 =========
 
 Goldilocks provides functions for the exporting of all censused regions metadata
-or for filtered regions held inside a CandidateList. The examples below follow
+or for filtered regions resulting from a query. The examples below follow
 on from the basic usage instructions earlier in the documentation.
 
 Census Data
@@ -73,12 +73,11 @@ Using the `my_sample` data: ::
     26      1       one     6       8
     27      0       one     7       9
 
-CandidateList
--------------
+FASTA
+-----
 
-The :class:`goldilocks.goldilocks.CandidateList` class, returned by Goldilocks
-from any sorting or filtering operation on censused regions provides a function
-to output sequence data to FASTA format.
+From any sorting or filtering operation on censused regions, a new Goldilocks
+object is returned, providing function to output filtered sequence data to FASTA format.
 
 Following on from the example introduced earlier, the example below shows the
 subsequences of `my_sample` in the FASTA format, ordered by their appearance in
@@ -86,7 +85,7 @@ the filtered `candidates` list, from the highest number of 'N' bases, to the
 lowest. ::
 
     ...
-    candidates = g._filter("max", group="my_sample")
+    candidates = g.query("max", group="my_sample")
     candidates.export_fasta("my_sample")
 
     >my_sample|Chr2|Pos1:3

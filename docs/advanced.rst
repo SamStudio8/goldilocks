@@ -18,7 +18,7 @@ example of counting missing nucleotides, this would represent the total number
 of 'N' bases seen in sequence data across each sample in the same genomic region
 on the same chromosome. But if you are more interested in a particular sample: ::
 
-    g._filter("max", group="my_sample")
+    g.query("max", group="my_sample")
 
 
 Track
@@ -28,7 +28,7 @@ When using tracks (for strategies that calculate multiple distinct values for
 each genomic region - such as different nucleotide bases or k-mers), you may wish
 to extract regions based on scores for a certain track: ::
 
-    g._filter("max", track="AAA")
+    g.query("max", track="AAA")
 
 
 Absolute distance
@@ -36,7 +36,7 @@ Absolute distance
 
 You may be interested in regions within some distance of the mean: ::
 
-    g._filter("mean", acutal_distance=10)
+    g.query("mean", acutal_distance=10)
 
 
 Percentile distance
@@ -44,16 +44,16 @@ Percentile distance
 
 Or perhaps the "top 10%", or the "middle 25%" around the mean: ::
 
-    g._filter("max", percentile_distance=10)
-    g._filter("mean", percentile_distance=25)
+    g.query("max", percentile_distance=10)
+    g.query("mean", percentile_distance=25)
 
 When not using `max` or `min`, by default both actual and percentile differences
 calculate 'around' the `mean` or `median` value instead. If you'd like to control
 this behaviour you can specify a direction: Let's fetch regions that have values
 falling within 25% above or below the mean respectively: ::
 
-    g._filter("mean", percentile_distance=25, direction=1)
-    g._filter("mean", percentile_distance=25, direction=-1)
+    g.query("mean", percentile_distance=25, direction=1)
+    g.query("mean", percentile_distance=25, direction=-1)
 
 
 Multiple criteria
@@ -63,7 +63,7 @@ You can of course use these at the same time (though actual and percentile dista
 are mutually exclusive), let's fetch the top 10% of regions that contain the most
 "AAA" k-mers for all chromosomes in a hypothetical sample called "my_kmer_example": ::
 
-    g._filter("max", group="my_sample", track="N", percentile_distance=10)
+    g.query("max", group="my_sample", track="N", percentile_distance=10)
 
 
 Excluding Regions
@@ -76,7 +76,7 @@ Starting position
 
 To filter regions based on the 1-indexed starting position greater than or equal to 3: ::
 
-    g._filter("min", exclusions={
+    g.query("min", exclusions={
                                 "start_gte": 3,
                                 })
 
@@ -85,7 +85,7 @@ Ending position
 
 To filter regions based on the 1-indexed ending position less than or equal to 9: ::
 
-    g._filter("min", exclusions={
+    g.query("min", exclusions={
                                 "end_lte": 9,
                                 })
 
@@ -94,7 +94,7 @@ Chromosome
 
 You can filter regions that appear on particular chromosomes completely by providing a list: ::
 
-    g._filter("min", exclusions={
+    g.query("min", exclusions={
                                 "chr": ["X", 6],
                                 })
 
@@ -105,7 +105,7 @@ When using groups, one may wish to exclude results where the value of another gr
 is less than the one selected by the query. For example, for each region the following
 would result in regions where the count for `my-other-sample` is greater than `my-sample`: ::
 
-    g._filter("min", group="my-sample", exclusions={
+    g.query("min", group="my-sample", exclusions={
                                 "region_group_lte": "my-other-sample",
                                 })
 
@@ -118,7 +118,7 @@ between bases 500-1000. Let's ignore regions from that area. Let's also exclude
 anything from chromosome 'G'. If a single one of these criteria are true, a region
 will be excluded: ::
 
-    g._filter("mean", exclusions={
+    g.query("mean", exclusions={
                                  "start_gte": 500,
                                  "end_lte": 1000,
                                  "chr": ['G'],
@@ -128,7 +128,7 @@ What if you want to exclude based on multiple criteria that should all be true?
 Let's exclude regions that start before or on base 100 on chromosome X or Y [#]_.
 Note the use of `use_and=True`! [#]_ ::
 
-    g._filter("mean", exclusions={
+    g.query("mean", exclusions={
                                  "start_lte": 100,
                                  "chr": ['X', 'Y'],
                                  }, use_and=True)
@@ -143,7 +143,7 @@ dependent exclusions; the syntax is the same as previously, just the exclusions
 dictionary is a dictionary of dictionaries with keys representing each chromosome.
 Note the use of `use_chrom=True`: ::
 
-    g._filter("median", exclusions={
+    g.query("median", exclusions={
                                     "one": {
                                         "start_lte": 3,
                                         "end_gte": 4
@@ -174,7 +174,7 @@ Limiting Regions
 
 One may also limit the number of results returned by Goldilocks: ::
 
-    g._filter("mean", limit=10)
+    g.query("mean", limit=10)
 
 
 Full Example
@@ -188,7 +188,7 @@ chromosome 2 that start on a base position greater than or equal to 5 *and* end 
 a base position less than or equal to 10. Although when filtering the default
 track is indeed 'default', we've explicity set that here too.::
 
-    g._filter("max",
+    g.query("max",
               group="my_sample",
               track="default",
               actual_distance=1,

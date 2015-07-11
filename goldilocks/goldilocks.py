@@ -1,6 +1,6 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 import numpy as np
@@ -16,6 +16,7 @@ import sys
 #      - Read FASTQ quality data but still output sequences (read both Q and SEQ)
 # TODO Replace 'group' nonclementure with 'sample'?
 # TODO "chrno" should be chrom
+#TODO Add std.dev. distance to query
 class Goldilocks(object):
     """Facade class responsible for conducting a census of genomic regions.
 
@@ -23,14 +24,6 @@ class Goldilocks(object):
     Goldilocks is able to census regions along multiple genomes of a desired
     length and overlap and provides an interface to query results for a given
     criteria.
-
-    .. note:: **_filter deprecated in 0.0.53**
-
-        `_filter` will be removed in Goldilocks 1.0.0, it is replaced by the
-        more suitably named `query`. Underscores are traditionally used for
-        private class members and `_filter` was merely named to prevent
-        confusion with the built-in `filter`.
-        Until 1.0, `_filter` will pass all of its arguments to `query`.
 
     Parameters
     ----------
@@ -793,20 +786,6 @@ class Goldilocks(object):
         new_g.sorted_regions = sorted_regions
         new_g.target = target
         return new_g
-
-    #TODO Remove defaults
-    def _filter(self, func="median", track="default", actual_distance=None, percentile_distance=None,
-            direction=0, group="total", limit=0, exclusions=None, use_and=False, use_chrom=False): # pragma: no cover
-        return self.query(func=func,
-                          track=track,
-                          actual_distance=actual_distance,
-                          percentile_distance=percentile_distance,
-                          direction=direction,
-                          group=group,
-                          limit=limit,
-                          exclusions=exclusions,
-                          use_and=use_and,
-                          use_chrom=use_chrom)
 
     def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None, title=None): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""

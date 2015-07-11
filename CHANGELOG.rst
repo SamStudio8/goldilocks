@@ -21,7 +21,7 @@ History
 * Scripts for generating test data added to `test_gen/` directory.
 * Tests updated to reflect the fact `CandidateList` lists are no longer returned
   by `query`.
-* `_filter` is to be deprecated in favour of `query` by 0.1.0
+* `_filter` is to be deprecated in favour of `query` by 0.0.7
 
 Beta (2014-10-08)
 ---------------------

@@ -166,10 +166,10 @@ Sorting Regions
 Following a census, Goldilocks allows you to sort the regions found by four
 mathematical operations: `max`, `min`, `mean` and `median`. ::
 
-    regions_max = g._filter("max")
-    regions_min = g._filter("min")
-    regions_mean = g._filter("mean")
-    regions_median = g._filter("median")
+    regions_max = g.query("max")
+    regions_min = g.query("min")
+    regions_mean = g.query("mean")
+    regions_median = g.query("median")
 
 The data is returned in a special list:, a :class:`goldilocks.goldilocks.CandidateList`
 which defines a table-based representation should a user wish to print the list: ::
@@ -217,8 +217,8 @@ Census an example sequence for appearance of 'N' bases: ::
 
     g = Goldilocks(NucleotideCounterStrategy(["N"]), sequence_data, length=3, stride=1)
 
-    regions_max_n_bases = g._filter("max")
-    regions_min_n_bases = g._filter("min")
-    regions_median_n_bases = g._filter("min")
-    regions_mean_n_bases = g._filter("min")
+    regions_max_n_bases = g.query("max")
+    regions_min_n_bases = g.query("min")
+    regions_median_n_bases = g.query("min")
+    regions_mean_n_bases = g.query("min")
 
