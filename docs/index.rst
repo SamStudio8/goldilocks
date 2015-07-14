@@ -18,6 +18,7 @@ Contents:
    exporting
    plotting
    custom
+   example
    contributing
    authors
    changelog
