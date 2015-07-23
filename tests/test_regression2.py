@@ -113,12 +113,12 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
         elif op == "min":
             suite.assertTrue(suite.g.group_counts[group][track][c["id"]] >= last_seen)
         elif op == "mean" or op == "median":
-            suite.assertEqual(targets[track], new_g.target)
             if targets is None:
                 suite.fail("Invalid test on op:mean|median using no target.")
             if track not in targets:
                 suite.fail("Invalid test on op:mean|median using no target.")
 
+            suite.assertEqual(targets[track], new_g.target)
             delta_target = abs(suite.g.group_counts[group][track][c["id"]] - targets[track])
             last_delta_target = abs(last_seen - targets[track])
             suite.assertTrue(delta_target >= last_delta_target)
@@ -495,7 +495,7 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
                     1: "GCGCGCGC..GCGCGC....GCGC......GC",
                 },
                 "my_other_sample": {
-                    1: "GC......GCGC....GCGCGC..GCGCGCGC",
+                    1: "GC......GCGC....GCGCGC..GCGCGCGCAAAAAAAA",
                 }
         }
         cls.g = Goldilocks(GCRatioStrategy(), cls.sequence_data, length=8, stride=8)
@@ -509,23 +509,26 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
                         1: {"default": 0.75},
                         2: {"default": 0.5},
                         3: {"default": 0.25},
+                        4: {"default": 0},
                     },
                     "my_other_sample": {
                         0: {"default": 0.25},
                         1: {"default": 0.5},
                         2: {"default": 0.75},
                         3: {"default": 1.0},
+                        4: {"default": 0},
                     },
                     "total": {
                         0: {"default": 0.625},
                         1: {"default": 0.625},
                         2: {"default": 0.625},
                         3: {"default": 0.625},
+                        4: {"default": 0},
                     },
                 },
         }
 
-        cls.EXPECTED_NUM_REGION = 4
+        cls.EXPECTED_NUM_REGION = 5
         cls.EXPECTED_REGION_COUNT = cls.EXPECTED_NUM_REGION*3
 
         # Each region gets an additional default counter

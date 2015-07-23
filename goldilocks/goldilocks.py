@@ -1,7 +1,9 @@
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.71"
+__version__ = "0.0.72"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
+
+from strategies import StrategyValue
 
 import numpy as np
 from math import floor, ceil
@@ -228,15 +230,15 @@ class Goldilocks(object):
             for track in self.strategy.TRACKS:
                 self.group_buckets[group][track] = {}
 
-                self.group_counts[group][track] = np.zeros(num_expected_regions)
-                self.group_counts["total"][track] = np.zeros(num_expected_regions)
+                self.group_counts[group][track] = np.zeros(num_expected_regions, dtype=StrategyValue)
+                self.group_counts["total"][track] = np.zeros(num_expected_regions, dtype=StrategyValue)
 
             # Populate additional group counters if using more than just the 'default' track
             if self.MULTI_TRACKED:
-                self.group_counts[group]["default"] = np.zeros(num_expected_regions)
+                self.group_counts[group]["default"] = np.zeros(num_expected_regions, dtype=StrategyValue)
 
         if self.MULTI_TRACKED:
-            self.group_counts["total"]["default"] = np.zeros(num_expected_regions)
+            self.group_counts["total"]["default"] = np.zeros(num_expected_regions, dtype=StrategyValue)
 
         # Automatically conduct census
         self.census()
@@ -279,6 +281,8 @@ class Goldilocks(object):
             chros = {}
             for group in self.groups:
                 chros[group] = {}
+                if len(self.groups[group][chrno]) < size and not self.IS_POS:
+                    print("[WARN] Group:Chrom '%s:%s' is not equal to the known size of '%s'" % (group, chrno, chrno))
                 for track in self.strategy.TRACKS:
                     chro = np.zeros(size, np.int8)
                     chros[group][track] = self.strategy.prepare(chro, self.groups[group][chrno], track, chrom=chrno)
@@ -373,7 +377,20 @@ class Goldilocks(object):
                 q_high = np.percentile(self.group_counts[group][track], 50 + upper_window)
             target = np.percentile(self.group_counts[group][track], 50)
         elif func.lower() == "mean":
-            mean = np.mean(self.group_counts[group][track])
+            # NOTE     : Using `sum` for calculation of the mean
+            # PURPOSE  : `StrategyValue` already represents means or rations
+            #            and a mean of the mean can be accomplished by addition.
+            #            Taking a mean of a set of `StrategyValue` objects
+            #            will yield an incorrect solution.
+            #
+            #            One could force the `dtype` to `np.float64` for
+            #            calculation but this assumes that k is equal for
+            #            all `StrategyValue` in the set (which is true for now).
+            if type(self.group_counts[group][track][0]) == StrategyValue:
+                mean = np.sum(self.group_counts[group][track])
+            else:
+                mean = np.mean(self.group_counts[group][track], dtype=np.float64)
+
             if actual:
                 q_low  = mean - lower_window
                 q_high = mean + upper_window
