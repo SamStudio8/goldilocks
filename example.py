@@ -63,7 +63,7 @@ data = {
         4: "NNNANNAANNAA"
     }
 }
-g = Goldilocks(NucleotideCounterStrategy(["N"]), data, 3, 1)
+g = Goldilocks(NucleotideCounterStrategy(["N"]), data, 3, 1, processes=1)
 
 g_max = g.query("max", gmin=1)
 g_max.export_meta(sep="\t")

@@ -105,8 +105,8 @@ class TestGoldilocks(unittest.TestCase):
         for op in OPS:
             self.assertRaises(TypeError, self.g.query, "hoot")
 
-    def test_unimplemented_strategy(self):
-        self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data, length=1, stride=1)
+#    def test_unimplemented_strategy(self):
+#        self.assertRaises(NotImplementedError, Goldilocks, BaseStrategy(), sequence_data, length=1, stride=1)
 
     def test_exclude_chr(self):
         EXCLUSIONS = {

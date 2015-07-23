@@ -6,11 +6,80 @@ __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 from strategies import StrategyValue
 
 import numpy as np
-from math import floor, ceil
 
 import copy
 import os
 import sys
+from math import floor, ceil
+from multiprocessing import Process, Queue, Pool, Manager
+
+SENTINEL_STOP = b"SSTOP"
+WORKER_STOP = b"WSTOP"
+def census_chrom(work_q, ret_q):
+    from strategies import StrategyValue
+    while True:
+        work_block = work_q.get()
+        if work_block == SENTINEL_STOP:
+            ret_q.put(WORKER_STOP)
+            break
+
+        SIZE = work_block["size"]
+        LENGTH = work_block["length"]
+        STRIDE = work_block["stride"]
+        data = work_block["data"]
+        strategy = work_block["strategy"]
+        chrno = work_block["chrno"]
+        i_offset = work_block["i_offset"]
+        n_regions = work_block["n_regions"]
+
+        print("[SRCH] Chr:%s" % str(chrno))
+        chros = {}
+        for track in strategy.TRACKS:
+            chro = np.zeros(SIZE, np.int8)
+            chros[track] = strategy.prepare(chro, data, track, chrom=chrno)
+
+        regions = {}
+        counts = {}
+        buckets = {}
+        for i, zeropos_start in enumerate(xrange(0, SIZE-LENGTH+1, STRIDE)):
+            onepos_start = zeropos_start + 1
+            zeropos_end = zeropos_start + LENGTH - 1
+            onepos_end = zeropos_end + 1
+
+            regions[i + i_offset] = {
+                "id": i + i_offset,
+                "seq_id": i,
+                "ichr": i,
+                "chr": chrno,
+                "pos_start": onepos_start,
+                "pos_end": onepos_end
+            }
+
+            counts["default"] = np.zeros(n_regions, dtype=StrategyValue)
+            for track in strategy.TRACKS:
+                buckets[track] = {}
+                counts[track] = np.zeros(n_regions, dtype=StrategyValue)
+
+                # Evaluate the prepared region using the selected strategy and track
+                value = strategy.evaluate(chros[track][zeropos_start:onepos_end], track=track)
+                # TODO Should we be ignoring these regions if they are empty?
+                # TODO Config option to include 0 in flter metrics
+                if value not in buckets[track]:
+                    # Add this particular number of variants as a bucket
+                    buckets[track][value] = []
+
+                buckets[track][value].append(i)
+                counts[track][i] = value
+                counts["default"][i] += value
+
+        ret_q.put({
+            "regions": regions,
+            "counts": counts,
+            "buckets": buckets,
+            "i_offset": i_offset,
+            "n_regions": n_regions
+        })
+
 
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
@@ -161,9 +230,10 @@ class Goldilocks(object):
         If either `length` or `stride` are less than one.
 
     """
-    def __init__(self, strategy, data, length, stride, is_pos=False):
+    def __init__(self, strategy, data, length, stride, is_pos=False, processes=1):
 
         self.strategy = strategy
+        self.PROCESSES = processes
         self.IS_POS = False
         if is_pos:
             self.IS_POS = True
@@ -275,53 +345,60 @@ class Goldilocks(object):
         except TypeError:
             chroms = self.chr_max_len.items()
 
-        regions = {}
-        region_i = 0
+        manager = Manager()
+        work_queue = manager.Queue()
+        reply_queue = manager.Queue()
+        pool = Pool(processes=self.PROCESSES)
+        processes = []
+        for _ in range(self.PROCESSES):
+            p = Process(target=census_chrom,
+                        args=(work_queue, reply_queue))
+            processes.append(p)
+            p.start()
+
+        # Add work to do
+        i_offset = 0
         for chrno, size in chroms:
-            chros = {}
+            n_regions = len(xrange(0, size-self.LENGTH+1, self.STRIDE))
             for group in self.groups:
-                chros[group] = {}
                 if len(self.groups[group][chrno]) < size and not self.IS_POS:
                     print("[WARN] Group:Chrom '%s:%s' is not equal to the known size of '%s'" % (group, chrno, chrno))
-                for track in self.strategy.TRACKS:
-                    chro = np.zeros(size, np.int8)
-                    chros[group][track] = self.strategy.prepare(chro, self.groups[group][chrno], track, chrom=chrno)
 
-            print("[SRCH] Chr:%s" % str(chrno))
-            for i, zeropos_start in enumerate(range(0, size-self.LENGTH+1, self.STRIDE)):
-                onepos_start = zeropos_start + 1
-                zeropos_end = zeropos_start + self.LENGTH - 1
-                onepos_end = zeropos_end + 1
-
-                regions[region_i] = {
-                    "id": region_i,
-                    "ichr": i,
-                    "chr": chrno,
-                    "pos_start": onepos_start,
-                    "pos_end": onepos_end
+                work_block = {
+                        "size": size,
+                        "length": self.LENGTH,
+                        "stride": self.STRIDE,
+                        "data": self.groups[group][chrno],
+                        "strategy": self.strategy,
+                        "chrno": chrno,
+                        "n_regions": n_regions,
+                        "i_offset": i_offset
                 }
+                work_queue.put(work_block)
+            i_offset += n_regions
 
-                for group in self.groups:
-                    for track in self.strategy.TRACKS:
-                        # Evaluate the prepared region using the selected strategy and track
-                        value = self.strategy.evaluate(chros[group][track][zeropos_start:onepos_end], track=track)
-                        # TODO Should we be ignoring these regions if they are empty?
-                        # TODO Config option to include 0 in flter metrics
-                        if value not in self.group_buckets[group][track]:
-                            # Add this particular number of variants as a bucket
-                            self.group_buckets[group][track][value] = []
+        # Add sentinels
+        for _ in range(self.PROCESSES):
+            work_queue.put(SENTINEL_STOP)
 
-                        # Add the region id to the bucket
-                        self.group_buckets[group][track][value].append(region_i)
+        # Collect results, wait for all sub-processes to reply to the sentinel
+        regions = {}
+        processes_replied = 0
+        while True:
+            region_block = reply_queue.get()
+            if region_block == WORKER_STOP:
+                processes_replied += 1
+                if processes_replied == self.PROCESSES:
+                    break
+            else:
+                i_offset = region_block["i_offset"]
+                n_regions = region_block["n_regions"]
+                regions.update(region_block["regions"])
 
-                        self.group_counts[group][track][region_i] = value
-                        self.group_counts["total"][track][region_i] += value
-
-                        if self.MULTI_TRACKED:
-                            self.group_counts[group]["default"][region_i] += value
-                            self.group_counts["total"]["default"][region_i] += value
-
-                region_i += 1
+                # Update central values
+                for track in self.strategy.TRACKS:
+                    self.group_buckets[group][track].update(region_block["buckets"][track])
+                    self.group_counts[group][track][i_offset:i_offset+n_regions] = region_block["counts"][track]
 
         # Populate total group_buckets now census is complete
         self.group_buckets["total"] = {}
