@@ -180,6 +180,15 @@ class Goldilocks(object):
         self.sorted_regions = []
         self.target = None
 
+        # Ensure stride and length are valid (>1)
+        if stride < 1:
+            raise ValueError("[FAIL] Stride must be at least 1 base wide.")
+        self.STRIDE = stride
+
+        if length < 1:
+            raise ValueError("[FAIL] Length must be at least 1 base wide.")
+        self.LENGTH = length
+
         # Read data
         self.groups = data
         self.max_chr_max_len = None
@@ -206,6 +215,10 @@ class Goldilocks(object):
                 if len_current_seq > self.chr_max_len[chrom]:
                     self.chr_max_len[chrom] = len_current_seq
 
+        num_expected_regions = 0
+        for chrom in self.chr_max_len:
+            num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
+
         # Initialise group-track counts and buckets
         for group in self.groups:
             self.group_buckets[group] = {}
@@ -215,24 +228,15 @@ class Goldilocks(object):
             for track in self.strategy.TRACKS:
                 self.group_buckets[group][track] = {}
 
-                self.group_counts[group][track] = []
-                self.group_counts["total"][track] = []
+                self.group_counts[group][track] = np.zeros(num_expected_regions)
+                self.group_counts["total"][track] = np.zeros(num_expected_regions)
 
             # Populate additional group counters if using more than just the 'default' track
             if self.MULTI_TRACKED:
-                self.group_counts[group]["default"] = []
+                self.group_counts[group]["default"] = np.zeros(num_expected_regions)
 
         if self.MULTI_TRACKED:
-            self.group_counts["total"]["default"] = []
-
-        # Ensure stride and length are valid (>1)
-        if stride < 1:
-            raise ValueError("[FAIL] Stride must be at least 1 base wide.")
-        self.STRIDE = stride
-
-        if length < 1:
-            raise ValueError("[FAIL] Length must be at least 1 base wide.")
-        self.LENGTH = length
+            self.group_counts["total"]["default"] = np.zeros(num_expected_regions)
 
         # Automatically conduct census
         self.census()
@@ -297,7 +301,6 @@ class Goldilocks(object):
                     for track in self.strategy.TRACKS:
                         # Evaluate the prepared region using the selected strategy and track
                         value = self.strategy.evaluate(chros[group][track][zeropos_start:onepos_end], track=track)
-
                         # TODO Should we be ignoring these regions if they are empty?
                         # TODO Config option to include 0 in flter metrics
                         if value not in self.group_buckets[group][track]:
@@ -307,23 +310,12 @@ class Goldilocks(object):
                         # Add the region id to the bucket
                         self.group_buckets[group][track][value].append(region_i)
 
-                        self.group_counts[group][track].append(value)
-
-                        try:
-                            self.group_counts["total"][track][region_i] += value
-                        except IndexError:
-                            self.group_counts["total"][track].append(value)
+                        self.group_counts[group][track][region_i] = value
+                        self.group_counts["total"][track][region_i] += value
 
                         if self.MULTI_TRACKED:
-                            try:
-                                self.group_counts["total"]["default"][region_i] += value
-                            except IndexError:
-                                self.group_counts["total"]["default"].append(value)
-
-                            try:
-                                self.group_counts[group]["default"][region_i] += value
-                            except IndexError:
-                                self.group_counts[group]["default"].append(value)
+                            self.group_counts[group]["default"][region_i] += value
+                            self.group_counts["total"]["default"][region_i] += value
 
                 region_i += 1
 
@@ -374,21 +366,21 @@ class Goldilocks(object):
         target = None
         if func.lower() == "median":
             if actual:
-                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50) - lower_window
-                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50) + upper_window
+                q_low  = np.percentile(self.group_counts[group][track], 50) - lower_window
+                q_high = np.percentile(self.group_counts[group][track], 50) + upper_window
             else:
-                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 50 - lower_window)
-                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 50 + upper_window)
-            target = np.percentile(np.asarray(self.group_counts[group][track]), 50)
+                q_low  = np.percentile(self.group_counts[group][track], 50 - lower_window)
+                q_high = np.percentile(self.group_counts[group][track], 50 + upper_window)
+            target = np.percentile(self.group_counts[group][track], 50)
         elif func.lower() == "mean":
-            mean = np.mean(np.asarray(self.group_counts[group][track]))
+            mean = np.mean(self.group_counts[group][track])
             if actual:
                 q_low  = mean - lower_window
                 q_high = mean + upper_window
             else:
                 # A crude (but probably 'close enough') calculation for the
                 # mean's percentile standing.
-                track_scores = np.asarray(self.group_counts[group][track])
+                track_scores = self.group_counts[group][track]
 
                 # Center scores around the mean
                 track_scores = track_scores - mean
@@ -398,23 +390,23 @@ class Goldilocks(object):
                 #     is not contained in track_scores...?
                 mean_percentile = (len(track_scores[track_scores <= 0]) / float(len(track_scores))) * 100
 
-                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), mean_percentile - lower_window)
-                q_high = np.percentile(np.asarray(self.group_counts[group][track]), mean_percentile + upper_window)
+                q_low  = np.percentile(self.group_counts[group][track], mean_percentile - lower_window)
+                q_high = np.percentile(self.group_counts[group][track], mean_percentile + upper_window)
 
             target = mean
         elif func.lower() == "max":
-            q_high = np.percentile(np.asarray(self.group_counts[group][track]), 100)
+            q_high = np.percentile(self.group_counts[group][track], 100)
             if actual:
-                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 100) - lower_window
+                q_low  = np.percentile(self.group_counts[group][track], 100) - lower_window
             else:
-                q_low  = np.percentile(np.asarray(self.group_counts[group][track]), 100 - lower_window)
+                q_low  = np.percentile(self.group_counts[group][track], 100 - lower_window)
             target = q_high
         elif func.lower() == "min":
-            q_low = np.percentile(np.asarray(self.group_counts[group][track]), 0)
+            q_low = np.percentile(self.group_counts[group][track], 0)
             if actual:
-                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 0) + upper_window
+                q_high = np.percentile(self.group_counts[group][track], 0) + upper_window
             else:
-                q_high = np.percentile(np.asarray(self.group_counts[group][track]), 0 + upper_window)
+                q_high = np.percentile(self.group_counts[group][track], 0 + upper_window)
             target = q_low
         else:
             raise TypeError("[FAIL] Invalid sorting function: '%s'" % func.lower())
@@ -727,8 +719,8 @@ class Goldilocks(object):
         else:
             #TODO Pretty ugly.
             q_low, q_high, target = self.__apply_filter_func(func, 0, 0, group, actual, track)
-            q_low  = min(np.asarray(self.group_counts[group][track]))
-            q_high = max(np.asarray(self.group_counts[group][track]))
+            q_low  = min(self.group_counts[group][track])
+            q_high = max(self.group_counts[group][track])
 
         # For each "number of variants" bucket: which map the number of variants
         # seen in a region, to all regions that contained that number of variants
