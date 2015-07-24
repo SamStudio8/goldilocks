@@ -8,14 +8,17 @@ from strategies import StrategyValue
 import numpy as np
 
 import copy
+import ctypes
 import os
 import sys
 from math import floor, ceil
-from multiprocessing import Process, Queue, Pool, Manager
+from multiprocessing import Process, Queue, Pool, Manager, Array
 
 SENTINEL_STOP = b"SSTOP"
 WORKER_STOP = b"WSTOP"
-def census_chrom(work_q, ret_q):
+
+"""
+def setup_chrom(work_q, ret_q):
     from strategies import StrategyValue
     while True:
         work_block = work_q.get()
@@ -35,8 +38,10 @@ def census_chrom(work_q, ret_q):
         print("[SRCH] Chr:%s" % str(chrno))
         chros = {}
         for track in strategy.TRACKS:
-            chro = np.zeros(SIZE, np.int8)
-            chros[track] = strategy.prepare(chro, data, track, chrom=chrno)
+            #chro = np.zeros(SIZE, np.int8)
+            shared_chro = Array(ctypes.c_bool, SIZE, lock=False)
+            np_chro = np.frombuffer(shared_chro, dtype=ctypes.c_bool)
+            chros[track] = strategy.prepare(np_chro, data, track, chrom=chrno)
 
         regions = {}
         counts = {}
@@ -60,26 +65,65 @@ def census_chrom(work_q, ret_q):
                 buckets[track] = {}
                 counts[track] = np.zeros(n_regions, dtype=StrategyValue)
 
-                # Evaluate the prepared region using the selected strategy and track
-                value = strategy.evaluate(chros[track][zeropos_start:onepos_end], track=track)
-                # TODO Should we be ignoring these regions if they are empty?
-                # TODO Config option to include 0 in flter metrics
-                if value not in buckets[track]:
-                    # Add this particular number of variants as a bucket
-                    buckets[track][value] = []
+            manager = Manager()
+            wwork_queue = manager.Queue()
+            rreply_queue = manager.Queue()
+            pool = Pool(processes=5)
+            processes = []
+            for _ in range(5):
+                p = Process(target=census_slide,
+                            args=(wwork_queue, rreply_queue))
+                processes.append(p)
+                p.start()
 
-                buckets[track][value].append(i)
-                counts[track][i] = value
-                counts["default"][i] += value
+            for track in strategy.TRACKS:
+                # Add work to do
+                wwork_block = {
+                    "i": i + i_offset,
+                    "s0": zeropos_start,
+                    "e1": onepos_end,
+                    "t": track,
+                }
+                wwork_queue.put(wwork_block)
 
-        ret_q.put({
-            "regions": regions,
-            "counts": counts,
-            "buckets": buckets,
-            "i_offset": i_offset,
-            "n_regions": n_regions
-        })
 
+            # Add sentinels
+            for _ in range(5):
+                wwork_queue.put(SENTINEL_STOP)
+
+            # Collect results, wait for all sub-processes to reply to the sentinel
+            regions = {}
+            processes_replied = 0
+            while True:
+                reply_block = rreply_queue.get()
+                if reply_block == WORKER_STOP:
+                    processes_replied += 1
+                    if processes_replied == 5:
+                        break
+                else:
+                    # Update central values
+                    ii = reply_block["i"]
+                    value = reply_block["value"]
+
+                    # Evaluate the prepared region using the selected strategy and track
+                    # TODO Should we be ignoring these regions if they are empty?
+                    # TODO Config option to include 0 in flter metrics
+                    if value not in buckets[track]:
+                        # Add this particular number of variants as a bucket
+                        buckets[track][value] = []
+
+                    buckets[track][value].append(ii)
+                    counts[track][ii] = value
+                    counts["default"][ii] += value
+
+                    ret_q.put({
+                        "regions": regions,
+                        "counts": counts,
+                        "buckets": buckets,
+                        "i_offset": i_offset,
+                        "n_regions": n_regions
+                    })
+"""
 
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
@@ -287,6 +331,17 @@ class Goldilocks(object):
                 if len_current_seq > self.chr_max_len[chrom]:
                     self.chr_max_len[chrom] = len_current_seq
 
+        self.dataview = {}
+        for group in self.groups:
+            if not is_pos:
+                self.dataview[group] = {}
+                for chrom in self.groups[group]:
+                    #self.dataview[group][chrom] = memoryview(self.groups[group][chrom])
+                    #Array(c_char, len(self.groups[group][chrom]), lock=False)
+                #shared_slide = Array(ctypes.c_bool, size, lock=False)
+                #np_slide = np.frombuffer(shared_slide, dtype=ctypes.c_bool)
+                    pass
+
         num_expected_regions = 0
         for chrom in self.chr_max_len:
             num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
@@ -345,37 +400,98 @@ class Goldilocks(object):
         except TypeError:
             chroms = self.chr_max_len.items()
 
+        def census_slide(work_q, ret_q):
+            from strategies import StrategyValue
+            while True:
+                work_block = work_q.get()
+                if work_block == SENTINEL_STOP:
+                    ret_q.put(WORKER_STOP)
+                    break
+
+                i = work_block["i"]
+                zeropos_start = work_block["s0"]
+                onepos_end = work_block["e1"]
+                track = work_block["t"]
+                group = work_block["g"]
+                chrno = work_block["chrno"]
+                #data = self.dataview[group][chrno][zeropos_start:onepos_end]
+                if not self.IS_POS:
+                    data = self.groups[group][chrno][zeropos_start:onepos_end]
+                else:
+                    data = self.groups[group][chrno]
+                size = work_block["length"]
+
+                #shared_slide = Array(ctypes.c_bool, size, lock=False)
+                #np_slide = np.frombuffer(shared_slide, dtype=ctypes.c_bool)
+                np_slide = np.zeros(size, dtype=np.int8)
+                slide = self.strategy.prepare(np_slide, data, track, chrom=chrno, start=zeropos_start)
+                value = self.strategy.evaluate(slide, track=track)
+
+                ret_q.put({
+                    "value": value,
+                    "i": i,
+                    "group": group,
+                    "track": track
+                })
+
+        # Setup multiprocessing
         manager = Manager()
         work_queue = manager.Queue()
         reply_queue = manager.Queue()
         pool = Pool(processes=self.PROCESSES)
         processes = []
-        for _ in range(self.PROCESSES):
-            p = Process(target=census_chrom,
-                        args=(work_queue, reply_queue))
-            processes.append(p)
-            p.start()
 
-        # Add work to do
-        i_offset = 0
+        chros = {}
+        region_i = 0
         for chrno, size in chroms:
-            n_regions = len(xrange(0, size-self.LENGTH+1, self.STRIDE))
+            queued = 0
+            iter_slides = xrange(0, size - self.LENGTH + 1, self.STRIDE)
+
+            # Set up shared chrom arrays
             for group in self.groups:
                 if len(self.groups[group][chrno]) < size and not self.IS_POS:
                     print("[WARN] Group:Chrom '%s:%s' is not equal to the known size of '%s'" % (group, chrno, chrno))
 
-                work_block = {
-                        "size": size,
-                        "length": self.LENGTH,
-                        "stride": self.STRIDE,
-                        "data": self.groups[group][chrno],
-                        "strategy": self.strategy,
-                        "chrno": chrno,
-                        "n_regions": n_regions,
-                        "i_offset": i_offset
+            # Census regions and queue work blocks for census evaluation
+            for i, zeropos_start in enumerate(iter_slides):
+                onepos_start = zeropos_start + 1
+                zeropos_end = zeropos_start + self.LENGTH - 1
+                onepos_end = zeropos_end + 1
+
+                self.regions[region_i] = {
+                    "id": region_i,
+                    "ichr": i,
+                    "chr": chrno,
+                    "pos_start": onepos_start,
+                    "pos_end": onepos_end
                 }
-                work_queue.put(work_block)
-            i_offset += n_regions
+
+                for group in self.groups:
+                    if self.IS_POS:
+                        #TODO Convert to local offset (evaluate whether to bother queing)
+                        data = self.groups[group][chrno]
+
+                    for track in self.strategy.TRACKS:
+                        # Add work to do
+                        wwork_block = {
+                            "i": region_i,
+                            "s0": zeropos_start,
+                            "e1": onepos_end,
+                            "t": track,
+                            "g": group,
+                            "chrno": chrno,
+                            "length": self.LENGTH
+                        }
+                        work_queue.put(wwork_block)
+                        queued += 1
+                region_i += 1
+            print("[SRCH] Queued %d Regions over Chr:%s" % (queued, str(chrno)))
+
+        for _ in range(self.PROCESSES):
+            p = Process(target=census_slide,
+                        args=(work_queue, reply_queue))
+            processes.append(p)
+            p.start()
 
         # Add sentinels
         for _ in range(self.PROCESSES):
@@ -383,22 +499,40 @@ class Goldilocks(object):
 
         # Collect results, wait for all sub-processes to reply to the sentinel
         regions = {}
+        blocks_received = 0
         processes_replied = 0
         while True:
-            region_block = reply_queue.get()
-            if region_block == WORKER_STOP:
+            reply_block = reply_queue.get()
+            if reply_block == WORKER_STOP:
                 processes_replied += 1
                 if processes_replied == self.PROCESSES:
+                    print("[SRCH] %d Regions Received" % blocks_received)
                     break
             else:
-                i_offset = region_block["i_offset"]
-                n_regions = region_block["n_regions"]
-                regions.update(region_block["regions"])
+                blocks_received += 1
+                reply_i = reply_block["i"]
+                value = reply_block["value"]
+                group = reply_block["group"]
+                track = reply_block["track"]
+
+                # TODO Should we be ignoring these regions if they are empty?
+                # TODO Config option to include 0 in flter metrics
+                if value not in self.group_buckets[group][track]:
+                    # Add this particular number of variants as a bucket
+                    self.group_buckets[group][track][value] = []
+                self.group_buckets[group][track][value].append(reply_i)
+
+                self.group_counts[group][track][reply_i] = value
+                self.group_counts["total"][track][reply_i] += value
+
+                if self.MULTI_TRACKED:
+                    self.group_counts["total"]["default"][reply_i] += value
+                    self.group_counts[group]["default"][reply_i] += value
 
                 # Update central values
-                for track in self.strategy.TRACKS:
-                    self.group_buckets[group][track].update(region_block["buckets"][track])
-                    self.group_counts[group][track][i_offset:i_offset+n_regions] = region_block["counts"][track]
+#                for track in self.strategy.TRACKS:
+#                    self.group_buckets[group][track].update(region_block["buckets"][track])
+#                    self.group_counts[group][track][i_offset:i_offset+n_regions] = region_block["counts"][track]
 
         # Populate total group_buckets now census is complete
         self.group_buckets["total"] = {}
@@ -437,8 +571,6 @@ class Goldilocks(object):
         # Populate super total-default group-track which sums the totals across
         # all tracks in all groups
         self.group_buckets["total"]["default"] = self.__bucketize(super_totals)
-
-        self.regions = regions
 
     #TODO Check that doubling the window size for max and min works as expected
     #TODO Is changing the behaviour (re: window) for different math ops a bad idea...

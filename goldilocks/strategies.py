@@ -172,7 +172,11 @@ class PositionCounterStrategy(BaseStrategy): # pragma: no cover
         # Populate the chromosome array with 1 for each position a variant exists
         #TODO Assuming 1-index, perhaps use a kwarg
         for variant_loc in data:
-            arr[variant_loc-1] = 1
+            variant_loc -= kwargs['start']
+            try:
+                arr[variant_loc-1] = 1
+            except:
+                break
         return arr
 
     def evaluate(self, region, **kwargs):

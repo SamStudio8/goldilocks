@@ -12,7 +12,7 @@ data = {
             1: [1,3,5,7,9,12,15,21,25,51,53,59,91,92,93,95,99,100]
         }
 }
-g = Goldilocks(PositionCounterStrategy(), data, is_pos=True, length=10, stride=1)
+g = Goldilocks(PositionCounterStrategy(), data, is_pos=True, length=10, stride=1, processes=1)
 
 g.query("max", actual_distance=2).export_meta(sep="\t", group="total")
 
