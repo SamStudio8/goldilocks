@@ -17,114 +17,6 @@ from multiprocessing import Process, Queue, Pool, Manager, Array
 SENTINEL_STOP = b"SSTOP"
 WORKER_STOP = b"WSTOP"
 
-"""
-def setup_chrom(work_q, ret_q):
-    from strategies import StrategyValue
-    while True:
-        work_block = work_q.get()
-        if work_block == SENTINEL_STOP:
-            ret_q.put(WORKER_STOP)
-            break
-
-        SIZE = work_block["size"]
-        LENGTH = work_block["length"]
-        STRIDE = work_block["stride"]
-        data = work_block["data"]
-        strategy = work_block["strategy"]
-        chrno = work_block["chrno"]
-        i_offset = work_block["i_offset"]
-        n_regions = work_block["n_regions"]
-
-        print("[SRCH] Chr:%s" % str(chrno))
-        chros = {}
-        for track in strategy.TRACKS:
-            #chro = np.zeros(SIZE, np.int8)
-            shared_chro = Array(ctypes.c_bool, SIZE, lock=False)
-            np_chro = np.frombuffer(shared_chro, dtype=ctypes.c_bool)
-            chros[track] = strategy.prepare(np_chro, data, track, chrom=chrno)
-
-        regions = {}
-        counts = {}
-        buckets = {}
-        for i, zeropos_start in enumerate(xrange(0, SIZE-LENGTH+1, STRIDE)):
-            onepos_start = zeropos_start + 1
-            zeropos_end = zeropos_start + LENGTH - 1
-            onepos_end = zeropos_end + 1
-
-            regions[i + i_offset] = {
-                "id": i + i_offset,
-                "seq_id": i,
-                "ichr": i,
-                "chr": chrno,
-                "pos_start": onepos_start,
-                "pos_end": onepos_end
-            }
-
-            counts["default"] = np.zeros(n_regions, dtype=StrategyValue)
-            for track in strategy.TRACKS:
-                buckets[track] = {}
-                counts[track] = np.zeros(n_regions, dtype=StrategyValue)
-
-            manager = Manager()
-            wwork_queue = manager.Queue()
-            rreply_queue = manager.Queue()
-            pool = Pool(processes=5)
-            processes = []
-            for _ in range(5):
-                p = Process(target=census_slide,
-                            args=(wwork_queue, rreply_queue))
-                processes.append(p)
-                p.start()
-
-            for track in strategy.TRACKS:
-                # Add work to do
-                wwork_block = {
-                    "i": i + i_offset,
-                    "s0": zeropos_start,
-                    "e1": onepos_end,
-                    "t": track,
-                }
-                wwork_queue.put(wwork_block)
-
-
-            # Add sentinels
-            for _ in range(5):
-                wwork_queue.put(SENTINEL_STOP)
-
-            # Collect results, wait for all sub-processes to reply to the sentinel
-            regions = {}
-            processes_replied = 0
-            while True:
-                reply_block = rreply_queue.get()
-                if reply_block == WORKER_STOP:
-                    processes_replied += 1
-                    if processes_replied == 5:
-                        break
-                else:
-                    # Update central values
-                    ii = reply_block["i"]
-                    value = reply_block["value"]
-
-                    # Evaluate the prepared region using the selected strategy and track
-                    # TODO Should we be ignoring these regions if they are empty?
-                    # TODO Config option to include 0 in flter metrics
-                    if value not in buckets[track]:
-                        # Add this particular number of variants as a bucket
-                        buckets[track][value] = []
-
-                    buckets[track][value].append(ii)
-                    counts[track][ii] = value
-                    counts["default"][ii] += value
-
-                    ret_q.put({
-                        "regions": regions,
-                        "counts": counts,
-                        "buckets": buckets,
-                        "i_offset": i_offset,
-                        "n_regions": n_regions
-                    })
-"""
-
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
 # TODO Support more interesting sequence formats? FASTQ reading?
@@ -331,17 +223,6 @@ class Goldilocks(object):
                 if len_current_seq > self.chr_max_len[chrom]:
                     self.chr_max_len[chrom] = len_current_seq
 
-        self.dataview = {}
-        for group in self.groups:
-            if not is_pos:
-                self.dataview[group] = {}
-                for chrom in self.groups[group]:
-                    #self.dataview[group][chrom] = memoryview(self.groups[group][chrom])
-                    #Array(c_char, len(self.groups[group][chrom]), lock=False)
-                #shared_slide = Array(ctypes.c_bool, size, lock=False)
-                #np_slide = np.frombuffer(shared_slide, dtype=ctypes.c_bool)
-                    pass
-
         num_expected_regions = 0
         for chrom in self.chr_max_len:
             num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
@@ -414,15 +295,13 @@ class Goldilocks(object):
                 track = work_block["t"]
                 group = work_block["g"]
                 chrno = work_block["chrno"]
-                #data = self.dataview[group][chrno][zeropos_start:onepos_end]
+                size = work_block["length"]
                 if not self.IS_POS:
-                    data = self.groups[group][chrno][zeropos_start:onepos_end]
+                    # help
+                    data = buffer(self.groups[group][chrno], zeropos_start, size)
                 else:
                     data = self.groups[group][chrno]
-                size = work_block["length"]
 
-                #shared_slide = Array(ctypes.c_bool, size, lock=False)
-                #np_slide = np.frombuffer(shared_slide, dtype=ctypes.c_bool)
                 np_slide = np.zeros(size, dtype=np.int8)
                 slide = self.strategy.prepare(np_slide, data, track, chrom=chrno, start=zeropos_start)
                 value = self.strategy.evaluate(slide, track=track)
