@@ -3,7 +3,7 @@ __copyright__ = "Copyright (c) Sam Nicholls"
 __version__ = "0.0.72"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
-from strategies import StrategyValue
+from strategies import StrategyValue, PositionCounterStrategy
 
 import numpy as np
 
@@ -173,7 +173,6 @@ class Goldilocks(object):
         self.IS_POS = False
         if is_pos:
             self.IS_POS = True
-            from strategies import PositionCounterStrategy
             print("[WARN] Positional data expected as input, forcing selection of PositionCounterStrategy.")
             self.strategy = PositionCounterStrategy()
 
@@ -282,7 +281,6 @@ class Goldilocks(object):
             chroms = self.chr_max_len.items()
 
         def census_slide(work_q, ret_q):
-            from strategies import StrategyValue
             while True:
                 work_block = work_q.get()
                 if work_block == SENTINEL_STOP:
@@ -298,7 +296,8 @@ class Goldilocks(object):
                 size = work_block["length"]
                 if not self.IS_POS:
                     # help
-                    data = buffer(self.groups[group][chrno], zeropos_start, size)
+                    #data = buffer(self.groups[group][chrno], zeropos_start, size)
+                    data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
                 else:
                     data = self.groups[group][chrno]
 
