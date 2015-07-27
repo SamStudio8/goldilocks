@@ -12,7 +12,7 @@ import ctypes
 import os
 import sys
 from math import floor, ceil
-from multiprocessing import Process, Queue, Pool, Manager, Array
+from multiprocessing import Process, Queue, Pool, Array
 
 SENTINEL_STOP = b"SSTOP"
 WORKER_STOP = b"WSTOP"
@@ -296,8 +296,8 @@ class Goldilocks(object):
                 size = work_block["length"]
                 if not self.IS_POS:
                     # help
-                    #data = buffer(self.groups[group][chrno], zeropos_start, size)
-                    data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
+                    data = buffer(self.groups[group][chrno], zeropos_start, size)
+                    #data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
                 else:
                     data = self.groups[group][chrno]
 
@@ -313,9 +313,8 @@ class Goldilocks(object):
                 })
 
         # Setup multiprocessing
-        manager = Manager()
-        work_queue = manager.Queue()
-        reply_queue = manager.Queue()
+        work_queue = Queue()
+        reply_queue = Queue()
         pool = Pool(processes=self.PROCESSES)
         processes = []
 
