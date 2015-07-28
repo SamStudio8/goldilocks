@@ -173,10 +173,11 @@ class PositionCounterStrategy(BaseStrategy): # pragma: no cover
         #TODO Assuming 1-index, perhaps use a kwarg
         for variant_loc in data:
             variant_loc -= kwargs['start']
-            try:
-                arr[variant_loc-1] = 1
-            except:
-                break
+            if variant_loc > 0:
+                try:
+                    arr[variant_loc-1] = 1
+                except:
+                    break
         return arr
 
     def evaluate(self, region, **kwargs):
