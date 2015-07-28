@@ -206,7 +206,7 @@ class TestGoldilocksRegression_NCounter(unittest.TestCase):
         number_comparisons = 0
         for region_i, region_data in self.g.regions.items():
             number_comparisons += 1
-            self.assertEqual(self.EXPECTED_REGIONS[region_data["chr"]][region_data["ichr"]], self.g.group_counts["GroupOne"]["N"][region_i])
+            self.assertEqual(self.EXPECTED_REGIONS[region_data["chr"]][region_data["ichr"]], self.g.counter_matrix[self.g._get_group_id("GroupOne"), self.g._get_track_id("N"), region_i])
         self.assertEqual(self.EXPECTED_REGION_COUNT, number_comparisons)
 
     def test_number_buckets(self):

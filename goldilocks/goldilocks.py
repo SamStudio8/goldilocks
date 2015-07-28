@@ -1,9 +1,11 @@
+from __future__ import absolute_import
+
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
 __version__ = "0.0.72"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
-from strategies import StrategyValue, PositionCounterStrategy
+from .strategies import StrategyValue, PositionCounterStrategy
 
 import numpy as np
 
@@ -177,7 +179,6 @@ class Goldilocks(object):
 
         self.groups = {}
 
-        self.group_counts = {"total": {}}
         self.group_buckets = {"total": {}}
 
         self.regions = {}
@@ -224,23 +225,14 @@ class Goldilocks(object):
             num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
 
         # Initialise group-track counts and buckets
+        self.counter_matrix = np.frombuffer(Array(ctypes.c_float, num_expected_regions * (len(self.strategy.TRACKS)+1) * (len(self.groups)+1), lock = False), dtype=ctypes.c_float)
+        self.counter_matrix = self.counter_matrix.reshape(len(self.groups)+1, len(self.strategy.TRACKS)+1, num_expected_regions)
         for group in self.groups:
             self.group_buckets[group] = {}
-            self.group_counts[group] = {}
 
             # Initialise storage for tracks
             for track in self.strategy.TRACKS:
                 self.group_buckets[group][track] = {}
-
-                self.group_counts[group][track] = np.zeros(num_expected_regions, dtype=StrategyValue)
-                self.group_counts["total"][track] = np.zeros(num_expected_regions, dtype=StrategyValue)
-
-            # Populate additional group counters if using more than just the 'default' track
-            if self.MULTI_TRACKED:
-                self.group_counts[group]["default"] = np.zeros(num_expected_regions, dtype=StrategyValue)
-
-        if self.MULTI_TRACKED:
-            self.group_counts["total"]["default"] = np.zeros(num_expected_regions, dtype=StrategyValue)
 
         # Automatically conduct census
         self.census()
@@ -277,18 +269,19 @@ class Goldilocks(object):
         except TypeError:
             chroms = self.chr_max_len.items()
 
-        def census_slide(work_q, ret_q):
+        def census_slide(work_q):
             while True:
                 work_block = work_q.get()
                 if work_block is None:
-                    ret_q.put(None)
-                    break
+                    return
 
                 i = work_block["i"]
                 zeropos_start = work_block["s0"]
-                onepos_end = work_block["e1"]
+                #onepos_end = work_block["e1"]
                 track = work_block["t"]
+                track_id = work_block["tid"]
                 group = work_block["g"]
+                group_id = work_block["gid"]
                 chrno = work_block["chrno"]
                 size = work_block["length"]
                 if not self.IS_POS:
@@ -302,16 +295,10 @@ class Goldilocks(object):
                 slide = self.strategy.prepare(np_slide, data, track, chrom=chrno, start=zeropos_start)
                 value = self.strategy.evaluate(slide, track=track)
 
-                ret_q.put({
-                    "value": value,
-                    "i": i,
-                    "group": group,
-                    "track": track
-                })
+                self.counter_matrix[group_id, track_id, i] = value
 
         # Setup multiprocessing
         work_queue = Queue()
-        reply_queue = Queue()
         processes = []
 
         chros = {}
@@ -340,14 +327,19 @@ class Goldilocks(object):
                 }
 
                 for group in self.groups:
+                    group_id = self._get_group_id(group)
                     for track in self.strategy.TRACKS:
+                        track_id = self._get_track_id(track)
+
                         # Add work to do
                         wwork_block = {
                             "i": region_i,
                             "s0": zeropos_start,
-                            "e1": onepos_end,
+                            #"e1": onepos_end,
                             "t": track,
+                            "tid": track_id,
                             "g": group,
+                            "gid": group_id,
                             "chrno": chrno,
                             "length": self.LENGTH
                         }
@@ -358,7 +350,8 @@ class Goldilocks(object):
 
         for _ in range(self.PROCESSES):
             p = Process(target=census_slide,
-                        args=(work_queue, reply_queue))
+                        args=(work_queue,))
+            #p.daemon = True
             processes.append(p)
 
         for p in processes:
@@ -368,92 +361,56 @@ class Goldilocks(object):
         for _ in range(self.PROCESSES):
             work_queue.put(None)
 
-#        for p in processes:
-#            p.join()
+        # Wait for processes to complete work
+        for p in processes:
+            p.join()
 
-        # Collect results, wait for all sub-processes to reply to the sentinel
-        regions = {}
-        blocks_received = 0
-        processes_replied = 0
-        while True:
-            reply_block = reply_queue.get()
-            if reply_block is None:
-                processes_replied += 1
-                if processes_replied == self.PROCESSES:
-                    print("[SRCH] %d Regions Received" % blocks_received)
-                    break
-            else:
-                blocks_received += 1
-                reply_i = reply_block["i"]
-                value = reply_block["value"]
-                group = reply_block["group"]
-                track = reply_block["track"]
-
-                # TODO Should we be ignoring these regions if they are empty?
-                # TODO Config option to include 0 in flter metrics
-                if value not in self.group_buckets[group][track]:
-                    # Add this particular number of variants as a bucket
-                    self.group_buckets[group][track][value] = []
-                self.group_buckets[group][track][value].append(reply_i)
-
-                self.group_counts[group][track][reply_i] = value
-                self.group_counts["total"][track][reply_i] += value
-
-                if self.MULTI_TRACKED:
-                    self.group_counts["total"]["default"][reply_i] += value
-                    self.group_counts[group]["default"][reply_i] += value
-
-        # Populate total group_buckets now census is complete
-        self.group_buckets["total"] = {}
-        super_totals = []
-
-        ggroups = list(sorted(self.groups.keys()))
-        ggroups.append("total")
-
-        for count_group in ggroups:
-            group_totals = []
+        # Aggregate counters
+        for group in self.groups:
+            group_id = self._get_group_id(group)
             for track in self.strategy.TRACKS:
-                totals = []
-                for region_id, value in enumerate(self.group_counts[count_group][track]):
-                    try:
-                        totals[region_id] += value
-                    except IndexError:
-                        totals.append(value)
+                track_id = self._get_track_id(track)
+                self.counter_matrix[0, track_id, ] += self.counter_matrix[group_id, track_id, ]
+                self.counter_matrix[0, 0, ] += self.counter_matrix[group_id, track_id, ]
 
-                    if count_group == "total":
-                    # Total track already stores sums, don't want to count
-                    # everything twice by using tracks in the non-total group
-                        try:
-                            super_totals[region_id] += value
-                        except IndexError:
-                            super_totals.append(value)
-                    else:
-                        try:
-                            group_totals[region_id] += value
-                        except IndexError:
-                            group_totals.append(value)
+            if self.MULTI_TRACKED:
+                self.counter_matrix[group_id, 0, ] = np.sum(self.counter_matrix[group_id], axis=0)
 
-                self.group_buckets[count_group][track] = self.__bucketize(totals)
+        # Aggregate buckets
+        for group in self.groups:
+            group_id = self._get_group_id(group)
+            self.group_buckets[group]["default"] = self.__bucketize(self.counter_matrix[group_id, 0, ])
+            for track in self.strategy.TRACKS:
+                track_id = self._get_track_id(track)
+                self.group_buckets[group][track] = self.__bucketize(self.counter_matrix[group_id, track_id, ])
+                self.group_buckets["total"][track] = self.__bucketize(self.counter_matrix[0, track_id, ])
+        self.group_buckets["total"]["default"] = self.__bucketize(self.counter_matrix[0, 0, ])
 
-            self.group_buckets[count_group]["default"] = self.__bucketize(group_totals)
+    def _get_group_id(self, group_name):
+        if group_name == "total":
+            return 0
+        return (sorted(self.groups.keys()).index(group_name)) + 1
 
-        # Populate super total-default group-track which sums the totals across
-        # all tracks in all groups
-        self.group_buckets["total"]["default"] = self.__bucketize(super_totals)
+    def _get_track_id(self, track_name):
+        if track_name == "default":
+            return 0
+        return (sorted(self.strategy.TRACKS).index(track_name)) + 1
 
     #TODO Check that doubling the window size for max and min works as expected
     #TODO Is changing the behaviour (re: window) for different math ops a bad idea...
     def __apply_filter_func(self, func, lower_window, upper_window, group, actual, track):
+        group_id = self._get_group_id(group)
+        track_id = self._get_track_id(track)
 
         target = None
         if func.lower() == "median":
             if actual:
-                q_low  = np.percentile(self.group_counts[group][track], 50) - lower_window
-                q_high = np.percentile(self.group_counts[group][track], 50) + upper_window
+                q_low  = np.percentile(self.counter_matrix[group_id, track_id, ], 50) - lower_window
+                q_high = np.percentile(self.counter_matrix[group_id, track_id, ], 50) + upper_window
             else:
-                q_low  = np.percentile(self.group_counts[group][track], 50 - lower_window)
-                q_high = np.percentile(self.group_counts[group][track], 50 + upper_window)
-            target = np.percentile(self.group_counts[group][track], 50)
+                q_low  = np.percentile(self.counter_matrix[group_id, track_id, ], 50 - lower_window)
+                q_high = np.percentile(self.counter_matrix[group_id, track_id, ], 50 + upper_window)
+            target = np.percentile(self.counter_matrix[group_id, track_id, ], 50)
         elif func.lower() == "mean":
             # NOTE     : Using `sum` for calculation of the mean
             # PURPOSE  : `StrategyValue` already represents means or rations
@@ -464,10 +421,11 @@ class Goldilocks(object):
             #            One could force the `dtype` to `np.float64` for
             #            calculation but this assumes that k is equal for
             #            all `StrategyValue` in the set (which is true for now).
-            if type(self.group_counts[group][track][0]) == StrategyValue:
-                mean = np.sum(self.group_counts[group][track])
-            else:
-                mean = np.mean(self.group_counts[group][track], dtype=np.float64)
+#            if type(self.group_counts[group][track][0]) == StrategyValue:
+#                mean = np.sum(self.group_counts[group][track])
+#            else:
+#                mean = np.mean(self.group_counts[group][track], dtype=np.float64)
+            mean = np.mean(self.counter_matrix[group_id, track_id, ], dtype=np.float64)
 
             if actual:
                 q_low  = mean - lower_window
@@ -475,7 +433,7 @@ class Goldilocks(object):
             else:
                 # A crude (but probably 'close enough') calculation for the
                 # mean's percentile standing.
-                track_scores = self.group_counts[group][track]
+                track_scores = self.counter_matrix[group_id, track_id, ]
 
                 # Center scores around the mean
                 track_scores = track_scores - mean
@@ -485,23 +443,23 @@ class Goldilocks(object):
                 #     is not contained in track_scores...?
                 mean_percentile = (len(track_scores[track_scores <= 0]) / float(len(track_scores))) * 100
 
-                q_low  = np.percentile(self.group_counts[group][track], mean_percentile - lower_window)
-                q_high = np.percentile(self.group_counts[group][track], mean_percentile + upper_window)
+                q_low  = np.percentile(self.counter_matrix[group_id, track_id, ], mean_percentile - lower_window)
+                q_high = np.percentile(self.counter_matrix[group_id, track_id, ], mean_percentile + upper_window)
 
             target = mean
         elif func.lower() == "max":
-            q_high = np.percentile(self.group_counts[group][track], 100)
+            q_high = np.percentile(self.counter_matrix[group_id, track_id, ], 100)
             if actual:
-                q_low  = np.percentile(self.group_counts[group][track], 100) - lower_window
+                q_low  = np.percentile(self.counter_matrix[group_id, track_id, ], 100) - lower_window
             else:
-                q_low  = np.percentile(self.group_counts[group][track], 100 - lower_window)
+                q_low  = np.percentile(self.counter_matrix[group_id, track_id, ], 100 - lower_window)
             target = q_high
         elif func.lower() == "min":
-            q_low = np.percentile(self.group_counts[group][track], 0)
+            q_low = np.percentile(self.counter_matrix[group_id, track_id, ], 0)
             if actual:
-                q_high = np.percentile(self.group_counts[group][track], 0) + upper_window
+                q_high = np.percentile(self.counter_matrix[group_id, track_id, ], 0) + upper_window
             else:
-                q_high = np.percentile(self.group_counts[group][track], 0 + upper_window)
+                q_high = np.percentile(self.counter_matrix[group_id, track_id, ], 0 + upper_window)
             target = q_low
         else:
             raise TypeError("[FAIL] Invalid sorting function: '%s'" % func.lower())
@@ -586,9 +544,9 @@ class Goldilocks(object):
             elif name == "end_gte":
                 ret = __exclude_end(region_dict, 1, to_apply["end_gte"])
             elif name == "region_group_lte":
-                ret = __exclude_val(self.group_counts[group][track][region_dict["id"]], -1, self.group_counts[to_apply["region_group_lte"]][track][region_dict["id"]])
+                ret = __exclude_val(self.counter_matrix[group_id, track_id, region_dict["id"]], -1, self.counter_matrix[self._get_group_id(to_apply["region_group_lte"]), track_id, region_dict["id"]])
             elif name == "region_group_gte":
-                ret = __exclude_val(self.group_counts[group][track][region_dict["id"]], 1, self.group_counts[to_apply["region_group_lte"]][track][region_dict["id"]])
+                ret = __exclude_val(self.counter_matrix[group_id, track_id, region_dict["id"]], 1, self.counter_matrix[self._get_group_id(to_apply["region_group_lte"]), track_id, region_dict["id"]])
             else:
                 if name in self.chr_max_len:
                     # It's probably a chromosome dict, do nothing.
@@ -784,6 +742,9 @@ class Goldilocks(object):
         distance = None
         actual = False
 
+        group_id = self._get_group_id(group)
+        track_id = self._get_track_id(track)
+
         if actual_distance is not None and percentile_distance is not None:
             raise ValueError("[FAIL] Cannot filter by both actual_distance and percentile_difference. Select one.")
 
@@ -814,8 +775,8 @@ class Goldilocks(object):
         else:
             #TODO Pretty ugly.
             q_low, q_high, target = self.__apply_filter_func(func, 0, 0, group, actual, track)
-            q_low  = min(self.group_counts[group][track])
-            q_high = max(self.group_counts[group][track])
+            q_low  = min(self.counter_matrix[group_id, track_id, ])
+            q_high = max(self.counter_matrix[group_id, track_id, ])
 
         # For each "number of variants" bucket: which map the number of variants
         # seen in a region, to all regions that contained that number of variants
@@ -836,13 +797,13 @@ class Goldilocks(object):
         #TODO Calculate distance and store it, then reserve sorting until
         # returning results to save time
         for region in sorted(self.regions,
-                    key=lambda x: (abs(self.group_counts[group][track][x] - target))):
+                    key=lambda x: (abs(self.counter_matrix[group_id, track_id, x] - target))):
 
             num_total += 1
             chosen = False
             if region in candidates:
                 num_selected += 1
-                if not self.__check_exclusions(exclusions, self.regions[region], group, track, use_and, use_chrom) and not self.__check_exclude_minmax(self.group_counts[group][track][self.regions[region]["id"]], gmin, gmax):
+                if not self.__check_exclusions(exclusions, self.regions[region], group, track, use_and, use_chrom) and not self.__check_exclude_minmax(self.counter_matrix[group_id, track_id, self.regions[region]["id"]], gmin, gmax):
                     chosen = True
                     sorted_regions.append(region)
                 else:
@@ -1079,7 +1040,7 @@ class Goldilocks(object):
                         "%s-%s" % (g, t),
                         str(region["chr"]),
                         str(region["ichr"]),
-                        str(self.group_counts[g][t][r])
+                        str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r])
                     ]))
             count += 1
 
@@ -1121,7 +1082,7 @@ class Goldilocks(object):
             values_string = ""
             for g in groups:
                 for t in tracks:
-                    values_string += str(self.group_counts[g][t][r])
+                    values_string += str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r])
                     values_string += sep
             values_string = values_string[:-1]
             to.write((sep.join([

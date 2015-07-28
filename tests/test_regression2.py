@@ -68,7 +68,7 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
     print(candidates) # Show some evidence the test is working...
     for i, c in enumerate(candidates):
         # Test value matches expecting region value
-        suite.assertEqual(suite.g.group_counts[group][track][c["id"]],
+        suite.assertEqual(suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]],
                 suite.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
 
         # Test region is actually correct
@@ -99,19 +99,19 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                     prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]], track)
                     total += suite.g.strategy.evaluate(prepared, track=track)
 
-        suite.assertEqual(suite.g.group_counts[group][track][c["id"]], total)
+        suite.assertEqual(suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]], total)
 
         # Test expected rank
         suite.assertEqual(EXPECTED_RANK[track][i], c["id"])
 
         # Test values are ordered
         if last_seen is None:
-            last_seen = suite.g.group_counts[group][track][c["id"]]
+            last_seen = suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]]
 
         if op == "max":
-            suite.assertTrue(suite.g.group_counts[group][track][c["id"]] <= last_seen)
+            suite.assertTrue(suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]] <= last_seen)
         elif op == "min":
-            suite.assertTrue(suite.g.group_counts[group][track][c["id"]] >= last_seen)
+            suite.assertTrue(suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]] >= last_seen)
         elif op == "mean" or op == "median":
             if targets is None:
                 suite.fail("Invalid test on op:mean|median using no target.")
@@ -119,12 +119,12 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                 suite.fail("Invalid test on op:mean|median using no target.")
 
             suite.assertEqual(targets[track], new_g.target)
-            delta_target = abs(suite.g.group_counts[group][track][c["id"]] - targets[track])
+            delta_target = abs(suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]] - targets[track])
             last_delta_target = abs(last_seen - targets[track])
             suite.assertTrue(delta_target >= last_delta_target)
         else:
             suite.fail("Invalid op.")
-        last_seen = suite.g.group_counts[group][track][c["id"]]
+        last_seen = suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]]
 
         number_comparisons += 1
 
@@ -289,16 +289,18 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
         the regions dictionary."""
 
         number_comparisons = 0
-        for group in self.g.group_counts:
-            for track in self.g.group_counts[group]:
-                for region_i, value in enumerate(self.g.group_counts[group][track]):
+        ggroups = self.g.groups.keys() + ["total"]
+        ttracks = self.g.strategy.TRACKS + ["default"]
+        for group in ggroups:
+            for track in ttracks:
+                for region_i, value in enumerate(self.g.counter_matrix[self.g._get_group_id(group), self.g._get_track_id(track),]):
                     # Get this region_i's chrom and ichr from the region data
                     chrom = self.g.regions[region_i]["chr"]
                     ichr = self.g.regions[region_i]["ichr"]
+                    print group, track, region_i, ":", self.EXPECTED_REGIONS[chrom][group][ichr][track], value
                     self.assertEqual(self.EXPECTED_REGIONS[chrom][group][ichr][track], value)
 
                     number_comparisons += 1
-                    ichr += 1
         self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
 
     def test_group_track_bucket_contents(self):
@@ -313,7 +315,7 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
             for track in self.g.group_buckets[group]:
                 for bucket in self.g.group_buckets[group][track]:
                     for region_id in self.g.group_buckets[group][track][bucket]:
-                        self.assertEqual(self.g.group_counts[group][track][region_id], bucket)
+                        self.assertEqual(self.g.counter_matrix[self.g._get_group_id(group), self.g._get_track_id(track), region_id], bucket)
                         number_comparisons += 1
         self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
 
@@ -433,9 +435,9 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
         the regions dictionary."""
 
         number_comparisons = 0
-        for group in self.g.group_counts:
-            for track in self.g.group_counts[group]:
-                for region_i, value in enumerate(self.g.group_counts[group][track]):
+        for group in self.g.groups:
+            for track in self.g.strategy.TRACKS:
+                for region_i, value in enumerate(self.g.counter_matrix[self.g._get_group_id(group), self.g._get_track_id(track),]):
                     # Get this region_i's chrom and ichr from the region data
                     chrom = self.g.regions[region_i]["chr"]
                     ichr = self.g.regions[region_i]["ichr"]
@@ -457,7 +459,7 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
             for track in self.g.group_buckets[group]:
                 for bucket in self.g.group_buckets[group][track]:
                     for region_id in self.g.group_buckets[group][track][bucket]:
-                        self.assertEqual(self.g.group_counts[group][track][region_id], bucket)
+                        self.assertEqual(self.g.counter_matrix[self.g._get_group_id(group), self.g._get_track_id(track), region_id], bucket)
                         number_comparisons += 1
         self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
 
@@ -542,16 +544,17 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
         the regions dictionary."""
 
         number_comparisons = 0
-        for group in self.g.group_counts:
-            for track in self.g.group_counts[group]:
-                for region_i, value in enumerate(self.g.group_counts[group][track]):
+        ggroups = self.g.groups.keys() + ["total"]
+        ttracks = self.g.strategy.TRACKS + ["default"]
+        for group in ggroups:
+            for track in ttracks:
+                for region_i, value in enumerate(self.g.counter_matrix[self.g._get_group_id(group), self.g._get_track_id(track),]):
                     # Get this region_i's chrom and ichr from the region data
                     chrom = self.g.regions[region_i]["chr"]
                     ichr = self.g.regions[region_i]["ichr"]
                     self.assertEqual(self.EXPECTED_REGIONS[chrom][group][ichr][track], value)
 
                     number_comparisons += 1
-                    ichr += 1
         self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
 
     def test_group_track_bucket_contents(self):
@@ -566,7 +569,7 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
             for track in self.g.group_buckets[group]:
                 for bucket in self.g.group_buckets[group][track]:
                     for region_id in self.g.group_buckets[group][track][bucket]:
-                        self.assertEqual(self.g.group_counts[group][track][region_id], bucket)
+                        self.assertEqual(self.g.counter_matrix[self.g._get_group_id(group), self.g._get_track_id(track), region_id], bucket)
                         number_comparisons += 1
         self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
 
