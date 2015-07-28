@@ -14,9 +14,6 @@ import sys
 from math import floor, ceil
 from multiprocessing import Process, Queue, Pool, Array
 
-SENTINEL_STOP = b"SSTOP"
-WORKER_STOP = b"WSTOP"
-
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
 # TODO Support more interesting sequence formats? FASTQ reading?
@@ -166,7 +163,7 @@ class Goldilocks(object):
         If either `length` or `stride` are less than one.
 
     """
-    def __init__(self, strategy, data, length, stride, is_pos=False, processes=1):
+    def __init__(self, strategy, data, length, stride, is_pos=False, processes=2):
 
         self.strategy = strategy
         self.PROCESSES = processes
@@ -283,8 +280,8 @@ class Goldilocks(object):
         def census_slide(work_q, ret_q):
             while True:
                 work_block = work_q.get()
-                if work_block == SENTINEL_STOP:
-                    ret_q.put(WORKER_STOP)
+                if work_block is None:
+                    ret_q.put(None)
                     break
 
                 i = work_block["i"]
@@ -315,7 +312,6 @@ class Goldilocks(object):
         # Setup multiprocessing
         work_queue = Queue()
         reply_queue = Queue()
-        pool = Pool(processes=self.PROCESSES)
         processes = []
 
         chros = {}
@@ -344,10 +340,6 @@ class Goldilocks(object):
                 }
 
                 for group in self.groups:
-                    if self.IS_POS:
-                        #TODO Convert to local offset (evaluate whether to bother queing)
-                        data = self.groups[group][chrno]
-
                     for track in self.strategy.TRACKS:
                         # Add work to do
                         wwork_block = {
@@ -368,11 +360,16 @@ class Goldilocks(object):
             p = Process(target=census_slide,
                         args=(work_queue, reply_queue))
             processes.append(p)
+
+        for p in processes:
             p.start()
 
         # Add sentinels
         for _ in range(self.PROCESSES):
-            work_queue.put(SENTINEL_STOP)
+            work_queue.put(None)
+
+#        for p in processes:
+#            p.join()
 
         # Collect results, wait for all sub-processes to reply to the sentinel
         regions = {}
@@ -380,7 +377,7 @@ class Goldilocks(object):
         processes_replied = 0
         while True:
             reply_block = reply_queue.get()
-            if reply_block == WORKER_STOP:
+            if reply_block is None:
                 processes_replied += 1
                 if processes_replied == self.PROCESSES:
                     print("[SRCH] %d Regions Received" % blocks_received)
@@ -405,11 +402,6 @@ class Goldilocks(object):
                 if self.MULTI_TRACKED:
                     self.group_counts["total"]["default"][reply_i] += value
                     self.group_counts[group]["default"][reply_i] += value
-
-                # Update central values
-#                for track in self.strategy.TRACKS:
-#                    self.group_buckets[group][track].update(region_block["buckets"][track])
-#                    self.group_counts[group][track][i_offset:i_offset+n_regions] = region_block["counts"][track]
 
         # Populate total group_buckets now census is complete
         self.group_buckets["total"] = {}
