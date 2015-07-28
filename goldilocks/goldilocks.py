@@ -371,10 +371,10 @@ class Goldilocks(object):
             for track in self.strategy.TRACKS:
                 track_id = self._get_track_id(track)
                 self.counter_matrix[0, track_id, ] += self.counter_matrix[group_id, track_id, ]
-                self.counter_matrix[0, 0, ] += self.counter_matrix[group_id, track_id, ]
 
             if self.MULTI_TRACKED:
                 self.counter_matrix[group_id, 0, ] = np.sum(self.counter_matrix[group_id], axis=0)
+        self.counter_matrix[0, 0, ] += np.sum(self.counter_matrix[0], axis=0)
 
         # Aggregate buckets
         for group in self.groups:

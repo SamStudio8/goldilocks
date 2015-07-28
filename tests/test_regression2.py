@@ -435,8 +435,10 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
         the regions dictionary."""
 
         number_comparisons = 0
-        for group in self.g.groups:
-            for track in self.g.strategy.TRACKS:
+        ggroups = self.g.groups.keys() + ["total"]
+        ttracks = self.g.strategy.TRACKS + ["default"]
+        for group in ggroups:
+            for track in ttracks:
                 for region_i, value in enumerate(self.g.counter_matrix[self.g._get_group_id(group), self.g._get_track_id(track),]):
                     # Get this region_i's chrom and ichr from the region data
                     chrom = self.g.regions[region_i]["chr"]
@@ -444,7 +446,6 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
                     self.assertEqual(self.EXPECTED_REGIONS[chrom][group][ichr][track], value)
 
                     number_comparisons += 1
-                    ichr += 1
         self.assertEqual(self.EXPECTED_COUNTERS_COUNT, number_comparisons)
 
     def test_group_track_bucket_contents(self):
