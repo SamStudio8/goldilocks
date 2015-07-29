@@ -182,7 +182,7 @@ class Goldilocks(object):
         self.group_buckets = {"total": {}}
 
         self.regions = {}
-        self.sorted_regions = []
+        self.selected_regions = []
         self.target = None
 
         # Ensure stride and length are valid (>1)
@@ -793,10 +793,14 @@ class Goldilocks(object):
         num_total = 0
 
         to_delete = []
-        sorted_regions = []
+        selected_regions = []
         #TODO Calculate distance and store it, then reserve sorting until
         # returning results to save time
-        for region in sorted(self.regions,
+        to_iter = sorted(self.regions.keys())
+        if self.selected_regions:
+            to_iter = self.selected_regions
+
+        for region in sorted(to_iter,
                     key=lambda x: (abs(self.counter_matrix[group_id, track_id, x] - target))):
 
             num_total += 1
@@ -805,7 +809,7 @@ class Goldilocks(object):
                 num_selected += 1
                 if not self.__check_exclusions(exclusions, self.regions[region], group, track, use_and, use_chrom) and not self.__check_exclude_minmax(self.counter_matrix[group_id, track_id, self.regions[region]["id"]], gmin, gmax):
                     chosen = True
-                    sorted_regions.append(region)
+                    selected_regions.append(region)
                 else:
                     num_excluded += 1
 
@@ -815,10 +819,10 @@ class Goldilocks(object):
         # Return the top N elements if desired
         # TODO Report total, selected, selected-excluded and selected-filtered
         if limit > 0:
-            for r in sorted_regions[limit:]:
+            for r in selected_regions[limit:]:
                 if r not in to_delete:
                     to_delete.append(r)
-            sorted_regions = sorted_regions[0:limit]
+            selected_regions = selected_regions[0:limit]
 
         print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
                 (num_total, num_selected, num_excluded, limit))
@@ -826,14 +830,9 @@ class Goldilocks(object):
         # TODO Pretty gross, it is probably worth brining back the CandidateList
         # object as a @property that provides the query function and then returning
         # frames from it for function chaining - rather than the Goldilocks instance...
-        new_g = copy.deepcopy(self)
-        for region in to_delete:
-            del new_g.regions[region]
-
-        print("[NOTE] %d regions pruned" % (len(to_delete)))
-        new_g.sorted_regions = sorted_regions
-        new_g.target = target
-        return new_g
+        self.selected_regions = selected_regions
+        self.target = target
+        return self
 
     def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None, title=None): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""
@@ -985,11 +984,11 @@ class Goldilocks(object):
 
     @property
     def candidates(self):
-        if not (len(self.regions) > 0 or len(self.sorted_regions) > 0):
+        if not (len(self.regions) > 0 or len(self.selected_regions) > 0):
             print("[WARN] No candidates found.\n")
 
-        if self.sorted_regions:
-            return [self.regions[i] for i in self.sorted_regions]
+        if self.selected_regions:
+            return [self.regions[i] for i in self.selected_regions]
         else:
             return self.regions
 
@@ -1068,8 +1067,8 @@ class Goldilocks(object):
         to.write((sep.join(["chr", "pos_start", "pos_end", sep.join(tracks_headers)]))+"\n")
 
         to_iter = sorted(self.regions.keys())
-        if self.sorted_regions:
-            to_iter = self.sorted_regions
+        if self.selected_regions:
+            to_iter = self.selected_regions
 
         count = 0
         for r in to_iter:
@@ -1109,8 +1108,8 @@ class Goldilocks(object):
                 to = open(filename, "w")
 
         to_iter = sorted(self.regions.keys())
-        if self.sorted_regions:
-            to_iter = self.sorted_regions
+        if self.selected_regions:
+            to_iter = self.selected_regions
 
         for r in to_iter:
             region = self.regions[r]
