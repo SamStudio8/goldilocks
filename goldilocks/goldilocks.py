@@ -14,7 +14,7 @@ import ctypes
 import os
 import sys
 from math import floor, ceil
-from multiprocessing import Process, Queue, Pool, Array
+from multiprocessing import Process, Queue, Array
 
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
@@ -845,7 +845,7 @@ class Goldilocks(object):
             fig = plt.subplot(1,1,1)
 
             num_regions = len(self.regions)
-            num_counts = [self.group_counts[group][track][x] for x in sorted(self.regions)]
+            num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions)]
 
             max_val = max(num_counts)
             plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker='o')
@@ -860,7 +860,7 @@ class Goldilocks(object):
             max_val = 0
             for i, chrom in enumerate(self.groups[group]):
 
-                num_counts = [self.group_counts[group][track][x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]
+                num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]
                 num_regions = len(num_counts)
 
                 if max(num_counts) > max_val:
@@ -948,7 +948,7 @@ class Goldilocks(object):
                     num_bins = len(bins)
                     bin_contents = np.zeros(len(bins))
 
-                    for x in [self.group_counts[group][track][x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]:
+                    for x in [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]:
                         bin_contents[find_bin(x, bins)] += 1
                 else:
                     print("Unbinned profile not yet supported.")
@@ -1128,7 +1128,7 @@ class Goldilocks(object):
                         handles[group] = open(group + "_" + filename, "w")
                     to = handles[group]
 
-                to.write(">%s|Chr%s|Pos%d:%d|%s\n" % (group, region["chr"], region["pos_start"], region["pos_end"], self.group_counts[group][track][region["id"]]))
+                to.write(">%s|Chr%s|Pos%d:%d|%s\n" % (group, region["chr"], region["pos_start"], region["pos_end"], self.counter_matrix[self._get_group_id(group), self._get_track_id(track), region["id"]]))
                 to.write(self.groups[group][region["chr"]][region["pos_start"]-1:region["pos_end"]]+"\n")
         if divide:
             for h in handles:
