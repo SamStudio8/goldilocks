@@ -183,7 +183,6 @@ class Goldilocks(object):
 
         self.regions = {}
         self.selected_regions = []
-        self.target = None
 
         # Ensure stride and length are valid (>1)
         if stride < 1:
@@ -831,13 +830,13 @@ class Goldilocks(object):
         # object as a @property that provides the query function and then returning
         # frames from it for function chaining - rather than the Goldilocks instance...
         self.selected_regions = selected_regions
-        self.target = target
         return self
 
     def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None, title=None): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""
 
         import matplotlib.pyplot as plt
+
 
         if group is None:
             group = "total"
