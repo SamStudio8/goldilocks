@@ -40,6 +40,7 @@ class BaseStrategy(object):
 
         self.TRACKS = tracks
         self.AXIS_TITLE = title
+        self.RATIO = False
 
     def prepare(self, arr, data, track, **kwargs):
         """Parse genomic data and apply some algorithm ('strategy') to populate
@@ -143,6 +144,8 @@ class GCRatioStrategy(BaseStrategy):
 
     def __init__(self, tracks=None):
         super(GCRatioStrategy, self).__init__(title="GC Ratio")
+        self.RATIO = True
+        self.RATIO_OF = None
 
     def prepare(self, arr, data, track, **kwargs):
         # Populate the region array with 1 for each position a GC base exists
@@ -157,7 +160,7 @@ class GCRatioStrategy(BaseStrategy):
         return arr
 
     def evaluate(self, region, **kwargs):
-        return float(np.sum(region))/len(region)
+        return (float(np.sum(region))/len(region))
 
 
 class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover

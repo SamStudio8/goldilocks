@@ -237,6 +237,7 @@ class Goldilocks(object):
         num_expected_regions = 0
         for chrom in self.chr_max_len:
             num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
+        self.num_expected_regions = num_expected_regions
 
         # Initialise group-track counts and buckets
         self.counter_matrix = np.frombuffer(Array(ctypes.c_float, num_expected_regions * (len(self.strategy.TRACKS)+1) * (len(self.groups)+1), lock = False), dtype=ctypes.c_float)
@@ -393,15 +394,43 @@ class Goldilocks(object):
         for p in processes:
             p.join()
 
+
+        # Recalibrate counters if ratios are used
+        #TODO I don't like this...
+        if self.strategy.RATIO:
+            RATIO_OF = self.strategy.RATIO_OF
+            if not self.strategy.RATIO_OF:
+                RATIO_OF = self.LENGTH
+
         # Aggregate counters
         for group in self.groups:
             group_id = self._get_group_id(group)
             for track in self.strategy.TRACKS:
                 track_id = self._get_track_id(track)
-                self.counter_matrix[0, track_id, ] += self.counter_matrix[group_id, track_id, ]
 
-            self.counter_matrix[group_id, 0, ] = np.sum(self.counter_matrix[group_id], axis=0)
-        self.counter_matrix[0, 0, ] += np.sum(self.counter_matrix[0], axis=0)
+                if self.strategy.RATIO:
+                    totals = self.counter_matrix[group_id, track_id, ] * RATIO_OF
+                    self.counter_matrix[0, track_id, ] += totals
+                else:
+                    self.counter_matrix[0, track_id, ] += self.counter_matrix[group_id, track_id, ]
+
+            if self.strategy.RATIO:
+                totals = self.counter_matrix[group_id] * RATIO_OF
+                self.counter_matrix[group_id, 0, ] = np.sum(totals, axis=0)
+            else:
+                self.counter_matrix[group_id, 0, ] = np.sum(self.counter_matrix[group_id], axis=0)
+
+        if self.strategy.RATIO:
+            for group in self.groups:
+                group_id = self._get_group_id(group)
+                self.counter_matrix[group_id, 0, ] /= (len(self.strategy.TRACKS) * RATIO_OF)
+
+            for track in self.strategy.TRACKS:
+                track_id = self._get_track_id(track)
+                self.counter_matrix[0, track_id, ] /= (len(self.groups) * RATIO_OF)
+        else:
+            self.counter_matrix[0, 0, ] += np.sum(self.counter_matrix[0], axis=0)
+
 
         # Aggregate buckets
         for group in self.groups:
@@ -439,19 +468,6 @@ class Goldilocks(object):
                 q_high = np.percentile(self.counter_matrix[group_id, track_id, ], 50 + upper_window)
             target = np.percentile(self.counter_matrix[group_id, track_id, ], 50)
         elif func.lower() == "mean":
-            # NOTE     : Using `sum` for calculation of the mean
-            # PURPOSE  : `StrategyValue` already represents means or rations
-            #            and a mean of the mean can be accomplished by addition.
-            #            Taking a mean of a set of `StrategyValue` objects
-            #            will yield an incorrect solution.
-            #
-            #            One could force the `dtype` to `np.float64` for
-            #            calculation but this assumes that k is equal for
-            #            all `StrategyValue` in the set (which is true for now).
-#            if type(self.group_counts[group][track][0]) == StrategyValue:
-#                mean = np.sum(self.group_counts[group][track])
-#            else:
-#                mean = np.mean(self.group_counts[group][track], dtype=np.float64)
             mean = np.mean(self.counter_matrix[group_id, track_id, ], dtype=np.float64)
 
             if actual:

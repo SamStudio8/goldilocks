@@ -67,11 +67,16 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
     print(candidates) # Show some evidence the test is working...
     for i, c in enumerate(candidates):
         # Test value matches expecting region value
-        suite.assertEqual(suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]],
-                suite.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
+        suite.assertEqual(suite.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track],
+                suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]])
 
         # Test region is actually correct
+        if suite.g.strategy.RATIO:
+            RATIO_OF = suite.g.strategy.RATIO_OF
+            if not suite.g.strategy.RATIO_OF:
+                RATIO_OF = suite.g.LENGTH
         total = 0
+        counter = 0
         if group != "total":
             if track == "default":
                 for ttrack in suite.TRACKS:
@@ -79,11 +84,19 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                         continue
                     region = np.zeros(suite.g.LENGTH, np.int8)
                     prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]-1:c["pos_end"]], ttrack)
-                    total += suite.g.strategy.evaluate(prepared, track=ttrack)
+                    if suite.g.strategy.RATIO:
+                        total += (suite.g.strategy.evaluate(prepared, track=ttrack)) * RATIO_OF
+                        counter += 1
+                    else:
+                        total += suite.g.strategy.evaluate(prepared, track=ttrack)
             else:
                 region = np.zeros(suite.g.LENGTH, np.int8)
                 prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]-1:c["pos_end"]], track)
-                total += suite.g.strategy.evaluate(prepared, track=track)
+                if suite.g.strategy.RATIO:
+                    total += (suite.g.strategy.evaluate(prepared, track=track)) * RATIO_OF
+                    counter += 1
+                else:
+                   total += suite.g.strategy.evaluate(prepared, track=track)
         else:
             for sample in suite.sequence_data:
                 if track == "default":
@@ -92,12 +105,22 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                             continue
                         region = np.zeros(suite.g.LENGTH, np.int8)
                         prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]], ttrack)
-                        total += suite.g.strategy.evaluate(prepared, track=ttrack)
+                        if suite.g.strategy.RATIO:
+                            total += (suite.g.strategy.evaluate(prepared, track=ttrack)) * RATIO_OF
+                            counter += 1
+                        else:
+                            total += suite.g.strategy.evaluate(prepared, track=ttrack)
                 else:
                     region = np.zeros(suite.g.LENGTH, np.int8)
                     prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]], track)
-                    total += suite.g.strategy.evaluate(prepared, track=track)
+                    if suite.g.strategy.RATIO:
+                        total += (suite.g.strategy.evaluate(prepared, track=track)) * RATIO_OF
+                        counter += 1
+                    else:
+                        total += suite.g.strategy.evaluate(prepared, track=track)
 
+        if suite.g.strategy.RATIO:
+            total /= (RATIO_OF * counter)
         suite.assertEqual(suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]], total)
 
         # Test expected rank
@@ -566,7 +589,7 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
 
         number_comparisons = 0
         ggroups = self.g.groups.keys() + ["total"]
-        ttracks = self.g.strategy.TRACKS + ["default"]
+        ttracks = self.g.strategy.TRACKS
         for group in ggroups:
             for track in ttracks:
                 for region_i, value in enumerate(self.g.counter_matrix[self.g._get_group_id(group), self.g._get_track_id(track),]):
