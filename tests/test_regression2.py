@@ -131,9 +131,8 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
 
 class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.sequence_data = {
+    def reset(self):
+        self.sequence_data = {
                 "my_sample": {
                     2: "NANANANANA",
                     "X": "GATTACAGATTACAN",
@@ -147,7 +146,13 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                     "three": ".N.",
                 }
         }
-        cls.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), cls.sequence_data, length=3, stride=1)
+        self.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), self.sequence_data, length=3, stride=1)
+
+    def setUp(self):
+        self.reset()
+
+    @classmethod
+    def setUpClass(cls):
         cls.GROUPS = ["my_sample", "my_other_sample", "total"]
         cls.TRACKS = ["A", "C", "G", "T", "N", "default"]
 
@@ -320,24 +325,28 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
     def test_max_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "max", group, self.TRACKS)
                 _test_sort_candidates(self, "max", group, track, EXPECTED_RANK)
 
     def test_min_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "min", group, self.TRACKS)
                 _test_sort_candidates(self, "min", group, track, EXPECTED_RANK)
 
     def test_mean_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "mean", group, self.TRACKS)
                 _test_sort_candidates(self, "mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
     def test_median_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "median", group, self.TRACKS)
                 _test_sort_candidates(self, "median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
@@ -345,10 +354,11 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
 #TODO Test percentile_distance around ops
 #TODO Test actual_distance around ops
 class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
+    def setUp(self):
+        self.reset()
 
-    @classmethod
-    def setUpClass(cls):
-        cls.sequence_data = {
+    def reset(self):
+        self.sequence_data = {
                 "my_sample": {
                     1: "..N..N..N",
                     2: "A.A.AA..A",
@@ -360,7 +370,10 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
                     3: "AAA.AA...",
                 }
         }
-        cls.g = Goldilocks(NucleotideCounterStrategy(["A","N"]), cls.sequence_data, length=3, stride=3)
+        self.g = Goldilocks(NucleotideCounterStrategy(["A","N"]), self.sequence_data, length=3, stride=3)
+
+    @classmethod
+    def setUpClass(cls):
         cls.GROUPS = ["my_sample", "my_other_sample", "total"]
         cls.TRACKS = ["A", "N", "default"]
 
@@ -465,33 +478,39 @@ class TestGoldilocksRegression_SimpleNucleotideCounter(unittest.TestCase):
     def test_max_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "max", group, self.TRACKS)
                 _test_sort_candidates(self, "max", group, track, EXPECTED_RANK)
 
     def test_min_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "min", group, self.TRACKS)
                 _test_sort_candidates(self, "min", group, track, EXPECTED_RANK)
 
     def test_mean_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "mean", group, self.TRACKS)
                 _test_sort_candidates(self, "mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
     def test_median_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "median", group, self.TRACKS)
                 _test_sort_candidates(self, "median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
 
 class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.sequence_data = {
+    def setUp(self):
+        self.reset()
+
+    def reset(self):
+        self.sequence_data = {
                 "my_sample": {
                     1: "GCGCGCGC..GCGCGC....GCGC......GC",
                 },
@@ -499,7 +518,10 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
                     1: "GC......GCGC....GCGCGC..GCGCGCGCAAAAAAAA",
                 }
         }
-        cls.g = Goldilocks(GCRatioStrategy(), cls.sequence_data, length=8, stride=8)
+        self.g = Goldilocks(GCRatioStrategy(), self.sequence_data, length=8, stride=8)
+
+    @classmethod
+    def setUpClass(cls):
         cls.GROUPS = ["my_sample", "my_other_sample", "total"]
         cls.TRACKS = ["default"]
 
@@ -575,24 +597,28 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
     def test_max_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "max", group, self.TRACKS)
                 _test_sort_candidates(self, "max", group, track, EXPECTED_RANK)
 
     def test_min_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "min", group, self.TRACKS)
                 _test_sort_candidates(self, "min", group, track, EXPECTED_RANK)
 
     def test_mean_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "mean", group, self.TRACKS)
                 _test_sort_candidates(self, "mean", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
     def test_median_candidates(self):
         for group in self.GROUPS:
             for track in self.TRACKS:
+                self.reset()
                 EXPECTED_RANK, EXPECTED_TARGET = _setup_sort(self, "median", group, self.TRACKS)
                 _test_sort_candidates(self, "median", group, track, EXPECTED_RANK, targets=EXPECTED_TARGET)
 
