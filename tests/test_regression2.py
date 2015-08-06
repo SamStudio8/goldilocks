@@ -5,7 +5,6 @@ import numpy as np
 from goldilocks.goldilocks import Goldilocks
 from goldilocks.strategies import NucleotideCounterStrategy
 from goldilocks.strategies import GCRatioStrategy
-from goldilocks.strategies import StrategyValue
 
 def _setup_sort(suite, op, group, TRACKS):
     EXPECTED_RANK = {}
@@ -72,7 +71,7 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                 suite.EXPECTED_REGIONS[c["chr"]][group][c["ichr"]][track])
 
         # Test region is actually correct
-        total = StrategyValue(0)
+        total = 0
         if group != "total":
             if track == "default":
                 for ttrack in suite.TRACKS:
@@ -297,7 +296,6 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                     # Get this region_i's chrom and ichr from the region data
                     chrom = self.g.regions[region_i]["chr"]
                     ichr = self.g.regions[region_i]["ichr"]
-                    print group, track, region_i, ":", self.EXPECTED_REGIONS[chrom][group][ichr][track], value
                     self.assertEqual(self.EXPECTED_REGIONS[chrom][group][ichr][track], value)
 
                     number_comparisons += 1

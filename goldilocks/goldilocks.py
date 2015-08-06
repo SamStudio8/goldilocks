@@ -857,6 +857,7 @@ class Goldilocks(object):
         # object as a @property that provides the query function and then returning
         # frames from it for function chaining - rather than the Goldilocks instance...
         self.selected_regions = selected_regions
+        self.target = target
         return self
 
     def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None, title=None): # pragma: no cover
@@ -1013,10 +1014,11 @@ class Goldilocks(object):
         if not (len(self.regions) > 0 or len(self.selected_regions) > 0):
             print("[WARN] No candidates found.\n")
 
+        to_iter = sorted(self.regions.keys())
         if self.selected_regions:
-            return [self.regions[i] for i in self.selected_regions]
-        else:
-            return self.regions
+            to_iter = self.selected_regions
+
+        return [self.regions[i] for i in to_iter]
 
     #TODO Export to file not stdout!
     def print_melt(self, sep=",", continuous=False):
