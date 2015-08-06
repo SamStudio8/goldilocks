@@ -5,12 +5,13 @@ __copyright__ = "Copyright (c) Sam Nicholls"
 __version__ = "0.0.72"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
-from .strategies import StrategyValue, PositionCounterStrategy
+from .strategies import PositionCounterStrategy
 
 import numpy as np
 
 import copy
 import ctypes
+import mmap
 import os
 import sys
 from math import floor, ceil
@@ -153,23 +154,18 @@ class Goldilocks(object):
         A list of region ids representing the result of a sorting operation
         after a call to `query`.
 
-    MULTI_TRACKED : boolean
-        Whether or not the selected search strategy is using more than
-        one 'default' track. If this is true, the group_counts and group_buckets
-        attributes will hold extra keys to summarise data over the various
-        samples and tracks.
-
     Raises
     ------
     ValueError
         If either `length` or `stride` are less than one.
 
     """
-    def __init__(self, strategy, data, length, stride, is_pos=False, processes=2):
+    def __init__(self, strategy, data, length, stride, is_pos=False, is_faidx=False, processes=2):
 
         self.strategy = strategy
         self.PROCESSES = processes
         self.IS_POS = False
+        self.IS_FAI = is_faidx
         if is_pos:
             self.IS_POS = True
             print("[WARN] Positional data expected as input, forcing selection of PositionCounterStrategy.")
@@ -196,28 +192,46 @@ class Goldilocks(object):
         # Read data
         self.groups = data
         self.max_chr_max_len = None
-
-        # Is this strategy multi-tracked?
-        self.MULTI_TRACKED = False
-        if (len(self.strategy.TRACKS) > 1
-                or (len(self.strategy.TRACKS) == 1 and "default" not in self.strategy.TRACKS)):
-            #TODO Warn if trying to use a track named strategy
-            self.MULTI_TRACKED = True
+        self.fa_idx = {}
 
         for group in self.groups:
-            #TODO Catch duplicates etc..
-            for chrom in self.groups[group]:
-                if is_pos:
-                    len_current_seq = max(self.groups[group][chrom])
-                else:
-                    len_current_seq = len(self.groups[group][chrom])
+            if self.IS_FAI:
+                self.groups[group]["seq"] = {}
+                #TODO Close f
+                #TODO Assume for now records in each input faidx are ordered zipwise
+                for i, line in enumerate(open(self.groups[group]["idx"])):
+                    self.groups[group]["seq"][i] = {}
+                    fields = line.strip().split("\t")
 
-                #TODO Should we not be looking for min length?
-                if chrom not in self.chr_max_len:
-                    self.chr_max_len[chrom] = len_current_seq
+                    chrom = i
+                    self.groups[group]["seq"][i]["length"] = int(fields[1])
+                    self.groups[group]["seq"][i]["fpos"] = int(fields[2])
+                    self.groups[group]["seq"][i]["line_bases"] = int(fields[3])
 
-                if len_current_seq > self.chr_max_len[chrom]:
-                    self.chr_max_len[chrom] = len_current_seq
+                    handle = open(".".join(self.groups[group]["idx"].split(".")[:-1]))
+                    self.groups[group]["handle"] = mmap.mmap(handle.fileno(), 0, prot=mmap.PROT_READ)
+
+                    #TODO Should we not be looking for min length?
+                    len_current_seq = int(fields[1])
+                    if chrom not in self.chr_max_len:
+                        self.chr_max_len[chrom] = len_current_seq
+
+                    if len_current_seq > self.chr_max_len[chrom]:
+                        self.chr_max_len[chrom] = len_current_seq
+            else:
+                #TODO Catch duplicates etc..
+                for chrom in self.groups[group]:
+                    if is_pos:
+                        len_current_seq = max(self.groups[group][chrom])
+                    else:
+                        len_current_seq = len(self.groups[group][chrom])
+
+                    #TODO Should we not be looking for min length?
+                    if chrom not in self.chr_max_len:
+                        self.chr_max_len[chrom] = len_current_seq
+
+                    if len_current_seq > self.chr_max_len[chrom]:
+                        self.chr_max_len[chrom] = len_current_seq
 
         num_expected_regions = 0
         for chrom in self.chr_max_len:
@@ -235,6 +249,11 @@ class Goldilocks(object):
 
         # Automatically conduct census
         self.census()
+
+        if self.IS_FAI:
+            for group in self.groups:
+                pass
+                #self.groups[group]["handle"].close()
 
     def __bucketize(self, scores_to_bucket):
         buckets = {}
@@ -283,12 +302,15 @@ class Goldilocks(object):
                 group_id = work_block["gid"]
                 chrno = work_block["chrno"]
                 size = work_block["length"]
-                if not self.IS_POS:
+
+                if self.IS_POS:
+                    data = self.groups[group][chrno]
+                elif self.IS_FAI:
+                    data = self.groups[group]["seq"][chrno]["seq"][zeropos_start:zeropos_start+size]
+                else:
                     # help
                     data = buffer(self.groups[group][chrno], zeropos_start, size)
                     #data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
-                else:
-                    data = self.groups[group][chrno]
 
                 np_slide = np.zeros(size, dtype=np.int8)
                 slide = self.strategy.prepare(np_slide, data, track, chrom=chrno, start=zeropos_start)
@@ -308,8 +330,14 @@ class Goldilocks(object):
 
             # Set up shared chrom arrays
             for group in self.groups:
-                if len(self.groups[group][chrno]) < size and not self.IS_POS:
-                    print("[WARN] Group:Chrom '%s:%s' is not equal to the known size of '%s'" % (group, chrno, chrno))
+                if not self.IS_FAI:
+                    if len(self.groups[group][chrno]) < size and not self.IS_POS:
+                        print("[WARN] Group:Chrom '%s:%s' is not equal to the known size of '%s'" % (group, chrno, chrno))
+                else:
+                    # Load data
+                    fpos = self.groups[group]["seq"][chrno]["fpos"]
+                    buff_len = self.groups[group]["seq"][chrno]["length"] + int(self.groups[group]["seq"][chrno]["length"] / self.groups[group]["seq"][chrno]["line_bases"])
+                    self.groups[group]["seq"][chrno]["seq"] = buffer(self.groups[group]["handle"], int(fpos), self.groups[group]["seq"][chrno]["length"])
 
             # Census regions and queue work blocks for census evaluation
             for i, zeropos_start in enumerate(iter_slides):
@@ -371,8 +399,7 @@ class Goldilocks(object):
                 track_id = self._get_track_id(track)
                 self.counter_matrix[0, track_id, ] += self.counter_matrix[group_id, track_id, ]
 
-            if self.MULTI_TRACKED:
-                self.counter_matrix[group_id, 0, ] = np.sum(self.counter_matrix[group_id], axis=0)
+            self.counter_matrix[group_id, 0, ] = np.sum(self.counter_matrix[group_id], axis=0)
         self.counter_matrix[0, 0, ] += np.sum(self.counter_matrix[0], axis=0)
 
         # Aggregate buckets

@@ -1,50 +1,5 @@
 import numpy as np
 
-class StrategyValue(float):
-
-    def __new__(cls, value, *args, **kwargs):
-        return float.__new__(cls, value)
-
-    def __init__(self, value, k=0):
-        if k != 0:
-            if k < 1:
-                raise ValueError("k must be == 0 or >= 1")
-        self.k = k
-
-    def __add__(self, other):
-
-        # Try to check weight of other, floats and the like will
-        # raise an AttributeError
-        try:
-            other_k = other.k
-        except AttributeError:
-            other_total = float(other)
-            other_k = 0
-
-        # Weight other
-        if other_k >= 1:
-            other_total = other * other.k
-        else:
-            other_total = float(other)
-
-        # Weight self
-        if self.k >= 1:
-            current_total = self * self.k
-        else:
-            current_total = float(self)
-
-        # New weight k
-        new_k = self.k + other_k
-        if new_k == 0:
-            new_average = (current_total + other_total)
-        else:
-            new_average = (current_total + other_total) / new_k
-
-        return StrategyValue(new_average, new_k)
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
 class BaseStrategy(object):
     """Interface for which census strategies must be compliant.
 
@@ -202,7 +157,7 @@ class GCRatioStrategy(BaseStrategy):
         return arr
 
     def evaluate(self, region, **kwargs):
-        return StrategyValue(float(np.sum(region))/len(region), len(region))
+        return float(np.sum(region))/len(region)
 
 
 class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover
