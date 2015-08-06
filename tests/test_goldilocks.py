@@ -30,8 +30,11 @@ OPS = ["median", "max", "min", "mean"]
 
 class TestGoldilocks(unittest.TestCase):
 
-    def setUp(self):
+    def reset(self):
         self.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), sequence_data, length=3, stride=1)
+
+    def setUp(self):
+        self.reset()
         self.TOTAL_REGIONS = 29
 
     def __test_simple_exclusions(self, EXCLUSIONS, limit=0):
@@ -46,6 +49,7 @@ class TestGoldilocks(unittest.TestCase):
 
         for exclusion_name, exclusion in EXCLUSIONS.items():
             for op in OPS:
+                self.reset()
                 if limit > 0:
                     candidates = self.g.query(op, exclusions={
                         exclusion["filter"]: exclusion["value"]
@@ -263,12 +267,15 @@ class TestGoldilocks(unittest.TestCase):
         for op in OPS:
             candidates = self.g.query(op, limit=1).candidates
             self.assertTrue(len(candidates) == 1)
+            self.reset()
 
             candidates = self.g.query(op, limit=10).candidates
             self.assertTrue(len(candidates) == 10)
+            self.reset()
 
             candidates = self.g.query(op, limit=100).candidates
             self.assertTrue(len(candidates) == self.TOTAL_REGIONS)
+            self.reset()
 
     def test_distance_upper(self):
         pass

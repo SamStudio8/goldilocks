@@ -179,6 +179,7 @@ class Goldilocks(object):
 
         self.regions = {}
         self.selected_regions = []
+        self.selected_count = -1
 
         # Ensure stride and length are valid (>1)
         if stride < 1:
@@ -818,36 +819,27 @@ class Goldilocks(object):
         num_excluded = 0
         num_total = 0
 
-        to_delete = []
         selected_regions = []
         #TODO Calculate distance and store it, then reserve sorting until
         # returning results to save time
         to_iter = sorted(self.regions.keys())
-        if self.selected_regions:
-            to_iter = self.selected_regions
+        if self.selected_count > -1:
+            to_iter = self.selected_regions[:]
 
         for region in sorted(to_iter,
                     key=lambda x: (abs(self.counter_matrix[group_id, track_id, x] - target))):
 
             num_total += 1
-            chosen = False
             if region in candidates:
                 num_selected += 1
                 if not self.__check_exclusions(exclusions, self.regions[region], group, track, use_and, use_chrom) and not self.__check_exclude_minmax(self.counter_matrix[group_id, track_id, self.regions[region]["id"]], gmin, gmax):
-                    chosen = True
                     selected_regions.append(region)
                 else:
                     num_excluded += 1
 
-            if not chosen:
-                to_delete.append(region)
-
         # Return the top N elements if desired
         # TODO Report total, selected, selected-excluded and selected-filtered
         if limit > 0:
-            for r in selected_regions[limit:]:
-                if r not in to_delete:
-                    to_delete.append(r)
             selected_regions = selected_regions[0:limit]
 
         print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
@@ -857,6 +849,7 @@ class Goldilocks(object):
         # object as a @property that provides the query function and then returning
         # frames from it for function chaining - rather than the Goldilocks instance...
         self.selected_regions = selected_regions
+        self.selected_count = len(selected_regions)
         self.target = target
         return self
 
@@ -1011,11 +1004,11 @@ class Goldilocks(object):
 
     @property
     def candidates(self):
-        if not (len(self.regions) > 0 or len(self.selected_regions) > 0):
+        if not (len(self.regions) > 0 or self.selected_count == 0):
             print("[WARN] No candidates found.\n")
 
         to_iter = sorted(self.regions.keys())
-        if self.selected_regions:
+        if self.selected_count > -1:
             to_iter = self.selected_regions
 
         return [self.regions[i] for i in to_iter]
@@ -1095,7 +1088,7 @@ class Goldilocks(object):
         to.write((sep.join(["chr", "pos_start", "pos_end", sep.join(tracks_headers)]))+"\n")
 
         to_iter = sorted(self.regions.keys())
-        if self.selected_regions:
+        if self.selected_count > -1:
             to_iter = self.selected_regions
 
         count = 0
@@ -1136,7 +1129,7 @@ class Goldilocks(object):
                 to = open(filename, "w")
 
         to_iter = sorted(self.regions.keys())
-        if self.selected_regions:
+        if self.selected_count > -1:
             to_iter = self.selected_regions
 
         for r in to_iter:
