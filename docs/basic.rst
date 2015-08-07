@@ -241,6 +241,15 @@ Note the regions in `g_max` are now sorted by the number
 of N bases that appeared. Ties are currently resolved by the region that was seen
 first (has the lowest `id`).
 
+Setting Number of Processes
+---------------------------
+
+Goldilocks supports multiprocessing and can spawn an additional process to perform
+the census steps before aggregating all the region counters and answering queries.
+To specify the number of processes Goldilocks should use, specify a `processes`
+argument to the constructor: ::
+
+    g = Goldilocks(NucleotideCounterStrategy(["N"]), sequence_data, length=3, stride=1, processes=4)
 
 Full Example
 ------------
@@ -263,7 +272,7 @@ Census an example sequence for appearance of 'N' bases: ::
         }
     }
 
-    g = Goldilocks(NucleotideCounterStrategy(["N"]), sequence_data, length=3, stride=1)
+    g = Goldilocks(NucleotideCounterStrategy(["N"]), sequence_data, length=3, stride=1, processes=4)
 
     g_max_n_bases = g.query("max")
     g_min_n_bases = g.query("min")
