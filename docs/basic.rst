@@ -244,7 +244,7 @@ first (has the lowest `id`).
 Setting Number of Processes
 ---------------------------
 
-Goldilocks supports multiprocessing and can spawn an additional process to perform
+Goldilocks supports multiprocessing and can spawn some number of additional processes to perform
 the census steps before aggregating all the region counters and answering queries.
 To specify the number of processes Goldilocks should use, specify a `processes`
 argument to the constructor: ::
