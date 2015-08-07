@@ -236,10 +236,7 @@ class Goldilocks(object):
 
         num_expected_regions = 0
         for chrom in self.chr_max_len:
-            try:
-                num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
-            except NameError:
-                num_expected_regions += len(range(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
+            num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
         self.num_expected_regions = num_expected_regions
 
         # Initialise group-track counts and buckets
@@ -300,7 +297,7 @@ class Goldilocks(object):
 
                 i = work_block["i"]
                 zeropos_start = work_block["s0"]
-                onepos_end = work_block["e1"]
+                #onepos_end = work_block["e1"]
                 track = work_block["t"]
                 track_id = work_block["tid"]
                 group = work_block["g"]
@@ -313,12 +310,7 @@ class Goldilocks(object):
                 elif self.IS_FAI:
                     data = self.groups[group]["seq"][chrno]["seq"][zeropos_start:zeropos_start+size]
                 else:
-                    # help
-                    #data = buffer(self.groups[group][chrno], zeropos_start, size)
-                    try:
-                        data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
-                    except TypeError:
-                        data = memoryview(self.groups[group][chrno].encode())[zeropos_start:onepos_end]
+                    data = buffer(self.groups[group][chrno], zeropos_start, size)
 
                 np_slide = np.zeros(size, dtype=np.int8)
                 slide = self.strategy.prepare(np_slide, data, track, chrom=chrno, start=zeropos_start)
@@ -334,10 +326,7 @@ class Goldilocks(object):
         region_i = 0
         for chrno, size in chroms:
             queued = 0
-            try:
-                iter_slides = xrange(0, size - self.LENGTH + 1, self.STRIDE)
-            except NameError:
-                iter_slides = range(0, size - self.LENGTH + 1, self.STRIDE)
+            iter_slides = xrange(0, size - self.LENGTH + 1, self.STRIDE)
 
             # Set up shared chrom arrays
             for group in self.groups:
@@ -348,8 +337,7 @@ class Goldilocks(object):
                     # Load data
                     fpos = self.groups[group]["seq"][chrno]["fpos"]
                     buff_len = self.groups[group]["seq"][chrno]["length"] + int(self.groups[group]["seq"][chrno]["length"] / self.groups[group]["seq"][chrno]["line_bases"])
-                    #self.groups[group]["seq"][chrno]["seq"] = buffer(self.groups[group]["handle"], int(fpos), self.groups[group]["seq"][chrno]["length"])
-                    self.groups[group]["seq"][chrno]["seq"] = memoryview(self.groups[group]["handle"])[int(fpos):int(fpos)+self.groups[group]["seq"][chrno]["length"]+1]
+                    self.groups[group]["seq"][chrno]["seq"] = buffer(self.groups[group]["handle"], int(fpos), self.groups[group]["seq"][chrno]["length"])
 
             # Census regions and queue work blocks for census evaluation
             for i, zeropos_start in enumerate(iter_slides):
@@ -374,7 +362,7 @@ class Goldilocks(object):
                         wwork_block = {
                             "i": region_i,
                             "s0": zeropos_start,
-                            "e1": onepos_end,
+                            #"e1": onepos_end,
                             "t": track,
                             "tid": track_id,
                             "g": group,
