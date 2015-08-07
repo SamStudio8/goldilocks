@@ -568,9 +568,12 @@ class Goldilocks(object):
                 print("[WARN] Exclusions dictionary appears to contain the name of a chromosome. Did you forget to set use_chrom=True?")
             to_apply = exclusions
 
+        num_checks = 0
         for name in to_apply:
             #TODO Could probably improve with a dict of funcs...
             ret = False
+            ignore_ret = False
+            num_checks += 1
             if name == "chr":
                 ret = __exclude_chro(region_dict, to_apply["chr"])
             elif name == "start_lte":
@@ -586,6 +589,10 @@ class Goldilocks(object):
             elif name == "region_group_gte":
                 ret = __exclude_val(self.counter_matrix[group_id, track_id, region_dict["id"]], 1, self.counter_matrix[self._get_group_id(to_apply["region_group_lte"]), track_id, region_dict["id"]])
             else:
+                # Don't prevent landing in here from breaking with use_and
+                ignore_ret = True
+                num_checks -= 1
+
                 if name in self.chr_max_len:
                     # It's probably a chromosome dict, do nothing.
                     pass
@@ -595,12 +602,17 @@ class Goldilocks(object):
 
             if use_and:
                 # Require all exclusions to be true...
-                if not ret:
+                if not ret and not ignore_ret:
                     return False
             else:
                 # If we're not waiting on all conditions, we can exclude on the first
                 if ret:
                     return True
+
+        if num_checks == 0:
+            # Nothing was checked for exlcusion, the exclusions_dict was liekly
+            # just full of chromosomes and the region is good
+            return False
 
         if use_and:
             # If we didn't bail on a previous false, all conditions must be satisfied

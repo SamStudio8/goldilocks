@@ -204,14 +204,13 @@ track is indeed 'default', we've explicity set that here too.::
                 use_chrom=True,
                 use_and=True,
                 limit=5
-    )
+    ).export_meta(sep="\t")
 
     [NOTE] Filtering values between 1.00 and 2.00 (inclusive)
     [NOTE] 28 processed, 12 match search criteria, 7 excluded, 5 limit
-
-    ID      VAL     CHR     POSITIONS (INC.)
-    0       {'default': 2}  2                1 -          3
-    2       {'default': 2}  2                3 -          5
-    1       {'default': 1}  2                2 -          4
-    3       {'default': 1}  2                4 -          6
-    20      {'default': 1}  X               13 -         15
+    chr     pos_start       pos_end my_other_sample_default my_sample_default
+    2       1       3       1.0     2.0
+    2       3       5       1.0     2.0
+    2       2       4       1.0     1.0
+    2       4       6       1.0     1.0
+    X       13      15      1.0     1.0
