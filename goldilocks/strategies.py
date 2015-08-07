@@ -149,15 +149,15 @@ class GCRatioStrategy(BaseStrategy):
 
     def prepare(self, arr, data, track, **kwargs):
         # Populate the region array with 1 for each position a GC base exists
-        #for location, base in enumerate(data):
-        #    base_u = base.upper()
-        #    if base_u == "G" or base_u == "C":
-        #        arr[location] = 1
-        #return arr
-        import re
-        for location in [m.start() for m in re.finditer("[GC]", data)]:
-            arr[location] = 1
+        for location, base in enumerate(data):
+            base_u = base.upper()
+            if base_u == "G" or base_u == "C":
+                arr[location] = 1
         return arr
+#        import re
+#        for location in [m.start() for m in re.finditer("[GC]", data)]:
+#            arr[location] = 1
+#        return arr
 
     def evaluate(self, region, **kwargs):
         return (float(np.sum(region))/len(region))

@@ -300,7 +300,7 @@ class Goldilocks(object):
 
                 i = work_block["i"]
                 zeropos_start = work_block["s0"]
-                #onepos_end = work_block["e1"]
+                onepos_end = work_block["e1"]
                 track = work_block["t"]
                 track_id = work_block["tid"]
                 group = work_block["g"]
@@ -314,8 +314,8 @@ class Goldilocks(object):
                     data = self.groups[group]["seq"][chrno]["seq"][zeropos_start:zeropos_start+size]
                 else:
                     # help
-                    data = buffer(self.groups[group][chrno], zeropos_start, size)
-                    #data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
+                    #data = buffer(self.groups[group][chrno], zeropos_start, size)
+                    data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
 
                 np_slide = np.zeros(size, dtype=np.int8)
                 slide = self.strategy.prepare(np_slide, data, track, chrom=chrno, start=zeropos_start)
@@ -345,7 +345,8 @@ class Goldilocks(object):
                     # Load data
                     fpos = self.groups[group]["seq"][chrno]["fpos"]
                     buff_len = self.groups[group]["seq"][chrno]["length"] + int(self.groups[group]["seq"][chrno]["length"] / self.groups[group]["seq"][chrno]["line_bases"])
-                    self.groups[group]["seq"][chrno]["seq"] = buffer(self.groups[group]["handle"], int(fpos), self.groups[group]["seq"][chrno]["length"])
+                    #self.groups[group]["seq"][chrno]["seq"] = buffer(self.groups[group]["handle"], int(fpos), self.groups[group]["seq"][chrno]["length"])
+                    self.groups[group]["seq"][chrno]["seq"] = memoryview(self.groups[group]["handle"])[int(fpos):int(fpos)+self.groups[group]["seq"][chrno]["length"]+1]
 
             # Census regions and queue work blocks for census evaluation
             for i, zeropos_start in enumerate(iter_slides):
@@ -370,7 +371,7 @@ class Goldilocks(object):
                         wwork_block = {
                             "i": region_i,
                             "s0": zeropos_start,
-                            #"e1": onepos_end,
+                            "e1": onepos_end,
                             "t": track,
                             "tid": track_id,
                             "g": group,
