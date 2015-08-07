@@ -236,7 +236,10 @@ class Goldilocks(object):
 
         num_expected_regions = 0
         for chrom in self.chr_max_len:
-            num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
+            try:
+                num_expected_regions += len(xrange(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
+            except NameError:
+                num_expected_regions += len(range(0, self.chr_max_len[chrom]-self.LENGTH+1, self.STRIDE))
         self.num_expected_regions = num_expected_regions
 
         # Initialise group-track counts and buckets
@@ -328,7 +331,10 @@ class Goldilocks(object):
         region_i = 0
         for chrno, size in chroms:
             queued = 0
-            iter_slides = xrange(0, size - self.LENGTH + 1, self.STRIDE)
+            try:
+                iter_slides = xrange(0, size - self.LENGTH + 1, self.STRIDE)
+            except NameError:
+                iter_slides = range(0, size - self.LENGTH + 1, self.STRIDE)
 
             # Set up shared chrom arrays
             for group in self.groups:
