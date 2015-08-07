@@ -315,7 +315,10 @@ class Goldilocks(object):
                 else:
                     # help
                     #data = buffer(self.groups[group][chrno], zeropos_start, size)
-                    data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
+                    try:
+                        data = memoryview(self.groups[group][chrno])[zeropos_start:onepos_end]
+                    except TypeError:
+                        data = memoryview(self.groups[group][chrno].encode())[zeropos_start:onepos_end]
 
                 np_slide = np.zeros(size, dtype=np.int8)
                 slide = self.strategy.prepare(np_slide, data, track, chrom=chrno, start=zeropos_start)
