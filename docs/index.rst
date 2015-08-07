@@ -13,7 +13,8 @@ Contents:
 
    readme
    installation
-   examples
+   cli
+   basic
    advanced
    exporting
    plotting

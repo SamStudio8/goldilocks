@@ -1,6 +1,6 @@
-==============
-Advanced Usage
-==============
+======================
+Advanced Package Usage
+======================
 
 The following assumes basic Python programming experience (and
 that you have installed Goldilocks and familiarised yourself

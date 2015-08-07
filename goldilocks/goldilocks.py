@@ -193,7 +193,6 @@ class Goldilocks(object):
         # Read data
         self.groups = data
         self.max_chr_max_len = None
-        self.fa_idx = {}
 
         for group in self.groups:
             if self.IS_FAI:
@@ -201,6 +200,7 @@ class Goldilocks(object):
                 #TODO Close f
                 #TODO Assume for now records in each input faidx are ordered zipwise
                 for i, line in enumerate(open(self.groups[group]["idx"])):
+                    i += 1
                     self.groups[group]["seq"][i] = {}
                     fields = line.strip().split("\t")
 
@@ -297,7 +297,6 @@ class Goldilocks(object):
 
                 i = work_block["i"]
                 zeropos_start = work_block["s0"]
-                #onepos_end = work_block["e1"]
                 track = work_block["t"]
                 track_id = work_block["tid"]
                 group = work_block["g"]
@@ -362,7 +361,6 @@ class Goldilocks(object):
                         wwork_block = {
                             "i": region_i,
                             "s0": zeropos_start,
-                            #"e1": onepos_end,
                             "t": track,
                             "tid": track_id,
                             "g": group,
@@ -378,7 +376,6 @@ class Goldilocks(object):
         for _ in range(self.PROCESSES):
             p = Process(target=census_slide,
                         args=(work_queue,))
-            #p.daemon = True
             processes.append(p)
 
         for p in processes:
