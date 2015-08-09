@@ -37,6 +37,10 @@ setuptools.setup(
 
     install_requires=requirements,
 
+    entry_points = {
+        "console_scripts": ["goldilocks=goldilocks.cmd:main"]
+    },
+
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',

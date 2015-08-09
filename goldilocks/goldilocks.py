@@ -168,7 +168,7 @@ class Goldilocks(object):
         self.IS_FAI = is_faidx
         if is_pos:
             self.IS_POS = True
-            print("[WARN] Positional data expected as input, forcing selection of PositionCounterStrategy.")
+            sys.stderr.write("[WARN] Positional data expected as input, forcing selection of PositionCounterStrategy.\n")
             self.strategy = PositionCounterStrategy()
 
         self.chr_max_len = {}
@@ -311,11 +311,7 @@ class Goldilocks(object):
                 else:
                     data = buffer(self.groups[group][chrno], zeropos_start, size)
 
-                np_slide = np.zeros(size, dtype=np.int8)
-                slide = self.strategy.prepare(np_slide, data, track, chrom=chrno, start=zeropos_start)
-                value = self.strategy.evaluate(slide, track=track)
-
-                self.counter_matrix[group_id, track_id, i] = value
+                self.counter_matrix[group_id, track_id, i] = self.strategy.census(data, track)
 
         # Setup multiprocessing
         work_queue = Queue()
@@ -323,16 +319,14 @@ class Goldilocks(object):
 
         chros = {}
         region_i = 0
+        t_queued = 0
         for chrno, size in chroms:
             queued = 0
             iter_slides = xrange(0, size - self.LENGTH + 1, self.STRIDE)
 
             # Set up shared chrom arrays
             for group in self.groups:
-                if not self.IS_FAI:
-                    if len(self.groups[group][chrno]) < size and not self.IS_POS:
-                        print("[WARN] Group:Chrom '%s:%s' is not equal to the known size of '%s'" % (group, chrno, chrno))
-                else:
+                if self.IS_FAI:
                     # Load data
                     fpos = self.groups[group]["seq"][chrno]["fpos"]
                     buff_len = self.groups[group]["seq"][chrno]["length"] + int(self.groups[group]["seq"][chrno]["length"] / self.groups[group]["seq"][chrno]["line_bases"])
@@ -354,6 +348,14 @@ class Goldilocks(object):
 
                 for group in self.groups:
                     group_id = self._get_group_id(group)
+
+                    if not self.IS_FAI and onepos_end > len(self.groups[group][chrno]) and not self.IS_POS:
+                        sys.stderr.write("[WARN] Genome:Chrom '%s:%s' does not fit on Region '%d'. Skipping.\n" % (group, chrno, region_i))
+                        for track in self.strategy.TRACKS:
+                            track_id = self._get_track_id(track)
+                            self.counter_matrix[group_id, track_id, region_i] = 0.0
+                        continue
+
                     for track in self.strategy.TRACKS:
                         track_id = self._get_track_id(track)
 
@@ -371,7 +373,9 @@ class Goldilocks(object):
                         work_queue.put(wwork_block)
                         queued += 1
                 region_i += 1
-            print("[SRCH] Queued %d Regions over Chr:%s" % (queued, str(chrno)))
+            t_queued += queued
+            sys.stderr.write("[SRCH] Queued %d Slides (%d Genomes x %d Tracks x %d Regions) on Chr:%s\n" % (queued, len(self.groups), len(self.strategy.TRACKS), len(iter_slides), str(chrno)))
+        sys.stderr.write("[SRCH] Queued %d Slides Total\n" % t_queued)
 
         for _ in range(self.PROCESSES):
             p = Process(target=census_slide,
@@ -565,7 +569,7 @@ class Goldilocks(object):
                 to_apply = exclusions
         else:
             if region_dict["chr"] in exclusions:
-                print("[WARN] Exclusions dictionary appears to contain the name of a chromosome. Did you forget to set use_chrom=True?")
+                sys.stderr.write("[WARN] Exclusions dictionary appears to contain the name of a chromosome. Did you forget to set use_chrom=True?\n")
             to_apply = exclusions
 
         num_checks = 0
@@ -598,7 +602,7 @@ class Goldilocks(object):
                     pass
                 else:
                     #TODO Better handling of invalid exclusion property
-                    print("[WARN] Attempted to exclude on invalid property '%s'" % name)
+                    sys.stderr.write("[WARN] Attempted to exclude on invalid property '%s'\n" % name)
 
             if use_and:
                 # Require all exclusions to be true...
@@ -830,7 +834,7 @@ class Goldilocks(object):
 
         # For each "number of variants" bucket: which map the number of variants
         # seen in a region, to all regions that contained that number of variants
-        print("[NOTE] Filtering values between %.2f and %.2f (inclusive)" % (floor(q_low), ceil(q_high)))
+        sys.stderr.write("[NOTE] Filtering values between %.2f and %.2f (inclusive)\n" % (floor(q_low), ceil(q_high)))
 
         for bucket in self.group_buckets[group][track]:
             if bucket >= floor(q_low) and bucket <= ceil(q_high):
@@ -865,7 +869,7 @@ class Goldilocks(object):
         if limit > 0:
             selected_regions = selected_regions[0:limit]
 
-        print("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit" %
+        sys.stderr.write("[NOTE] %d processed, %d match search criteria, %d excluded, %d limit\n" %
                 (num_total, num_selected, num_excluded, limit))
 
         # TODO Pretty gross, it is probably worth brining back the CandidateList
@@ -1028,7 +1032,7 @@ class Goldilocks(object):
     @property
     def candidates(self):
         if not (len(self.regions) > 0 or self.selected_count == 0):
-            print("[WARN] No candidates found.\n")
+            sys.stderr.write("[WARN] No candidates found.\n")
 
         to_iter = sorted(self.regions.keys())
         if self.selected_count > -1:
@@ -1054,13 +1058,13 @@ class Goldilocks(object):
         tracks = sorted(self.strategy.TRACKS)
         groups = sorted(self.groups)
 
-        print(sep.join([
+        sys.stdout.write(sep.join([
             "c",
             "id",
             "group_track",
             "chr",
             "i",
-            "value"
+            "value\n"
         ]))
 
         count = 0
@@ -1077,18 +1081,19 @@ class Goldilocks(object):
 
             for g in groups:
                 for t in tracks:
-                    print(sep.join([
+                    sys.stdout.write(sep.join([
                         str(count),
                         str(region["id"]),
                         "%s-%s" % (g, t),
                         str(region["chr"]),
                         str(region["ichr"]),
-                        str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r])
+                        str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r]),
+                        "\n"
                     ]))
             count += 1
 
     #TODO Export to file not stdout!
-    def export_meta(self, group=None, track="default", to=sys.stdout, sep=",", divisible=None):
+    def export_meta(self, group=None, track=None, to=sys.stdout, sep=",", divisible=None):
         """Export census metadata to stdout with the following header: id, track1,
         [track2 ... trackN], chr, pos_start, pos_end. Accepts a seperator but
         defaults to a comma-delimited table."""
@@ -1105,8 +1110,7 @@ class Goldilocks(object):
             groups = [group]
 
         for g in groups:
-            #tracks_headers.append([g + '_' + track for track in tracks])
-            tracks_headers.append(sep.join([g + '_' + track for track in tracks]))
+            tracks_headers.append(sep.join([str(g) + '_' + track for track in tracks]))
 
         to.write((sep.join(["chr", "pos_start", "pos_end", sep.join(tracks_headers)]))+"\n")
 
@@ -1139,7 +1143,7 @@ class Goldilocks(object):
     def export_fasta(self, groups=None, track="default", to=sys.stdout, divide=False):
         """Export all regions held in FASTA format."""
         if self.IS_POS:
-            print("[FAIL] Cannot export FASTA without sequence data!")
+            sys.stderr.write("[FAIL] Cannot export FASTA without sequence data!\n")
             sys.exit(1)
 
         if to is not sys.stdout:

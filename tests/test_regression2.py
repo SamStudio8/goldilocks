@@ -77,47 +77,58 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
                 RATIO_OF = suite.g.LENGTH
         total = 0
         counter = 0
+
         if group != "total":
             if track == "default":
                 for ttrack in suite.TRACKS:
                     if ttrack == "default" and len(suite.TRACKS) > 1:
                         continue
-                    region = np.zeros(suite.g.LENGTH, np.int8)
-                    prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]-1:c["pos_end"]], ttrack)
+                    if c["pos_end"] > len(suite.g.groups[group][c["chr"]]):
+                        counter += 1
+                        continue
+
+                    region = suite.sequence_data[group][c["chr"]][c["pos_start"]-1:c["pos_end"]]
                     if suite.g.strategy.RATIO:
-                        total += (suite.g.strategy.evaluate(prepared, track=ttrack)) * RATIO_OF
+                        total += (suite.g.strategy.census(region, ttrack)) * RATIO_OF
                         counter += 1
                     else:
-                        total += suite.g.strategy.evaluate(prepared, track=ttrack)
+                        total += suite.g.strategy.census(region, ttrack)
             else:
-                region = np.zeros(suite.g.LENGTH, np.int8)
-                prepared = suite.g.strategy.prepare(region, suite.sequence_data[group][c["chr"]][c["pos_start"]-1:c["pos_end"]], track)
-                if suite.g.strategy.RATIO:
-                    total += (suite.g.strategy.evaluate(prepared, track=track)) * RATIO_OF
+                if c["pos_end"] > len(suite.g.groups[group][c["chr"]]):
                     counter += 1
                 else:
-                   total += suite.g.strategy.evaluate(prepared, track=track)
+                    region = suite.sequence_data[group][c["chr"]][c["pos_start"]-1:c["pos_end"]]
+                    if suite.g.strategy.RATIO:
+                        total += (suite.g.strategy.census(region, track)) * RATIO_OF
+                        counter += 1
+                    else:
+                        total += suite.g.strategy.census(region, track)
         else:
             for sample in suite.sequence_data:
                 if track == "default":
                     for ttrack in suite.TRACKS:
                         if ttrack == "default" and len(suite.TRACKS) > 1:
                             continue
-                        region = np.zeros(suite.g.LENGTH, np.int8)
-                        prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]], ttrack)
+                        if c["pos_end"] > len(suite.sequence_data[sample][c["chr"]]):
+                            counter += 1
+                            continue
+
+                        region = suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]]
                         if suite.g.strategy.RATIO:
-                            total += (suite.g.strategy.evaluate(prepared, track=ttrack)) * RATIO_OF
+                            total += (suite.g.strategy.census(region, ttrack)) * RATIO_OF
                             counter += 1
                         else:
-                            total += suite.g.strategy.evaluate(prepared, track=ttrack)
+                            total += suite.g.strategy.census(region, ttrack)
                 else:
-                    region = np.zeros(suite.g.LENGTH, np.int8)
-                    prepared = suite.g.strategy.prepare(region, suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]], track)
+                    if c["pos_end"] > len(suite.sequence_data[sample][c["chr"]]):
+                        counter += 1
+                        continue
+                    region = suite.sequence_data[sample][c["chr"]][c["pos_start"]-1:c["pos_end"]]
                     if suite.g.strategy.RATIO:
-                        total += (suite.g.strategy.evaluate(prepared, track=track)) * RATIO_OF
+                        total += (suite.g.strategy.census(region, track)) * RATIO_OF
                         counter += 1
                     else:
-                        total += suite.g.strategy.evaluate(prepared, track=track)
+                        total += suite.g.strategy.census(region, track)
 
         if suite.g.strategy.RATIO:
             total /= (RATIO_OF * counter)
@@ -199,7 +210,7 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                         4: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
                         5: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
                         6: {'A': 1, 'C': 0, 'T': 0, 'G': 1, 'N': 1, "default": 3},
-                        7: {'A': 1, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 2},
+                        7: {'A': 0, 'C': 0, 'T': 0, 'G': 0, 'N': 0, "default": 0},
                     },
                     "total": {
                         0: {'A': 2, 'C': 0, 'T': 0, 'G': 1, 'N': 3, "default": 6},
@@ -209,7 +220,7 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                         4: {'A': 2, 'C': 0, 'T': 0, 'G': 1, 'N': 3, "default": 6},
                         5: {'A': 3, 'C': 0, 'T': 0, 'G': 1, 'N': 2, "default": 6},
                         6: {'A': 2, 'C': 0, 'T': 0, 'G': 1, 'N': 3, "default": 6},
-                        7: {'A': 3, 'C': 0, 'T': 0, 'G': 0, 'N': 2, "default": 5},
+                        7: {'A': 2, 'C': 0, 'T': 0, 'G': 0, 'N': 1, "default": 3},
                     },
                 },
                 "X": {

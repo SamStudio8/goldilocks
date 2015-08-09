@@ -42,121 +42,66 @@ class BaseStrategy(object):
         self.AXIS_TITLE = title
         self.RATIO = False
 
-    def prepare(self, arr, data, track, **kwargs):
-        """Parse genomic data and apply some algorithm ('strategy') to populate
-        an array with values for later evaluation.
-
-        Populate elements in a given iterable `arr` (typically a numpy array)
-        by applying some processing strategy on genomic sequence `data`.
-        `track` can be used to further inform this function's strategy on what
-        behaviour to apply. For example, a nucleotide counting strategy would
-        use `track` to discern which nucleotide to count in `data`.
-
-        Parameters
-        ----------
-        arr : array_like
-
-        data : array_like
-
-        track : str
-
-        Returns
-        -------
-        arr : array_like
-
-        Raises
-        ------
-        NotImplementedError
-            If attempting to utilise a strategy that inherits from `BaseStrategy`
-            without providing an implementation for `prepare`.
-        """
-        raise NotImplementedError("strategy.prepare")
-
-    def evaluate(self, region, **kwargs):
-        """Evaluate the contents of a given iterable 'region' (typically a numpy
-        array) as prepared by this strategy. The simplest strategies will sum
-        the binary flags over the array.
-
-        Raises
-        ------
-        NotImplementedError
-            If attempting to utilise a strategy that inherits from `BaseStrategy`
-            without providing an implementation for `evaluate`.
-        """
-        raise NotImplementedError("strategy.evaluate")
+    def census(self, sequence, track, **kwargs):
+        raise NotImplementedError("strategy.census")
 
 class NucleotideCounterStrategy(BaseStrategy):
 
     def __init__(self, bases):
+        if len(bases) == 0:
+            bases = ['A', 'C', 'G', 'T', 'N']
         super(NucleotideCounterStrategy, self).__init__(tracks=bases, title="Base Count")
 
-    def prepare(self, arr, data, current_track, **kwargs):
-        for location, base in enumerate(data):
-            if base.upper() == current_track:
-                arr[location] = 1
-        return arr
+    def census(self, sequence, track, **kwargs):
+        #return sequence.count(track)  ## doesn't work on buffers...
+        count = 0
+        for base in sequence:
+            if base == track:
+                count += 1
+        return count
 
-    def evaluate(self, region, **kwargs):
-        return np.sum(region)
-
-class KMerCounterStrategy(BaseStrategy): # pragma: no cover
+class MotifCounterStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, kmers):
-        super(KMerCounterStrategy, self).__init__(tracks=kmers, title="Motif Count")
-
-    def prepare(self, arr, data, track, **kwargs):
         import re
+        super(MotifCounterStrategy, self).__init__(tracks=kmers, title="Motif Count")
 
-        # Populate the region array with 1 for the start position of desired K-Mer
-        #TODO Use KMP?
-        for location in [m.start() for m in re.finditer(track, data)]:
-            arr[location] = 1
-        return arr
-
-    def evaluate(self, region, **kwargs):
-        # Need to allow for cases where the K-mer present flag has been placed
-        # at the very end of the region (and thus the region merely contains only
-        # the first base of the desired K-mer
-        return np.sum(region[:-(len(kwargs['track'])-1)])
+    def census(self, sequence, track, **kwargs):
+        return len(re.findall(track, sequence))
 
 class PositionCounterStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, tracks=None):
         super(PositionCounterStrategy, self).__init__(title="Count")
 
-    def prepare(self, arr, data, track, **kwargs):
+    def census(self, sequence, track, **kwargs):
         # Populate the chromosome array with 1 for each position a variant exists
         #TODO Assuming 1-index, perhaps use a kwarg
+        count = 0
         for variant_loc in data:
             variant_loc -= kwargs['start']
             if variant_loc > 0:
                 try:
                     arr[variant_loc-1] = 1
+                    count += 1
                 except:
                     break
-        return arr
-
-    def evaluate(self, region, **kwargs):
-        return np.sum(region)
+        return count
 
 
 class GCRatioStrategy(BaseStrategy):
 
     def __init__(self, tracks=None):
         super(GCRatioStrategy, self).__init__(title="GC Ratio")
+
+        import re
+        self.modules = { "re": re }
+
         self.RATIO = True
         self.RATIO_OF = None
 
-    def prepare(self, arr, data, track, **kwargs):
-        # Populate the region array with 1 for each position a GC base exists
-        import re
-        for location in [m.start() for m in re.finditer("[GC]", data)]:
-            arr[location] = 1
-        return arr
-
-    def evaluate(self, region, **kwargs):
-        return (float(np.sum(region))/len(region))
-
+    def census(self, sequence, track, **kwargs):
+        return float(len(self.modules["re"].findall("[GC]", sequence)))/len(sequence)
 
 class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover
 
@@ -172,21 +117,19 @@ class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover
 
         super(ReferenceConsensusStrategy, self).__init__(title=title)
 
-    def prepare(self, arr, data, current_track, **kwargs):
+    def census(self, sequence, track, **kwargs):
         # Currently only handles global references (ie. not for group/track)
+        count = 0
         for location, base in enumerate(data):
             if self.POLARITY > 0:
                 if base.upper() == self.REFERENCE[kwargs['chrom']][location].upper():
-                    arr[location] = 1
+                    count += 1
             elif self.POLARITY < 0:
                 if base.upper() != self.REFERENCE[kwargs['chrom']][location].upper():
-                    arr[location] = 1
+                    count += 1
             else:
                 if base.upper() == self.REFERENCE[kwargs['chrom']][location].upper():
-                    arr[location] = 1
+                    count += 1
                 else:
-                    arr[location] = -1
-        return arr
-
-    def evaluate(self, region, **kwargs):
-        return np.sum(region)
+                    count -= 1
+        return count
