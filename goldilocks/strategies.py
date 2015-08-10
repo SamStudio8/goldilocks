@@ -62,12 +62,18 @@ class NucleotideCounterStrategy(BaseStrategy):
 
 class MotifCounterStrategy(BaseStrategy): # pragma: no cover
 
-    def __init__(self, kmers):
+    def __init__(self, motifs, overlap=True):
         import re
-        super(MotifCounterStrategy, self).__init__(tracks=kmers, title="Motif Count")
+        self.modules = { "re": re }
+        self.overlap = overlap
+
+        super(MotifCounterStrategy, self).__init__(tracks=motifs, title="Motif Count")
 
     def census(self, sequence, track, **kwargs):
-        return len(re.findall(track, sequence))
+        if self.overlap:
+            return len(self.modules["re"].findall("(?=(%s))" % track, sequence))
+        else:
+            return len(self.modules["re"].findall(track, sequence))
 
 class PositionCounterStrategy(BaseStrategy): # pragma: no cover
 

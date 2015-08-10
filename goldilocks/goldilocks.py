@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 __author__ = "Sam Nicholls <sn8@sanger.ac.uk>"
 __copyright__ = "Copyright (c) Sam Nicholls"
-__version__ = "0.0.72"
+__version__ = "0.0.8"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 from .strategies import PositionCounterStrategy

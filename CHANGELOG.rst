@@ -1,7 +1,28 @@
 History
 =======
 
-0.0.71 (2014-07-11)
+0.0.80 (2015-08-10)
+-------------------
+* Added multiprocessing capabilities during census step.
+* Added a simple command line interface.
+* Removed prepare-evaluate paradigm from strategies and now perform counts
+  directly on input data in one step.
+* Skip slides (and set all counts to 0) if their `end_pos` falls outside of
+  the region on that particular genome's chromosome/contig.
+* Rename `KMerCounterStrategy` to `MotifCounterStrategy`
+* Fixed bug causing `use_and` to not work as expected for chromosomes not
+  explicitly listed in the `exceptions` dict when also using `use_chrom`.
+* Support use of FASTA files which must be supplied with a `samtools faidx` style index.
+* Stopped supporting Python 3 due to incompatability with `buffer` and `memoryview`.
+* Prevent `query` from deep copying itself on return. Note this means that a query
+  will alter the original Goldilocks object.
+* Now using a 3D numpy matrix to store counters with memory shared to
+  support multiprocessing during census.
+* Removed `StrategyValue` as these cannot be stored in shared memory. This makes
+  ratio-based strategies a bit of a hack currently (but still work...)
+* tldr; Goldilocks is at least 2-4x faster than previously, even without multiprocessing
+
+0.0.71 (2015-07-11)
 -------------------
 * Officially add MIT license to repository.
 * Deprecate `_filter`.
@@ -23,7 +44,7 @@ History
   the group-track value.
 * `CandidateList` removed and replaced with simply returning a new `Goldilocks`.
 
-0.0.6 (2014-06-23)
+0.0.6 (2015-06-23)
 ------------------
 * `Goldilocks.sorted_regions` stores a list of region ids to represent the result
   of a sorting operation following a call to `query`.
