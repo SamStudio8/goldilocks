@@ -36,6 +36,14 @@ Where a strategy is a census strategy listed as available... ::
 Example
 #######
 
-::
-    goldilocks nuc max --tracks A C G T N -l 100000 -s 50000 -@ 4 /store/ref/hs37d5.fa.fai
+Tabulate all regions and their associated counts of nucleotides A, C, G, T and N.
+Window size 100Kbp, overlap 50Kbp. Census will spawn 4 processes. Regions in
+table will be sorted by co-ordinate: ::
+
+    goldilocks nuc none --tracks A C G T N -l 100000 -s 50000 -@ 4 /store/ref/hs37d5.fa.fai
+
+Tabulate all regions and their associated GC-content. Same parameters as previous
+example but table will be sorted by maximum GC-content descending: ::
+
+    goldilocks gc max -l 100000 -s 50000 -@ 4 /store/ref/hs37d5.fa.fai
 
