@@ -4,6 +4,14 @@ goldilocks package
 Submodules
 ----------
 
+goldilocks.cmd module
+---------------------
+
+.. automodule:: goldilocks.cmd
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 goldilocks.goldilocks module
 ----------------------------
 
