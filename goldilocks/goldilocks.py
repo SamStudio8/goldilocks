@@ -119,13 +119,13 @@ class Goldilocks(object):
         The total number of regions anticipated to require census.
 
     counter_matrix : Unlocked 3D numpy array buffer
-        Stores the value returned by the census for a group-track-region triplet.
+        Stores the value returned by the census for a group-track-region triplet. Dimensions are thus: ::
 
-        Dimensions are thus: ::
             counter_matrix[group][track][region_i]
 
-        "Total" group, is group 0.
-        "Default" track, is track 0.
+        * "Total" group, is group 0.
+        * "Default" track, is track 0.
+        * Thus, `counter_matrix[0][0]` represents the aggregate of all groups and tracks for each i.
 
         Once the census is complete the data stored in these counters are
         used for calculating a target value such as the maximum, minimum,
@@ -1082,6 +1082,18 @@ class Goldilocks(object):
 
     @property
     def candidates(self):
+        """Retrieve candidate region metadata.
+
+        Returns
+        -------
+        Candidate List : list{dict{str, dict{str, int}}}
+            If a query has been performed with :func:`goldilocks.goldilocks.Goldilocks.query`,
+            returns a list of candidates as found in `regions`, sorted by the `func`
+            used by that `query`, sorted and filtered by order and presence in
+            `selected_regions`.
+
+            Otherwise, returns `regions` as a list.
+        """
         if not (len(self.regions) > 0 or self.selected_count == 0):
             sys.stderr.write("[WARN] No candidates found.\n")
 
