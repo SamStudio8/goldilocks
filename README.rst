@@ -11,6 +11,10 @@ Goldilocks
 .. image:: https://coveralls.io/repos/SamStudio8/goldilocks/badge.png?branch=master
         :target: https://coveralls.io/r/SamStudio8/goldilocks
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/SamStudio8/goldilocks
+   :target: https://gitter.im/SamStudio8/goldilocks?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 Locating genomic regions that are "just right".
 
 * Documentation: http://goldilocks.readthedocs.org.
@@ -53,7 +57,7 @@ GCRatioStrategy                   Calculate GC-ratio for subregions across the
                                   genome.
 NucleotideCounterStrategy         Count given nucleotides for subregions across
                                   the genome.
-KMerCounterStrategy               Search for one or more particular k-mers of
+MotifCounterStrategy              Search for one or more particular motifs of
                                   interest of any and varying size in subregions
                                   across the genome.
 ReferenceConsensusStrategy        Calculate the (dis)similarity to a given
@@ -94,6 +98,7 @@ Requirements
 To use;
 
 * numpy
+* matplotlib (for plotting)
 
 To test;
 
@@ -117,11 +122,6 @@ Citation
 --------
 
 Citation pending...
-
-
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/SamStudio8/goldilocks
-   :target: https://gitter.im/SamStudio8/goldilocks?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
 License
 -------
