@@ -51,10 +51,17 @@ class Goldilocks(object):
                 "chrom_name_or_number": "SEQUENCE",
             }
 
+        When submitting with FASTA, the index for each sample must be
+        provided in the following format: ::
+
+            "my_sample": {
+                "idx": "/path/to/my_sample.fa.fai"
+            }
+
     length : int
         Desired region length, all censused regions will be of this many bases.
-        If a region will end such that it would end beyond the end of a chromosome,
-        it will not be added to the census.
+        If a region will end such that it would end beyond the end of the
+        highest seen position on a chromosome, it will not be added to the census.
 
     stride : int
         Number of bases to add to the start of the last region before the
@@ -65,34 +72,60 @@ class Goldilocks(object):
         Whether or not the data stored in `data` is sequence data.
         If `is_pos` is True, Goldilocks will expect a list of base positions.
 
+    is_faidx : boolean, optional(default=False)
+        Whether or not the data in `data` refers to the locations of FAIDX files.
+        If `is_faidx` is True, Goldilocks will expect paths to be provided to
+        an `idx` key, for each sample in the `data` dict.
+
+    processes : int, optional(default=2)
+        The number of additional processes to spawn to perform the census.
+
     Attributes
     ----------
     strategy : Strategy object
         The desired :mod:`goldilocks.strategies` search strategy as selected by
-        the user upon initialisation. Goldilocks will use the exposed `prepare`
-        and `evaluate` functions of `stategy` to conduct the census.
+        the user upon initialisation. Goldilocks will expect the necessary
+        `census` function to be implemented in the strategy class.
 
     data : dict{str, dict{[str|int], str}}
         Data on which to conduct a census, in a nested dict.
 
-    length : int
+    LENGTH : int
         Desired region length, as provided by the user.
 
-    stride : int
+    STRIDE : int
         Desired region stride, as provided by the user.
+
+    PROCESSES : int,
+        Number of processes to spawn and administer during census.
+
+    IS_POS : boolean,
+        Whether or not `data` is expected to contain base-position information
+        rather than sequence data. This will force use of `PositionCounterStrategy`.
+
+    IS_FAI : boolean,
+        Whether or not `data` is expected to contain references to FASTA index.
 
     chr_max_len : dict{str, int}
         Maps names of chromosomes to the largest size encountered for that
         chromosome across all samples
 
-    group_counts : dict{str, dict{str, list{int}}}
-        Each group contains a dictionary of track-counter lists.
-        For each group-track pair, a list stores the values returned from
-        strategy evaluation for each subregion encountered by the census
-        function. Each value is appended to the relevant group-track list.
+    groups : dict{str, dict{[str|int], str}}
+        A copy of the input `data` dict. If `is_faidx`, the `groups` dictionary
+        will be modified to contain information loaded from the FASTA index for
+        each sample.
 
-        When a strategy uses multiple groups and tracks, the region id is
-        used to update the corresponding elements in these lists.
+    num_expected_regions : int
+        The total number of regions anticipated to require census.
+
+    counter_matrix : Unlocked 3D numpy array buffer
+        Stores the value returned by the census for a group-track-region triplet.
+
+        Dimensions are thus: ::
+            counter_matrix[group][track][region_i]
+
+        "Total" group, is group 0.
+        "Default" track, is track 0.
 
         Once the census is complete the data stored in these counters are
         used for calculating a target value such as the maximum, minimum,
@@ -139,20 +172,26 @@ class Goldilocks(object):
             =========    ===============================================
             Key          Value
             =========    ===============================================
+            id           The i'th region to be censused.
             chr          Chromosome on which this region appears
             ichr         Region is the i'th to appear on this chromosome
             pos_start    1-indexed base this region starts on (incl.)
             pos_end      1-indexed base this region ends on (incl.)
             =========    ===============================================
 
-        The region id can be used to access the corresponding counter
-        information from the lists stored in group_counts.
+        The `ichr` can be used to access corresponding counter
+        information from `counter_matrix[group][track][ichr]`.
 
-        These ids are also the same ids saved in relevant group_buckets.
+        These ids are also the same ids saved in relevant `group_buckets`.
 
-    sorted_regions : list{int}
+    selected_regions : list{int}
         A list of region ids representing the result of a sorting operation
         after a call to `query`.
+
+    selected_count : int
+        The size of selected_regions, otherwise -1. This is used to decide whether
+        the Goldilocks object should return regions from `selected_regions` or
+        all regions, as stored in `regions`.
 
     Raises
     ------
@@ -672,13 +711,9 @@ class Goldilocks(object):
 
             .. note::
                 Ratio-based strategies that do not simply count instances of given
-                bases or motifs etc. will be correctly weighted by use of
-                :class:`goldilocks.strategies.StrategyValue` in aggregate groups
-                and tracks. No special handling for these sort of strategies is required.
-
-                However, if you are writing a custom strategy, be sure to return
-                a :class:`goldilocks.strategies.StrategyValue` from your `evaluate`
-                method.
+                bases or motifs etc. will be correctly weighted if the `RATIO`
+                flag is set in the appropriate strategy class.
+                No other special handling for these sort of strategies is required.
 
         actual_distance : float, optional(default=None)
         percentile_distance : float, optional(default=None)
@@ -720,6 +755,12 @@ class Goldilocks(object):
                 be changed to +1 or -1, respectively - as it doesn't make sense to
                 search "around" the maximum or minimum value.
 
+        gmin : int, optional(default=None)
+            Filter any candidates whose value is below (but not equal to) `gmin`.
+
+        gmax : int, optional(default=None)
+            Filter any candidates whose value is above (but not equal to) `gmax`.
+
         limit : int, optional(default=0)
             Maximum number of regions to return.
             By default, all regions that meet the specified criteria will be returned.
@@ -738,15 +779,19 @@ class Goldilocks(object):
 
             Currently the following excluding criteria are available:
 
-            =========   ==============================================================
-            Criterion   Purpose
-            =========   ==============================================================
-            start_lte   Region starts on 1-indexed base less than or equal to value
-            start_gte   Region starts on 1-indexed base greater than or equal to value
-            end_lte     Region ends on 1-indexed base less than or equal to value
-            end_gte     Region ends on 1-indexed base greater than or equal to value
-            chr         Region appears on chr in given list
-            =========   ==============================================================
+            ================   ==============================================================
+            Criterion          Purpose
+            ================   ==============================================================
+            start_lte          Region starts on 1-indexed base less than or equal to value
+            start_gte          Region starts on 1-indexed base greater than or equal to value
+            end_lte            Region ends on 1-indexed base less than or equal to value
+            end_gte            Region ends on 1-indexed base greater than or equal to value
+            chr                Region appears on chr in given list
+            region_group_lte   Ignore candidates whose value for the provided group is lte
+                               the value of interest.
+            region_group_gte   Ignore candidates whose value for the provided group is gte
+                               the value of interest.
+            ================   ==============================================================
 
             Further information and examples on using these effectively can be
             found in the documentation on sorting and filtering.
@@ -769,6 +814,12 @@ class Goldilocks(object):
                 chromosome to be excluded.
 
             .. note::
+                Exclusions that are not inside a key that matches a chromosome
+                will apply to all chromosomes. However, exclusions defined in
+                a sub-dict with a chromosome key, will override the global
+                exclusions that have been set.
+
+            .. note::
                 Goldilocks will print a warning to stdout if it encounters the name of a
                 chromosome in the `exclusions` dict without `use_chrom` being set
                 to true, but will continue to complete the query anyway.
@@ -776,10 +827,10 @@ class Goldilocks(object):
         Returns
         -------
         Goldilocks object : :class:`goldilocks.goldilocks.Goldilocks`
-            Returns a new instance of Goldilocks where the regions are filtered
-            and the result of any sorting operation is stored in sorted_regions.
-            Sorts are descending from absolute distance to the target as calculated
-            by `func`. The target is also stored as `target`.
+            Returns the current Goldilocks, setting `selected_regions` to the
+            list of candidates found and `selected_count` to the length of
+            `selected_regions`. Sorts are always descending from absolute
+            distance to the target as calculated by `func`.
 
         Raises
         ------
