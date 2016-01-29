@@ -1,5 +1,5 @@
 from goldilocks.goldilocks import Goldilocks
-from goldilocks.strategies import PositionCounterStrategy, GCRatioStrategy, NucleotideCounterStrategy, KMerCounterStrategy, ReferenceConsensusStrategy
+from goldilocks.strategies import PositionCounterStrategy, GCRatioStrategy, MotifCounterStrategy, NucleotideCounterStrategy, ReferenceConsensusStrategy
 
 #########################################
 """Read a pair of 1-indexed base position lists and output all regions falling
@@ -28,17 +28,20 @@ g = Goldilocks(GCRatioStrategy(), data, 3, 1)
 g.query("max", limit=5).export_fasta()
 
 #########################################
-"""Read a short sequence and census the appearance of the "AAA" and "CCC" motif.
+"""
+Read a short sequence and census the appearance of the "AAA" and "CCC" motif.
 Output a table of regions with the most occurrences of CCC (and at least one)
 and another table of regions featuring the most appearances of both motifs.
 Output only the maximum region (actual_distance = 0) displaying both motifs to
-FASTA."""
+FASTA.
+"""
+
 data = {
         "my_sequence": {
             1: "CCCAAACCCGGGCCCGGGAGAAACCC"
         }
 }
-g = Goldilocks(KMerCounterStrategy(["AAA", "CCC"]), data, 9, 1)
+g = Goldilocks(MotifCounterStrategy(["AAA", "CCC"]), data, 9, 1)
 
 g.query("max", track="CCC", gmin=1).export_meta(sep="\t")
 g.query("max", group="total").export_meta(sep="\t", group="total", track="default")

@@ -47,13 +47,13 @@ Output only the maximum region (actual_distance = 0) displaying both motifs to
 FASTA. ::
 
     from goldilocks.goldilocks import Goldilocks
-    from goldilocks.strategies import KMerCounterStrategy
+    from goldilocks.strategies import MotifCounterStrategy
     data = {
             "my_sequence": {
                 1: "CCCAAACCCGGGCCCGGGAGAAACCC"
             }
     }
-    g = Goldilocks(KMerCounterStrategy(["AAA", "CCC"]), data, 9, 1)
+    g = Goldilocks(MotifCounterStrategy(["AAA", "CCC"]), data, 9, 1)
 
     g.query("max", track="CCC", gmin=1).export_meta(sep="\t")
     g.query("max", group="total").export_meta(sep="\t", group="total", track="default")

@@ -1,6 +1,19 @@
 History
 =======
 
+0.0.82 (2016-01-29)
+-------------------
+* Changed example to use `MotifCounterStrategy` over removed `KMerCounterStrategy`.
+* Fix runtime `NameError` preventing `PositionCounterStrategy` from executing correctly.
+* Fix runtime `NameError` preventing `ReferenceConsensusStrategy` from executing correctly.
+* Add default `count` track to `PositionCounterStrategy` to prevent accidental
+  multiple counting issue encountered when couting with the `default` track.
+* Add LICENSE
+
+0.0.81 (2016-01-29)
+-------------------
+* Fix versioning error.
+
 0.0.80 (2015-08-10)
 -------------------
 * Added multiprocessing capabilities during census step.

@@ -61,7 +61,7 @@ Multiple criteria
 
 You can of course use these at the same time (though actual and percentile distances
 are mutually exclusive), let's fetch the top 10% of regions that contain the most
-"AAA" k-mers for all chromosomes in a hypothetical sample called "my_kmer_example": ::
+"AAA" k-mers for all chromosomes in a hypothetical sample called "my_sample": ::
 
     g.query("max", group="my_sample", track="N", percentile_distance=10)
 

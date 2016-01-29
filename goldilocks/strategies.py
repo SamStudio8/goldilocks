@@ -78,20 +78,13 @@ class MotifCounterStrategy(BaseStrategy): # pragma: no cover
 class PositionCounterStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, tracks=None):
-        super(PositionCounterStrategy, self).__init__(title="Count")
+        super(PositionCounterStrategy, self).__init__(tracks=["count"], title="Count")
 
-    def census(self, sequence, track, **kwargs):
-        # Populate the chromosome array with 1 for each position a variant exists
-        #TODO Assuming 1-index, perhaps use a kwarg
+    def census(self, positions, track, **kwargs):
         count = 0
-        for variant_loc in data:
-            variant_loc -= kwargs['start']
-            if variant_loc > 0:
-                try:
-                    arr[variant_loc-1] = 1
-                    count += 1
-                except:
-                    break
+        for variant_loc in positions:
+            if variant_loc >= kwargs['start'] and variant_loc < kwargs['start']+kwargs['length']:
+                count += 1
         return count
 
 
@@ -126,7 +119,7 @@ class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover
     def census(self, sequence, track, **kwargs):
         # Currently only handles global references (ie. not for group/track)
         count = 0
-        for location, base in enumerate(data):
+        for location, base in enumerate(sequence):
             if self.POLARITY > 0:
                 if base.upper() == self.REFERENCE[kwargs['chrom']][location].upper():
                     count += 1
