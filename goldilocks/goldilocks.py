@@ -6,6 +6,7 @@ __version__ = "0.0.82"
 __maintainer__ = "Sam Nicholls <sam@samnicholls.net>"
 
 from .strategies import PositionCounterStrategy
+from .util import parse_si_bp
 
 import numpy as np
 
@@ -221,10 +222,19 @@ class Goldilocks(object):
         self.selected_count = -1
 
         # Ensure stride and length are valid (>1)
+        self.STRIDE_SI = stride
+        stride = parse_si_bp(stride)
+        if not stride:
+            raise ValueError("[FAIL] Invalid stride.")
+
         if stride < 1:
             raise ValueError("[FAIL] Stride must be at least 1 base wide.")
         self.STRIDE = stride
 
+        self.LENGTH_SI = length
+        length = parse_si_bp(length)
+        if not length:
+            raise ValueError("[FAIL] Invalid length.")
         if length < 1:
             raise ValueError("[FAIL] Length must be at least 1 base wide.")
         self.LENGTH = length
@@ -932,7 +942,7 @@ class Goldilocks(object):
         self.target = target
         return self
 
-    def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None, title=None): # pragma: no cover
+    def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None, title=None, ignore_query=False): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""
 
         import matplotlib.pyplot as plt
@@ -942,8 +952,13 @@ class Goldilocks(object):
             group = "total"
             fig = plt.subplot(1,1,1)
 
-            num_regions = len(self.regions)
-            num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions)]
+            #TODO Check a query was made?
+            if ignore_query:
+                num_regions = len(self.regions)
+                num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions)]
+            else:
+                num_regions = self.selected_count
+                num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.selected_regions)]
 
             max_val = max(num_counts)
             plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker='o')
@@ -958,8 +973,13 @@ class Goldilocks(object):
             max_val = 0
             for i, chrom in enumerate(self.groups[group]):
 
-                num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]
-                num_regions = len(num_counts)
+                #TODO Check a query was made?
+                if ignore_query:
+                    num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]
+                    num_regions = len(num_counts)
+                else:
+                    num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.selected_regions) if self.regions[x]["chr"] == chrom]
+                    num_regions = len(num_counts)
 
                 if max(num_counts) > max_val:
                     max_val = max(num_counts)
@@ -980,7 +1000,7 @@ class Goldilocks(object):
                 horizontalalignment='center', verticalalignment='center'
             )
 
-        plt.xlabel("Region#")
+        plt.xlabel("Region# (%sbp : %sbp)" % (self.LENGTH_SI, self.STRIDE_SI))
 
         if title:
             plt.suptitle(title, fontsize=16)

@@ -1,6 +1,16 @@
 History
 =======
 
+0.0.83
+-------------------
+* `-l` and `-s` CLI arguments and corresponding `length` and `stride` parameters
+  to `Goldilocks` constructor now support SI suffixes: `K`, `M`, `G`, `T`.
+  `util` module contains `parse_si_bp` used to parse option strings and return
+  the number of bases for length and stride.
+* Add length and stride to x-axis label of plots.
+* Add `ignore_query` option to `plot` to override new default behaviour of plot
+  that only plots points for regions remaining after a call to `query`.
+
 0.0.82 (2016-01-29)
 -------------------
 * Changed example to use `MotifCounterStrategy` over removed `KMerCounterStrategy`.

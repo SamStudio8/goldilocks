@@ -1,10 +1,11 @@
 from __future__ import absolute_import
 
 from .goldilocks import Goldilocks
+from .util import parse_si_bp
 from . import strategies
-#from .strategies import PositionCounterStrategy
 
 import argparse
+import re
 import sys
 
 def main():
@@ -28,8 +29,8 @@ def main():
     parser.add_argument('sort', choices=SORTS)
     parser.add_argument('faidx', nargs='+')
     parser.add_argument('-t', '--tracks', nargs='+')
-    parser.add_argument('-l', '--length', required=True, type=int)
-    parser.add_argument('-s', '--stride', required=True, type=int)
+    parser.add_argument('-l', '--length', required=True, type=parse_si_bp)
+    parser.add_argument('-s', '--stride', required=True, type=parse_si_bp)
     parser.add_argument('-@', '--processes', default=1, type=int)
     args = parser.parse_args()
 
@@ -47,3 +48,4 @@ def main():
         g.query(args.sort).export_meta(sep="\t")
     else:
         g.export_meta(sep="\t")
+
