@@ -1,7 +1,7 @@
 History
 =======
 
-0.0.83
+0.0.83-beta
 -------------------
 * `-l` and `-s` CLI arguments and corresponding `length` and `stride` parameters
   to `Goldilocks` constructor now support SI suffixes: `K`, `M`, `G`, `T`.
