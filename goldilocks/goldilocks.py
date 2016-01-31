@@ -226,7 +226,6 @@ class Goldilocks(object):
         stride = parse_si_bp(stride)
         if not stride:
             raise ValueError("[FAIL] Invalid stride.")
-
         if stride < 1:
             raise ValueError("[FAIL] Stride must be at least 1 base wide.")
         self.STRIDE = stride

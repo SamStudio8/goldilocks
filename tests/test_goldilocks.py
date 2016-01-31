@@ -94,11 +94,13 @@ class TestGoldilocks(unittest.TestCase):
         self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=1, stride=0)
         self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=1, stride=-1)
         self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=1, stride=-1000)
+        self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=1, stride='A')
 
     def test_invalid_length(self):
         self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=0, stride=1)
         self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1, stride=1)
         self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length=-1000, stride=1)
+        self.assertRaises(ValueError, Goldilocks, NucleotideCounterStrategy([]), sequence_data, length='A', stride=1)
 
     def test_invalidquery_distance(self):
         for op in OPS:

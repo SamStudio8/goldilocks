@@ -12,10 +12,10 @@ def parse_si_bp(option):
 
     # I'd rather not use RE for this...
     try:
-        bases = re.findall('\d+', option)[0]
+        bases = re.findall('-?\d+', option)[0]
         option = option.replace(bases, '')
     except IndexError:
-        return None
+        raise ValueError()
 
     bases = int(bases)
     for char in option:
