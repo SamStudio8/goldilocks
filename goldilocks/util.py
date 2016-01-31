@@ -8,7 +8,7 @@ def parse_si_bp(option):
         'T': 1000000000000,
     }
 
-    option = option.upper().strip().replace(' ', '').replace('BP', '')
+    option = str(option).upper().strip().replace(' ', '').replace('BP', '')
 
     # I'd rather not use RE for this...
     try:
