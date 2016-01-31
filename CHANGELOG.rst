@@ -29,6 +29,19 @@ History
 * Improve labels for plotting.
 * Reduce duplication of plotting code inside `plot`.
 * Share Y axis across plot panels to prevent potentially misleading default plots.
+* Reduce duplication of code used for outputting metadata:
+* Add `fmt` kwarg to `export_meta` that permits one of:
+    * bed
+        BED format (compulsory fields only)
+    * circos
+        A format compatible with the circos plotting tool
+    * melt
+        A format that will suit import to an R dataframe without the need
+        for additional munging with reshape2
+    * table
+        A plain tabular format that will suit for quick outputs with
+        some munging
+* Remove `print_melt`, use `export_meta` with `fmt=melt`.
 
 
 0.0.82 (2016-01-29)
@@ -39,6 +52,7 @@ History
 * Add default `count` track to `PositionCounterStrategy` to prevent accidental
   multiple counting issue encountered when couting with the `default` track.
 * Add LICENSE
+* Paper accepted for press!
 
 0.0.81 (2016-01-29)
 -------------------

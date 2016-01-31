@@ -15,6 +15,7 @@ def main():
         "gc": strategies.GCRatioStrategy,
         "ref": strategies.ReferenceConsensusStrategy,
     }
+    FORMATS = ["bed", "circos", "melt", "table"] #TODO Gross duplication
     SORTS = ["min", "max", "mean", "median", "none"]
 
     if len(sys.argv) == 2:
@@ -22,6 +23,10 @@ def main():
             print("Available Strategies")
             for s in STRATEGIES:
                 print("  * %s" % s)
+            print
+            print("Available Output Formats")
+            for f in FORMATS:
+                print("  * %s" % f)
             sys.exit(0)
 
     parser = argparse.ArgumentParser(description='Wrapper script for Goldilocks library.')
@@ -29,6 +34,7 @@ def main():
     parser.add_argument('sort', choices=SORTS)
     parser.add_argument('faidx', nargs='+')
     parser.add_argument('-t', '--tracks', nargs='+')
+    parser.add_argument('-f', '--format', default="table", choices=FORMATS)
     parser.add_argument('-l', '--length', required=True, type=parse_si_bp)
     parser.add_argument('-s', '--stride', required=True, type=parse_si_bp)
     parser.add_argument('-@', '--processes', default=1, type=int)
@@ -47,5 +53,4 @@ def main():
     if args.sort != "none":
         g.query(args.sort).export_meta(sep="\t")
     else:
-        g.export_meta(sep="\t")
-
+        g.export_meta(sep="\t", fmt=args.format)

@@ -1026,11 +1026,18 @@ class Goldilocks(object):
                     ax[i+j,0].set_xlim([0,len(p_bins)])
 
                     if bin_prop:
+                        # Convert axis to use percentages
                         formatter = mticker.FuncFormatter(lambda x, pos: '{:3.0f}%'.format(x*100))
                         ax[i+j,0].yaxis.set_major_formatter(formatter)
 
                 else:
-                    ax[i+j,0].plot(range(0, self.chr_max_len[p_chrom], self.STRIDE)[:len(num_counts)], num_counts, label="g"+str(chrom))
+                    if group == "total":
+                        chr_max = sum([self.chr_max_len[x] for x in self.chr_max_len.keys()])
+                        ax[i+j,0].scatter(range(0, chr_max, self.STRIDE)[:len(num_counts)], num_counts, c=num_counts, label="g"+str(p_chrom))
+                        ax[i+j,0].set_xlim([0,chr_max])
+                        ax[i+j,0].set_ylim([0,max_val])
+                    else:
+                        ax[i+j,0].plot(range(0, self.chr_max_len[p_chrom], self.STRIDE)[:len(num_counts)], num_counts, label="g"+str(p_chrom))
 
                 if p_group != "total":
                     if chrom:
@@ -1101,105 +1108,152 @@ class Goldilocks(object):
 
         return [self.regions[i] for i in to_iter]
 
-    #TODO Export to file not stdout!
-    def print_melt(self, sep=",", continuous=False):
-
-        # Work out offset
-        to_skip = 0
-        skipped = 0
-        if continuous:
-            if self.LENGTH < self.STRIDE:
-                Exception("Cannot use continuous=True where stride > length...")
-            if self.LENGTH % self.STRIDE != 0:
-                Exception("Cannot use continuous=True where length/stride > 0...")
-
-            to_skip = (self.LENGTH / self.STRIDE) - 1
-            skipped = to_skip
-
-        tracks = sorted(self.strategy.TRACKS)
-        groups = sorted(self.groups)
-
-        sys.stdout.write(sep.join([
-            "c",
-            "id",
-            "group_track",
-            "chr",
-            "i",
-            "value\n"
-        ]))
-
-        count = 0
-        last_chr = None
-        for r in sorted(self.regions.keys()):
-            region = self.regions[r]
-            if region["chr"] != last_chr:
-                skipped = to_skip
-
-            if skipped != to_skip:
-                skipped += 1
-                continue
-            skipped = 0
-
-            for g in groups:
-                for t in tracks:
-                    sys.stdout.write(sep.join([
-                        str(count),
-                        str(region["id"]),
-                        "%s-%s" % (g, t),
-                        str(region["chr"]),
-                        str(region["ichr"]),
-                        str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r]),
-                        "\n"
-                    ]))
-            count += 1
-
-    #TODO Export to file not stdout!
-    def export_meta(self, group=None, track=None, to=sys.stdout, sep=",", divisible=None):
-        """Export census metadata to stdout with the following header: id, track1,
-        [track2 ... trackN], chr, pos_start, pos_end. Accepts a seperator but
-        defaults to a comma-delimited table."""
+    def export_meta(self, group=None, track=None, to=sys.stdout, fmt="table", sep="\t", overlaps=True, header=True, ignore_query=False, value_bool=False, divisible=None, chr_prefix=""):
 
         if not track:
             tracks = sorted(self.strategy.TRACKS)
         else:
             tracks = [track]
 
-        tracks_headers = []
         if not group:
             groups = sorted(self.groups)
         else:
             groups = [group]
 
+        # Build up list of column header names for groupID-track combinations (if needed)
+        tracks_header = []
         for g in groups:
-            tracks_headers.append(sep.join([str(g) + '_' + track for track in tracks]))
+            tracks_header.append(sep.join([str(g) + '_' + track for track in tracks]))
 
-        to.write((sep.join(["chr", "pos_start", "pos_end", sep.join(tracks_headers)]))+"\n")
+        # Work out whether it is necessary (or possible) to skip some regions
+        # to prevent duplicate counting in cases where regions overlap
+        if not overlaps:
+            if self.LENGTH < self.STRIDE:
+                raise Exception("Cannot use continuous=True where stride > length...")
+            if self.LENGTH % self.STRIDE != 0:
+                raise Exception("Cannot use continuous=True where length/stride > 0...")
 
-        to_iter = sorted(self.regions.keys())
-        if self.selected_count > -1:
-            to_iter = self.selected_regions
+            to_skip = (self.LENGTH / self.STRIDE) - 1
+            skipped = to_skip
+
+        # Write an appropriate header
+        if header:
+            if fmt == "table":
+                to.write((sep.join([
+                    "chr",
+                    "pos_start",
+                    "pos_end",
+                    sep.join(tracks_header),
+                ]))+"\n")
+            elif fmt == "circos":
+                if len(groups) > 1 or len(tracks) > 1:
+                    print "[WARN] 'circos' output format typically works best when a group and track are set..."
+
+                to.write((sep.join([
+                    "chr",
+                    "pos_start",
+                    "pos_end",
+                    "value",
+                ]))+"\n")
+            elif fmt == "melt":
+                to.write((sep.join([
+                    "region",
+                    "region_id",
+                    "group_track",
+                    "group",
+                    "track",
+                    "chr",
+                    "chr_i",
+                    "value",
+                ]))+"\n")
+            elif fmt == "bed":
+                to.write((sep.join([
+                    "chrom",
+                    "chromStart",
+                    "chromEnd",
+                ]))+"\n")
+                pass
+
+        # Iterate over data
+        out_regions = sorted(self.regions.keys())
+        if self.selected_count > -1 and not ignore_query:
+            out_regions = self.selected_regions
 
         count = 0
-        for r in to_iter:
-            region = self.regions[r]
+        last_chr = None
+        for r in out_regions:
+            region = self.regions[r] # Fetch region
+
+            if not overlaps:
+                if region["chr"] != last_chr:
+                    skipped = to_skip
+
+                if skipped != to_skip:
+                    skipped += 1
+                    continue
+                skipped = 0
 
             if divisible:
                 if (region["pos_start"]-1) % divisible != 0:
                     continue
 
-            values_string = ""
-            for g in groups:
-                for t in tracks:
-                    values_string += str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r])
-                    values_string += sep
-            values_string = values_string[:-1]
-            to.write((sep.join([
-                str(region["chr"]),
-                str(region["pos_start"]),
-                str(region["pos_end"]),
-                values_string]
-            ))+"\n")
+            if fmt == "table":
+                group_track_vals = []
+                for g in groups:
+                    for t in tracks:
+                        if value_bool:
+                            v = str(int(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r] > 0.0))
+                        else:
+                            v = str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r])
+                        group_track_vals.append(v)
+
+                to.write((sep.join([
+                    chr_prefix + str(region["chr"]),
+                    str(region["pos_start"]),
+                    str(region["pos_end"]),
+                    sep.join(group_track_vals),
+                ]))+"\n")
+            elif fmt == "circos":
+                for g in groups:
+                    for t in tracks:
+                        if value_bool:
+                            v = str(int(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r] > 0.0))
+                        else:
+                            v = str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r])
+
+                        to.write((sep.join([
+                            chr_prefix + str(region["chr"]),
+                            str(region["pos_start"]),
+                            str(region["pos_end"]),
+                            v,
+                        ]))+"\n")
+            elif fmt == "melt":
+                for g in groups:
+                    for t in tracks:
+                        if value_bool:
+                            v = str(int(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r] > 0.0))
+                        else:
+                            v = str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r])
+
+                        to.write((sep.join([
+                            str(count),
+                            str(region["id"]),
+                            "%s-%s" % (g ,t),
+                            str(g),
+                            str(t),
+                            chr_prefix + str(region["chr"]),
+                            str(region["ichr"]),
+                            v,
+                        ]))+"\n")
+            elif fmt == "bed":
+                to.write((sep.join([
+                    chr_prefix + str(region["chr"]),
+                    str(region["pos_start"]-1),
+                    str(region["pos_end"]-1),
+                ]))+"\n")
+
             count += 1
+            last_chr = region["chr"]
 
     def export_fasta(self, groups=None, track="default", to=sys.stdout, divide=False):
         """Export all regions held in FASTA format."""
