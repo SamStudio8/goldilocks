@@ -51,6 +51,6 @@ def main():
     g = Goldilocks(STRATEGIES[args.strategy](tracks), sequence_faidx, length=args.length, stride=args.stride, processes=args.processes, is_faidx=True)
 
     if args.sort != "none":
-        g.query(args.sort).export_meta(sep="\t")
+        g.query(args.sort).export_meta(sep="\t", fmt=args.format)
     else:
         g.export_meta(sep="\t", fmt=args.format)
