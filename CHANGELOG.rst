@@ -10,6 +10,26 @@ History
 * Add length and stride to x-axis label of plots.
 * Add `ignore_query` option to `plot` to override new default behaviour of plot
   that only plots points for regions remaining after a call to `query`.
+* Remove `profile` function, use `plot` with `bins=N` instead.
+* Add binning to `plot` to reduce code duplication.
+* Add `chrom` kwarg to `plot` to allow plotting of a single chromosome across
+  multiple input genomes.
+* Fix support for plotting data from multiple contigs or chromosomes of a single
+  input genome when provided as a FASTA.
+* Add `ignore_query` kwarg to `plot` for ignoring the results of a query on
+  the `Goldilocks` object when performing a plot afterwards.
+* Bins no longer have to be specified manually, use `bins=N`, this will create
+  N+1 bins (a special 0 bin is reserved) between 0 and the largest observed
+  value unless `bin_max` is also provided.
+* Bins may have a hard upper limit set with `bin_max`. This will override the
+  default of the largest observed value regardless of whether `bin_max` is smaller.
+* Binning may now be plotted by proportion by setting `bin_prop`, showing the
+  percentage of regions that were added to a given bin, rather than the total
+  count.
+* Improve labels for plotting.
+* Reduce duplication of plotting code inside `plot`.
+* Share Y axis across plot panels to prevent potentially misleading default plots.
+
 
 0.0.82 (2016-01-29)
 -------------------

@@ -942,86 +942,11 @@ class Goldilocks(object):
         self.target = target
         return self
 
-    def plot(self, group=None, track="default", ylim=None, save_to=None, annotation=None, title=None, ignore_query=False): # pragma: no cover
+    def plot(self, group=None, track="default", bins=None, ylim=None, save_to=None, annotation=None, title=None, ignore_query=False, chrom=None, bin_prop=False, bin_max=None): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""
 
         import matplotlib.pyplot as plt
-
-
-        if group is None:
-            group = "total"
-            fig = plt.subplot(1,1,1)
-
-            #TODO Check a query was made?
-            if ignore_query:
-                num_regions = len(self.regions)
-                num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions)]
-            else:
-                num_regions = self.selected_count
-                num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.selected_regions)]
-
-            max_val = max(num_counts)
-            plt.scatter(range(0, num_regions), num_counts, c=num_counts, marker='o')
-            #plt.plot(range(0, num_regions), num_counts, "black")
-            plt.axis([0, num_regions, 0, max_val])
-            plt.ylabel(self.strategy.AXIS_TITLE)
-            if ylim:
-                plt.ylim(ylim)
-        else:
-            fig, ax = plt.subplots(len(self.groups[group]),1, sharex=True, squeeze=False)
-
-            max_val = 0
-            for i, chrom in enumerate(self.groups[group]):
-
-                #TODO Check a query was made?
-                if ignore_query:
-                    num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]
-                    num_regions = len(num_counts)
-                else:
-                    num_counts = [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.selected_regions) if self.regions[x]["chr"] == chrom]
-                    num_regions = len(num_counts)
-
-                if max(num_counts) > max_val:
-                    max_val = max(num_counts)
-
-                ax[i,0].plot(range(0, num_regions), num_counts, label="g"+str(chrom))
-                ax[i,0].text(
-                    1.05, 0.5, ("Chr#"+str(chrom)), transform=ax[i,0].transAxes,
-                    rotation=270, fontsize=12, va='top',
-                    horizontalalignment='center', verticalalignment='center'
-                )
-
-                if ylim:
-                    ax[i,0].set_ylim(ylim)
-
-            # Y axis label
-            fig.text(
-                .05, 0.5, self.strategy.AXIS_TITLE, rotation='vertical',
-                horizontalalignment='center', verticalalignment='center'
-            )
-
-        plt.xlabel("Region# (%sbp : %sbp)" % (self.LENGTH_SI, self.STRIDE_SI))
-
-        if title:
-            plt.suptitle(title, fontsize=16)
-        else:
-            plt.suptitle('%s-%s' % (group, track), fontsize=16)
-
-        if annotation:
-            plt.annotate(annotation, xy=(.5, 1.03),  xycoords='axes fraction', ha='center', va='center', fontsize=11)
-
-        if save_to:
-            plt.savefig(save_to)
-            plt.close()
-        else:
-            plt.show()
-
-    # TODO Copies a lot of plot's functionality
-    # TODO Need to alter x ticks to show bin names
-    def profile(self, group=None, track="default", ylim=None, save_to=None, annotation=None, bins=None): # pragma: no cover
-        """Represent profiled regions in a plot using matplotlib."""
-
-        import matplotlib.pyplot as plt
+        import matplotlib.ticker as mticker
 
         #TODO Check this!
         def find_bin(x, bins):
@@ -1035,62 +960,115 @@ class Goldilocks(object):
             # else last bin
             return len(bins) - 1
 
-        if group is None:
+        if group is None and chrom is None:
             group = "total"
-            fig = plt.subplot(1,1,1)
 
-            if bins:
-                num_bins = len(bins)
-                bin_contents = np.zeros(len(bins))
-                for x in self.group_buckets[group][track]:
-                    bin_contents[find_bin(x, bins)] = len(self.group_buckets[group][track][x])
-            else:
-                print("Unbinned profile not yet supported.")
-                import sys
-                sys.exit(1)
-
-            max_val = max(bin_contents)
-            plt.bar(range(0, num_bins), bin_contents)
-            plt.axis([0, num_bins, 0, max_val])
-            plt.ylabel("Region Count")
-
-
-            if ylim:
-                plt.ylim(ylim)
+        if chrom:
+            # Plotting by chroms not groups, so fetch all groups
+            plot_groups = self.groups.keys()
+            plot_chroms = [ chrom ]
         else:
-            fig, ax = plt.subplots(len(self.groups[group]),1, sharex=True, squeeze=False)
+            plot_groups = [group]
 
-            for i, chrom in enumerate(self.groups[group]):
+            if self.IS_FAI:
+                # Hack for plots still working when FASTA index files were passed
+                # instead of raw sequences... Just plot as many CHR as there were
+                # on sample one...
+                plot_chroms = self.groups[self.groups.keys()[0]]["seq"]
+            else:
+                plot_chroms = self.groups[group]
+
+        if group == "total":
+            # Cheap trick to force the plot to have just one subplot.
+            plot_chroms = [ None ]
+
+        #TODO Should try and detect when groups and chroms are both > 1,
+        # as I don't want to support matrix-style graphs with this API thanks!
+        fig, ax = plt.subplots(len(plot_groups)*len(plot_chroms),1, sharey=True, sharex=True, squeeze=False)
+
+        for j, p_group in enumerate(plot_groups):
+            for i, p_chrom in enumerate(plot_chroms):
+
+                if ignore_query or len(self.selected_regions) == 0:
+                    if p_group == "total":
+                        num_counts = [self.counter_matrix[self._get_group_id("total"), self._get_track_id(track), x] for x in sorted(self.regions)]
+                    else:
+                        num_counts = [self.counter_matrix[self._get_group_id(p_group), self._get_track_id(track), x] for x in sorted(self.regions) if self.regions[x]["chr"] == p_chrom]
+                else:
+                    if p_group == "total":
+                        num_counts = [self.counter_matrix[self._get_group_id("total"), self._get_track_id(track), x] for x in sorted(self.selected_regions)]
+                    else:
+                        num_counts = [self.counter_matrix[self._get_group_id(p_group), self._get_track_id(track), x] for x in sorted(self.selected_regions) if self.regions[x]["chr"] == p_chrom]
+                num_regions = len(num_counts)
+
+                max_val = max(num_counts)
 
                 if bins:
-                    num_bins = len(bins)
-                    bin_contents = np.zeros(len(bins))
+                    if type(bins) != list:
+                        if bin_max:
+                            p_bins = np.linspace(0, bin_max, bins+1)
+                        else:
+                            p_bins = np.linspace(0, max_val, bins+1)
+                    else:
+                        p_bins = bins
 
-                    for x in [self.counter_matrix[self._get_group_id(group), self._get_track_id(track), x] for x in sorted(self.regions) if self.regions[x]["chr"] == chrom]:
-                        bin_contents[find_bin(x, bins)] += 1
+                    num_bins = len(p_bins)
+                    bin_contents = np.zeros(len(p_bins))
+
+                    for x in num_counts:
+                        bin_contents[find_bin(x, p_bins)] += 1
+
+                    if bin_prop:
+                        bin_contents = np.array(bin_contents)/sum(bin_contents)
+
+                    ax[i+j,0].bar(range(len(p_bins)), bin_contents)
+                    ax[i+j,0].set_xticks(np.arange(len(p_bins)) + 0.75/2)
+                    ax[i+j,0].set_xticklabels(p_bins)
+                    ax[i+j,0].set_xlim([0,len(p_bins)])
+
+                    if bin_prop:
+                        formatter = mticker.FuncFormatter(lambda x, pos: '{:3.0f}%'.format(x*100))
+                        ax[i+j,0].yaxis.set_major_formatter(formatter)
+
                 else:
-                    print("Unbinned profile not yet supported.")
-                    import sys
-                    sys.exit(1)
+                    ax[i+j,0].plot(range(0, self.chr_max_len[p_chrom], self.STRIDE)[:len(num_counts)], num_counts, label="g"+str(chrom))
 
-                ax[i,0].bar(range(0, num_bins), bin_contents, label="g"+str(chrom))
-                ax[i,0].text(
-                    1.05, 0.5, ("Chr#"+str(chrom)), transform=ax[i,0].transAxes,
-                    rotation=270, fontsize=12, va='top',
-                    horizontalalignment='center', verticalalignment='center'
-                )
+                if p_group != "total":
+                    if chrom:
+                        # Plot the group name label instead
+                        ax[i+j,0].text(
+                            1.05, 0.5, p_group, transform=ax[i+j,0].transAxes,
+                            rotation=270, fontsize=12, va='top',
+                            horizontalalignment='center', verticalalignment='center'
+                        )
+                    else:
+                        ax[i+j,0].text(
+                            1.05, 0.5, ("Chr#"+str(p_chrom)), transform=ax[i+j,0].transAxes,
+                            rotation=270, fontsize=12, va='top',
+                            horizontalalignment='center', verticalalignment='center'
+                        )
 
                 if ylim:
-                    ax[i,0].set_ylim(ylim)
+                    ax[i+j,0].set_ylim(ylim)
 
-            # Y axis label
+        # Y axis label
+        if not bins:
+            fig.text(
+                .05, 0.5, self.strategy.AXIS_TITLE, rotation='vertical',
+                horizontalalignment='center', verticalalignment='center'
+            )
+        else:
             fig.text(
                 .05, 0.5, "Region Count", rotation='vertical',
                 horizontalalignment='center', verticalalignment='center'
             )
 
-        plt.xlabel("Bin")
-        plt.suptitle('%s-%s' % (group, track), fontsize=16)
+        plt.xlabel("Location (bp)[%s:%s]" % (self.LENGTH_SI, self.STRIDE_SI))
+
+        if title:
+            plt.suptitle(title, fontsize=16)
+        else:
+            plt.suptitle('%s-%s' % (group, track), fontsize=16)
 
         if annotation:
             plt.annotate(annotation, xy=(.5, 1.03),  xycoords='axes fraction', ha='center', va='center', fontsize=11)
