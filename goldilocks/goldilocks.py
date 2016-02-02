@@ -200,13 +200,14 @@ class Goldilocks(object):
         If either `length` or `stride` are less than one.
 
     """
-    def __init__(self, strategy, data, length, stride, is_pos=False, is_faidx=False, processes=2):
+    def __init__(self, strategy, data, length, stride, is_pos=False, is_faidx=False, is_pos_file=False, processes=2):
 
         self.strategy = strategy
         self.PROCESSES = processes
-        self.IS_POS = False
+        self.IS_POS = is_pos
         self.IS_FAI = is_faidx
-        if is_pos:
+        self.IS_POSF = is_pos_file
+        if self.IS_POS or self.IS_POSF:
             self.IS_POS = True
             sys.stderr.write("[WARN] Positional data expected as input, forcing selection of PositionCounterStrategy.\n")
             self.strategy = PositionCounterStrategy()
@@ -242,6 +243,31 @@ class Goldilocks(object):
         self.groups = data
         self.max_chr_max_len = None
 
+        # Intercept position file data
+        if self.IS_POSF:
+            new_groups = {}
+            for group in self.groups:
+                new_groups[group] = {}
+
+                #TODO Close
+                for line in open(self.groups[group]["posf"]):
+                    line = line.strip()
+                    if line[0] == "#":
+                        continue
+                    fields = line.split("\t")
+
+                    # Split on colon if needed
+                    vchrom = fields[0]
+                    vbase = fields[1]
+                    if ':' in fields[0]:
+                        vchrom, vbase = fields[0].split(':')
+
+                    vchrom = int(vchrom)
+                    if vchrom not in new_groups[group]:
+                        new_groups[group][vchrom] = []
+                    new_groups[group][vchrom].append(int(vbase))
+            self.groups = new_groups
+
         for group in self.groups:
             if self.IS_FAI:
                 self.groups[group]["seq"] = {}
@@ -270,7 +296,7 @@ class Goldilocks(object):
             else:
                 #TODO Catch duplicates etc..
                 for chrom in self.groups[group]:
-                    if is_pos:
+                    if self.IS_POS:
                         len_current_seq = max(self.groups[group][chrom])
                     else:
                         len_current_seq = len(self.groups[group][chrom])
