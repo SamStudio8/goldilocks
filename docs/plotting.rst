@@ -61,8 +61,6 @@ Note that both the ``x`` and ``y`` axes are shared between all panels to
 avoid the automatic creation of graphics with the potential to mislead
 readers on a first glance by not featuring the same axes ticks.
 
-[sec:multi]
-
 Plot a contig or chromosome from multiple samples
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -225,8 +223,7 @@ Plot data from multiple counting tracks from one sample’s chromosomes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The examples thus far have demonstrated plotting the results of a
-strategy responsible for counting one interesting property. But as
-demonstrated in Section [sec:nuc], strategies are capable of counting
+strategy responsible for counting one interesting property. But strategies are capable of counting
 multiple targets of interest simultaneously. Of course, one may wish to
 plot the results of all tracks rather than just the totals - especially
 for cases such as nucleotide counting where the sum of all counts will
@@ -257,7 +254,7 @@ with the ``tracks`` list to plot counts proportionally.
 Plot data from multiple counting tracks for one chromosome across many samples
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As seen in Section [sec:multi], one can use the ``chrom`` keyword
+As previously demonstrated, one can use the ``chrom`` keyword
 argument for ``plot`` to create a figure featuring a panel per input
 sample, displaying census results for a particular chromosome.
 Similarly, this feature is supported when plotting multiple tracks with
@@ -285,11 +282,11 @@ Integration with external plotting tools
 ggplot2
 ~~~~~~~
 
-Plotting packages such as ``ggplot2`` favour \`\`melted" input as
-described in Section [sec:melted]. The figure below was created using
+Plotting packages such as ``ggplot2`` favour \`\`melted" input.
+The figure below was created using
 data from Goldilocks as part of our quality control study, the scatter
 plot compares the density of SNPs between the GWAS and SNP chip studies
-across the human genome. 0.5cm
+across the human genome.
 
 .. image:: examples/figures/megabase_plot.png
    :scale: 15 %
@@ -297,14 +294,13 @@ across the human genome. 0.5cm
 Circos
 ~~~~~~
 
-As demonstrated in Section [sec:circos], Goldilocks has an output format
+Goldilocks has an output format
 specifically designed to output information for use with the \`\`popular
 and pretty" ``circos`` visualisation tool. Below is an example of a
 figure that can be generated from data gathered by Goldilocks. The
 figure visualises the selection of regions from our original quality
-control study. The Python script used to generate the data follows. The
-configuration for the plot itself has been excluded for the sake of
-brevity but can be downloaded from the online documentation.
+control study. The Python script used to generate the data and the Circos
+configuration follow.
 
 .. image:: examples/figures/circos_latest.png
    :scale: 15 %
