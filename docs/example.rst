@@ -9,7 +9,7 @@ Example One
 Read a pair of 1-indexed base position lists and output all regions falling
 within 2 of the maximum count of positions in regions across both, in a table. ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import PositionCounterStrategy
     data = {
             "my_positions": {
@@ -27,7 +27,7 @@ Example Two
 -----------
 Read a short sequence, census GC-ratio and output the top 5 regions as FASTA. ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import GCRatioStrategy
     data = {
             "my_sequence": {
@@ -46,7 +46,7 @@ and another table of regions featuring the most appearances of both motifs.
 Output only the maximum region (actual_distance = 0) displaying both motifs to
 FASTA. ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import MotifCounterStrategy
     data = {
             "my_sequence": {
@@ -66,7 +66,7 @@ Read two samples of three short chromosomes and search for 'N' nucleotides.
 List and export a FASTA of regions that contain at least one N, sorted by number
 of N's appearing across both samples. Below, an example of complex filtering. ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import NucleotideCounterStrategy
     data = {
         "sample_one": {
@@ -124,7 +124,7 @@ of the census for each region into desired bins and plot the result as a histogr
 Repeat the process for the my_sequence sample and produce a panelled histogram
 for each chromosome. ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import GCRatioStrategy
     data = {
         "my_sequence": {
@@ -154,7 +154,7 @@ regions demonstrating the worst consensus to the given reference over both sampl
 Plot the lack of consensus as line graphs for each chromosome, for each sample,
 then over all chromosomes for all samples on one graph. ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import ReferenceConsensusStrategy
     data = {
         "first_sample": {
@@ -184,7 +184,7 @@ Read a pair of 1-indexed base position lists from two samples. Sort regions
 with the least number of marked positions on Sample 1 and subsort by max marked
 positions in Sample 2. ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import PositionCounterStrategy
     data = {
             "my_positions": {

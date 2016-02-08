@@ -28,6 +28,14 @@ goldilocks.strategies module
     :undoc-members:
     :show-inheritance:
 
+goldilocks.util module
+----------------------
+
+.. automodule:: goldilocks.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

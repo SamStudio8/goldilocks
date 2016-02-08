@@ -13,7 +13,7 @@ To use Goldilocks you will need to import the :class:`goldilocks.goldilocks.Gold
 class and your desired census strategy (e.g. NucleotideCounterStrategy) from
 :mod:`goldilocks.strategies` to your script: ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import NucleotideCounterStrategy
 
 
@@ -63,16 +63,16 @@ then for each sample, pass the path to the index to Goldilocks in the following
 structure: ::
 
     sequence_data = {
-            "my_sequence": {"idx": "/path/to/fastaidx/1.fa.fai"},
-            "my_other_sequence": {"idx": "/path/to/fastaidx/2.fa.fai"},
-            "my_other_other_sequence": {"idx": "/path/to/fastaidx/3.fa.fai"},
+            "my_sequence": {"file": "/path/to/fastaidx/1.fa.fai"},
+            "my_other_sequence": {"file": "/path/to/fastaidx/2.fa.fai"},
+            "my_other_other_sequence": {"file": "/path/to/fastaidx/3.fa.fai"},
     }
 
 When supplying sequences in this format, note the following:
 
     * `is_faidx=True` must be passed to the Goldilocks constructor (see below),
     * It is assumed that the FASTA will be in the same directory with the same name as its index, just without the ".fai" extension,
-    * The key in the sequence data dictionary for each sample, must be `idx`,
+    * The key in the sequence data dictionary for each sample, must be `file`,
     * The `i`-th sequence in each FASTA will be censused together, thus the order in which your sequences appear matters.
 
 It is anticipated in future these assumptions will be circumvented by additional
@@ -82,7 +82,7 @@ To specify the `is_faidx` argument, call the constructor like so: ::
 
     g = Goldilocks(NucleotideCounterStrategy(["N"]), sequence_data, length=3, stride=1, is_faidx=True)
 
-Now Goldilocks will know to expect to open these `idx` values as FASTA indexes,
+Now Goldilocks will know to expect to open these `file` values as FASTA indexes,
 not sequence data!
 
 Conducting a Census
@@ -256,7 +256,7 @@ Full Example
 
 Census an example sequence for appearance of 'N' bases: ::
 
-    from goldilocks.goldilocks import Goldilocks
+    from goldilocks import Goldilocks
     from goldilocks.strategies import NucleotideCounterStrategy
 
     sequence_data = {

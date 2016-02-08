@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from goldilocks.goldilocks import Goldilocks
+from goldilocks import Goldilocks
 from goldilocks.strategies import NucleotideCounterStrategy
 
 ################################################################################
@@ -24,10 +24,10 @@ DATA = {
 }
 DATA_FAI = {
     "GroupOne": {
-        "idx": "tests/dat/my_sequence.fa.fai"
+        "file": "tests/dat/my_sequence.fa.fai"
     },
     "GroupTwo": {
-        "idx": "tests/dat/my_other_sequence.fa.fai"
+        "file": "tests/dat/my_other_sequence.fa.fai"
     }
 }
 STRIDE = 1

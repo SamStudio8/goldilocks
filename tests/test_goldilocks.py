@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from goldilocks.goldilocks import Goldilocks
+from goldilocks import Goldilocks
 from goldilocks.strategies import BaseStrategy, NucleotideCounterStrategy
 
 ################################################################################

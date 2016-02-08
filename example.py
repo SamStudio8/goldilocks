@@ -1,4 +1,4 @@
-from goldilocks.goldilocks import Goldilocks
+from goldilocks import Goldilocks
 from goldilocks.strategies import PositionCounterStrategy, GCRatioStrategy, MotifCounterStrategy, NucleotideCounterStrategy, ReferenceConsensusStrategy
 
 #########################################

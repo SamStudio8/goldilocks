@@ -16,12 +16,12 @@ class BaseStrategy(object):
         By default the argument is None which will cause the `TRACKS` attribute
         to be populated with one track; "default".
 
-    title : str, optional(default="")
+    label : str, optional(default="")
         A string used to annotate what the values returned by this strategy
         `evaluate` method represent, particularly for use on the y-axis in any
         plots generated.
 
-        If performing a census for GC Ratio, a suitable title might be "GC Ratio".
+        If performing a census for GC Ratio, a suitable label might be "GC Ratio".
         A nucleotide counter may use something more generic such as "Nucleotide Count".
 
     Attributes
@@ -30,16 +30,16 @@ class BaseStrategy(object):
         A list of strings representing features of interest in the input data
         to be censused as provided by the user on instantiation.
 
-    AXIS_TITLE : str
+    AXIS_LABEL : str
         A string used to establish the context of the values returned from this
         strategy's `evaluate` function, as provided by the user on instantiation.
     """
-    def __init__(self, tracks=None, title=""):
+    def __init__(self, tracks=None, label=""):
         if tracks is None:
             tracks = ["default"]
 
         self.TRACKS = tracks
-        self.AXIS_TITLE = title
+        self.AXIS_LABEL = label
         self.RATIO = False
 
     def census(self, sequence, track, **kwargs):
@@ -47,16 +47,16 @@ class BaseStrategy(object):
 
 class NucleotideCounterStrategy(BaseStrategy):
 
-    def __init__(self, bases):
-        if len(bases) == 0:
+    def __init__(self, bases=None):
+        if not bases:
             bases = ['A', 'C', 'G', 'T', 'N']
-        super(NucleotideCounterStrategy, self).__init__(tracks=bases, title="Base Count")
+        super(NucleotideCounterStrategy, self).__init__(tracks=bases, label="Base Count")
 
     def census(self, sequence, track, **kwargs):
         #return sequence.count(track)  ## doesn't work on buffers...
         count = 0
         for base in sequence:
-            if base == track:
+            if base.upper() == track:
                 count += 1
         return count
 
@@ -67,7 +67,7 @@ class MotifCounterStrategy(BaseStrategy): # pragma: no cover
         self.modules = { "re": re }
         self.overlap = overlap
 
-        super(MotifCounterStrategy, self).__init__(tracks=motifs, title="Motif Count")
+        super(MotifCounterStrategy, self).__init__(tracks=motifs, label="Motif Count")
 
     def census(self, sequence, track, **kwargs):
         if self.overlap:
@@ -78,7 +78,7 @@ class MotifCounterStrategy(BaseStrategy): # pragma: no cover
 class PositionCounterStrategy(BaseStrategy): # pragma: no cover
 
     def __init__(self, tracks=None):
-        super(PositionCounterStrategy, self).__init__(tracks=["count"], title="Count")
+        super(PositionCounterStrategy, self).__init__(tracks=["count"], label="Count")
 
     def census(self, positions, track, **kwargs):
         count = 0
@@ -91,7 +91,7 @@ class PositionCounterStrategy(BaseStrategy): # pragma: no cover
 class GCRatioStrategy(BaseStrategy):
 
     def __init__(self, tracks=None):
-        super(GCRatioStrategy, self).__init__(title="GC Ratio")
+        super(GCRatioStrategy, self).__init__(label="GC Ratio")
 
         import re
         self.modules = { "re": re }
@@ -108,13 +108,13 @@ class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover
         self.POLARITY = polarity
         self.REFERENCE = reference
 
-        title = "Reference Concordance"
+        label = "Reference Concordance"
         if polarity > 0:
-            title = "Reference Matches"
+            label = "Reference Matches"
         elif polarity < 0:
-            title = "Reference Mismatches"
+            label = "Reference Mismatches"
 
-        super(ReferenceConsensusStrategy, self).__init__(title=title)
+        super(ReferenceConsensusStrategy, self).__init__(label=title)
 
     def census(self, sequence, track, **kwargs):
         # Currently only handles global references (ie. not for group/track)

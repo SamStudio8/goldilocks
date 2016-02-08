@@ -17,6 +17,7 @@ import os
 import sys
 from math import floor, ceil
 from multiprocessing import Process, Queue, Array
+from textwrap import wrap
 
 # TODO Generate database of regions with stats... SQL/SQLite
 #      - Probably more of a wrapper script than core-functionality: goldib
@@ -25,6 +26,10 @@ from multiprocessing import Process, Queue, Array
 # TODO Replace 'group' nonclementure with 'sample'?
 # TODO "chrno" should be chrom
 #TODO Add std.dev. distance to query
+#TODO Summary stat system (max total mean)
+#TODO Improve efficiency of census? Conduct in one pass instead of multiple?
+#           Is it quicker to just rip through a region N times than it is
+#           to parse the region once with N if statements to read over?
 class Goldilocks(object):
     """Facade class responsible for conducting a census of genomic regions.
 
@@ -56,7 +61,7 @@ class Goldilocks(object):
         provided in the following format: ::
 
             "my_sample": {
-                "idx": "/path/to/my_sample.fa.fai"
+                "file": "/path/to/my_sample.fa.fai"
             }
 
     length : int
@@ -76,7 +81,7 @@ class Goldilocks(object):
     is_faidx : boolean, optional(default=False)
         Whether or not the data in `data` refers to the locations of FAIDX files.
         If `is_faidx` is True, Goldilocks will expect paths to be provided to
-        an `idx` key, for each sample in the `data` dict.
+        an `file` key, for each sample in the `data` dict.
 
     processes : int, optional(default=2)
         The number of additional processes to spawn to perform the census.
@@ -241,7 +246,6 @@ class Goldilocks(object):
 
         # Read data
         self.groups = data
-        self.max_chr_max_len = None
 
         # Intercept position file data
         if self.IS_POSF:
@@ -250,7 +254,7 @@ class Goldilocks(object):
                 new_groups[group] = {}
 
                 #TODO Close
-                for line in open(self.groups[group]["posf"]):
+                for line in open(self.groups[group]["file"]):
                     line = line.strip()
                     if line[0] == "#":
                         continue
@@ -273,7 +277,7 @@ class Goldilocks(object):
                 self.groups[group]["seq"] = {}
                 #TODO Close f
                 #TODO Assume for now records in each input faidx are ordered zipwise
-                for i, line in enumerate(open(self.groups[group]["idx"])):
+                for i, line in enumerate(open(self.groups[group]["file"])):
                     i += 1
                     self.groups[group]["seq"][i] = {}
                     fields = line.strip().split("\t")
@@ -282,8 +286,10 @@ class Goldilocks(object):
                     self.groups[group]["seq"][i]["length"] = int(fields[1])
                     self.groups[group]["seq"][i]["fpos"] = int(fields[2])
                     self.groups[group]["seq"][i]["line_bases"] = int(fields[3])
+                    self.groups[group]["seq"][i]["line_bytes"] = int(fields[4])
+                    self.groups[group]["seq"][i]["line_ends"] = int(fields[4]) - int(fields[3])
 
-                    handle = open(".".join(self.groups[group]["idx"].split(".")[:-1]))
+                    handle = open(".".join(self.groups[group]["file"].split(".")[:-1]))
                     self.groups[group]["handle"] = mmap.mmap(handle.fileno(), 0, prot=mmap.PROT_READ)
 
                     #TODO Should we not be looking for min length?
@@ -291,7 +297,7 @@ class Goldilocks(object):
                     if chrom not in self.chr_max_len:
                         self.chr_max_len[chrom] = len_current_seq
 
-                    if len_current_seq > self.chr_max_len[chrom]:
+                    if len_current_seq < self.chr_max_len[chrom]:
                         self.chr_max_len[chrom] = len_current_seq
             else:
                 #TODO Catch duplicates etc..
@@ -301,11 +307,10 @@ class Goldilocks(object):
                     else:
                         len_current_seq = len(self.groups[group][chrom])
 
-                    #TODO Should we not be looking for min length?
                     if chrom not in self.chr_max_len:
                         self.chr_max_len[chrom] = len_current_seq
 
-                    if len_current_seq > self.chr_max_len[chrom]:
+                    if len_current_seq < self.chr_max_len[chrom]:
                         self.chr_max_len[chrom] = len_current_seq
 
         num_expected_regions = 0
@@ -371,6 +376,8 @@ class Goldilocks(object):
 
                 i = work_block["i"]
                 zeropos_start = work_block["s0"]
+                start_offset = work_block["start_offset"]
+                end_offset = work_block["end_offset"]
                 track = work_block["t"]
                 track_id = work_block["tid"]
                 group = work_block["g"]
@@ -381,7 +388,10 @@ class Goldilocks(object):
                 if self.IS_POS:
                     data = self.groups[group][chrno]
                 elif self.IS_FAI:
-                    data = self.groups[group]["seq"][chrno]["seq"][zeropos_start:zeropos_start+size]
+                    data = self.groups[group]["seq"][chrno]["seq"][zeropos_start+start_offset:zeropos_start+size+start_offset+end_offset].replace("\n","")
+                    if len(data) != size:
+                        sys.stderr.write("[WARN] Census window of incorrect length extracted.\n")
+                        sys.stderr.write("       GROUP: %s\tTRACK: %s\tCHR: %s\tSTARTPOS: %d\n" % (group, track, str(chrno), zeropos_start+1))
                 else:
                     data = buffer(self.groups[group][chrno], zeropos_start, size)
 
@@ -404,14 +414,29 @@ class Goldilocks(object):
                 if self.IS_FAI:
                     # Load data
                     fpos = self.groups[group]["seq"][chrno]["fpos"]
-                    buff_len = self.groups[group]["seq"][chrno]["length"] + int(self.groups[group]["seq"][chrno]["length"] / self.groups[group]["seq"][chrno]["line_bases"])
-                    self.groups[group]["seq"][chrno]["seq"] = buffer(self.groups[group]["handle"], int(fpos), self.groups[group]["seq"][chrno]["length"])
+
+                    # Calculate required buffer length, this must include both the nucleotides themselves AND the line endings from the FASTA
+                    num_line_ends = int(self.groups[group]["seq"][chrno]["length"] / self.groups[group]["seq"][chrno]["line_bases"])
+                    buff_len = self.groups[group]["seq"][chrno]["length"] + (num_line_ends * self.groups[group]["seq"][chrno]["line_ends"])
+                    self.groups[group]["seq"][chrno]["seq"] = buffer(self.groups[group]["handle"], int(fpos), buff_len)
 
             # Census regions and queue work blocks for census evaluation
             for i, zeropos_start in enumerate(iter_slides):
                 onepos_start = zeropos_start + 1
                 zeropos_end = zeropos_start + self.LENGTH - 1
                 onepos_end = zeropos_end + 1
+
+                if self.IS_FAI:
+                    # Calculate the offset caused by line endings seen to the current position
+                    line_ends_before = int(zeropos_start / self.groups[group]["seq"][chrno]["line_bases"])
+                    line_ends_before = line_ends_before * self.groups[group]["seq"][chrno]["line_ends"]
+
+                    # Calculate the offset caused by line endings that will be encountered during the current window
+                    line_ends_during = int(zeropos_end / self.groups[group]["seq"][chrno]["line_bases"])
+                    line_ends_during = (line_ends_during * self.groups[group]["seq"][chrno]["line_ends"]) - line_ends_before
+                else:
+                    line_ends_before = line_ends_during = 0
+
 
                 self.regions[region_i] = {
                     "id": region_i,
@@ -443,7 +468,10 @@ class Goldilocks(object):
                             "g": group,
                             "gid": group_id,
                             "chrno": chrno,
-                            "length": self.LENGTH
+                            "length": self.LENGTH,
+
+                            "start_offset": line_ends_before,
+                            "end_offset": line_ends_during,
                         }
                         work_queue.put(wwork_block)
                         queued += 1
@@ -964,10 +992,10 @@ class Goldilocks(object):
         # frames from it for function chaining - rather than the Goldilocks instance...
         self.selected_regions = selected_regions
         self.selected_count = len(selected_regions)
-        self.target = target
+#TODO?  self.target = target
         return self
 
-    def plot(self, group=None, track="default", bins=None, ylim=None, save_to=None, annotation=None, title=None, ignore_query=False, chrom=None, bin_prop=False, bin_max=None): # pragma: no cover
+    def plot(self, group=None, tracks=["default"], bins=None, ylim=None, save_to=None, annotation=None, title=None, ignore_query=False, chrom=None, prop=False, bin_max=None): # pragma: no cover
         """Represent censused regions in a plot using matplotlib."""
 
         import matplotlib.pyplot as plt
@@ -1001,11 +1029,15 @@ class Goldilocks(object):
                 # on sample one...
                 plot_chroms = self.groups[self.groups.keys()[0]]["seq"]
             else:
-                plot_chroms = self.groups[group]
+                plot_chroms = self.groups[self.groups.keys()[0]]
 
         if group == "total":
             # Cheap trick to force the plot to have just one subplot.
             plot_chroms = [ None ]
+
+        if bins and len(tracks) > 1:
+            print("[FAIL] Histograms currently don't support multi-track plots. Sorry!")
+            sys.exit()
 
         #TODO Should try and detect when groups and chroms are both > 1,
         # as I don't want to support matrix-style graphs with this API thanks!
@@ -1014,56 +1046,80 @@ class Goldilocks(object):
         for j, p_group in enumerate(plot_groups):
             for i, p_chrom in enumerate(plot_chroms):
 
-                if ignore_query or len(self.selected_regions) == 0:
+                plot_data = []
+                max_val = None
+                for track in tracks:
+                    if ignore_query or len(self.selected_regions) == 0:
+                        plot_regions = self.regions
+                    else:
+                        plot_regions = self.selected_regions
+
                     if p_group == "total":
                         num_counts = [self.counter_matrix[self._get_group_id("total"), self._get_track_id(track), x] for x in sorted(self.regions)]
+                        num_counts_tot = [self.counter_matrix[self._get_group_id("total"), self._get_track_id("default"), x] for x in sorted(self.regions)]
                     else:
                         num_counts = [self.counter_matrix[self._get_group_id(p_group), self._get_track_id(track), x] for x in sorted(self.regions) if self.regions[x]["chr"] == p_chrom]
-                else:
-                    if p_group == "total":
-                        num_counts = [self.counter_matrix[self._get_group_id("total"), self._get_track_id(track), x] for x in sorted(self.selected_regions)]
-                    else:
-                        num_counts = [self.counter_matrix[self._get_group_id(p_group), self._get_track_id(track), x] for x in sorted(self.selected_regions) if self.regions[x]["chr"] == p_chrom]
-                num_regions = len(num_counts)
+                        num_counts_tot = [self.counter_matrix[self._get_group_id(p_group), self._get_track_id("default"), x] for x in sorted(self.regions) if self.regions[x]["chr"] == p_chrom]
 
-                max_val = max(num_counts)
+                    if prop and not bins:
+                        num_counts = np.array(num_counts) / np.array(num_counts_tot)
+                    num_regions = len(num_counts)
 
-                if bins:
-                    if type(bins) != list:
-                        if bin_max:
-                            p_bins = np.linspace(0, bin_max, bins+1)
+                    plot_data.append({
+                        "track": track,
+                        "y": num_counts,
+                        "x_len": len(num_counts)
+                    })
+
+                    if max_val < max(num_counts):
+                        max_val = max(num_counts)
+
+                for data in plot_data:
+                    num_counts = data["y"]
+                    num_regions = data["x_len"]
+
+                    if bins:
+                        if type(bins) != list:
+                            if bin_max:
+                                p_bins = np.linspace(0, bin_max, bins+1)
+                            else:
+                                p_bins = np.linspace(0, max_val, bins+1)
                         else:
-                            p_bins = np.linspace(0, max_val, bins+1)
+                            p_bins = bins
+
+                        bin_contents = np.zeros(len(p_bins))
+
+                        for x in num_counts:
+                            bin_contents[find_bin(x, p_bins)] += 1
+
+                        if prop:
+                            bin_contents = np.array(bin_contents)/sum(bin_contents)
+
+                        ax[i+j,0].bar(range(len(p_bins)), bin_contents)
+                        ax[i+j,0].set_xticks(np.arange(len(p_bins)) + 0.75/2)
+                        ax[i+j,0].set_xticklabels(p_bins)
+                        ax[i+j,0].set_xlim([0,len(p_bins)])
+
                     else:
-                        p_bins = bins
+                        if group == "total":
+                            chr_max = sum([self.chr_max_len[x] for x in self.chr_max_len.keys()])
+                            if len(tracks) > 1:
+                                ax[i+j,0].plot(range(0, chr_max, self.STRIDE)[:len(num_counts)], num_counts, alpha=0.75, label=data["track"])
+                            else:
+                                ax[i+j,0].scatter(range(0, chr_max, self.STRIDE)[:len(num_counts)], num_counts, c=num_counts, label="g"+str(p_chrom))
+                            ax[i+j,0].set_xlim([0,chr_max])
+                            ax[i+j,0].set_ylim([0,max_val])
+                        else:
+                            alpha=1.0
+                            if len(tracks) > 1:
+                                alpha=0.75
+                            ax[i+j,0].plot(range(0, self.chr_max_len[p_chrom], self.STRIDE)[:len(num_counts)], num_counts, alpha=alpha, label=data["track"])
 
-                    num_bins = len(p_bins)
-                    bin_contents = np.zeros(len(p_bins))
-
-                    for x in num_counts:
-                        bin_contents[find_bin(x, p_bins)] += 1
-
-                    if bin_prop:
-                        bin_contents = np.array(bin_contents)/sum(bin_contents)
-
-                    ax[i+j,0].bar(range(len(p_bins)), bin_contents)
-                    ax[i+j,0].set_xticks(np.arange(len(p_bins)) + 0.75/2)
-                    ax[i+j,0].set_xticklabels(p_bins)
-                    ax[i+j,0].set_xlim([0,len(p_bins)])
-
-                    if bin_prop:
+                    if prop:
                         # Convert axis to use percentages
                         formatter = mticker.FuncFormatter(lambda x, pos: '{:3.0f}%'.format(x*100))
                         ax[i+j,0].yaxis.set_major_formatter(formatter)
 
-                else:
-                    if group == "total":
-                        chr_max = sum([self.chr_max_len[x] for x in self.chr_max_len.keys()])
-                        ax[i+j,0].scatter(range(0, chr_max, self.STRIDE)[:len(num_counts)], num_counts, c=num_counts, label="g"+str(p_chrom))
-                        ax[i+j,0].set_xlim([0,chr_max])
-                        ax[i+j,0].set_ylim([0,max_val])
-                    else:
-                        ax[i+j,0].plot(range(0, self.chr_max_len[p_chrom], self.STRIDE)[:len(num_counts)], num_counts, label="g"+str(p_chrom))
 
                 if p_group != "total":
                     if chrom:
@@ -1081,26 +1137,29 @@ class Goldilocks(object):
                         )
 
                 if ylim:
-                    ax[i+j,0].set_ylim(ylim)
+                    ax[i+j,0].set_ylim([0,ylim])
+
+        #TODO This will write over the title...
+        if len(tracks) > 1:
+            ax[0,0].legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
+                               ncol=len(tracks), mode="expand", borderaxespad=0.)
 
         # Y axis label
         if not bins:
             fig.text(
-                .05, 0.5, self.strategy.AXIS_TITLE, rotation='vertical',
+                .05, 0.5, self.strategy.AXIS_LABEL, rotation='vertical',
                 horizontalalignment='center', verticalalignment='center'
             )
+            plt.xlabel("Location (bp)[%s:%s]" % (self.LENGTH_SI, self.STRIDE_SI))
         else:
             fig.text(
                 .05, 0.5, "Region Count", rotation='vertical',
                 horizontalalignment='center', verticalalignment='center'
             )
-
-        plt.xlabel("Location (bp)[%s:%s]" % (self.LENGTH_SI, self.STRIDE_SI))
+            plt.xlabel("Bin [%s:%s]" % (self.LENGTH_SI, self.STRIDE_SI))
 
         if title:
             plt.suptitle(title, fontsize=16)
-        else:
-            plt.suptitle('%s-%s' % (group, track), fontsize=16)
 
         if annotation:
             plt.annotate(annotation, xy=(.5, 1.03),  xycoords='axes fraction', ha='center', va='center', fontsize=11)
@@ -1110,6 +1169,11 @@ class Goldilocks(object):
             plt.close()
         else:
             plt.show()
+
+    def reset_candidates(self):
+        self.selected_regions = []
+        self.selected_count = -1
+
 
     @property
     def candidates(self):
@@ -1135,6 +1199,8 @@ class Goldilocks(object):
         return [self.regions[i] for i in to_iter]
 
     def export_meta(self, group=None, track=None, to=sys.stdout, fmt="table", sep="\t", overlaps=True, header=True, ignore_query=False, value_bool=False, divisible=None, chr_prefix=""):
+        if to is not sys.stdout:
+            to = open(to, "w")
 
         if not track:
             tracks = sorted(self.strategy.TRACKS)
@@ -1149,7 +1215,7 @@ class Goldilocks(object):
         # Build up list of column header names for groupID-track combinations (if needed)
         tracks_header = []
         for g in groups:
-            tracks_header.append(sep.join([str(g) + '_' + track for track in tracks]))
+            tracks_header.append(sep.join([str(g) + '_' + str(track) for track in tracks]))
 
         # Work out whether it is necessary (or possible) to skip some regions
         # to prevent duplicate counting in cases where regions overlap
@@ -1173,9 +1239,9 @@ class Goldilocks(object):
                 ]))+"\n")
             elif fmt == "circos":
                 if len(groups) > 1 or len(tracks) > 1:
-                    print "[WARN] 'circos' output format typically works best when a group and track are set..."
+                    sys.stderr.write("[WARN] 'circos' output format typically works best when a group and track are set...\n")
 
-                to.write((sep.join([
+                to.write((" ".join([
                     "chr",
                     "pos_start",
                     "pos_end",
@@ -1247,7 +1313,7 @@ class Goldilocks(object):
                         else:
                             v = str(self.counter_matrix[self._get_group_id(g), self._get_track_id(t), r])
 
-                        to.write((sep.join([
+                        to.write((" ".join([
                             chr_prefix + str(region["chr"]),
                             str(region["pos_start"]),
                             str(region["pos_end"]),
@@ -1316,8 +1382,26 @@ class Goldilocks(object):
                         handles[group] = open(group + "_" + filename, "w")
                     to = handles[group]
 
-                to.write(">%s|Chr%s|Pos%d:%d|%s\n" % (group, region["chr"], region["pos_start"], region["pos_end"], self.counter_matrix[self._get_group_id(group), self._get_track_id(track), region["id"]]))
-                to.write(self.groups[group][region["chr"]][region["pos_start"]-1:region["pos_end"]]+"\n")
+                to.write(">%s|Chr%s|Pos%d:%d|%s|%s\n" % (group, region["chr"], region["pos_start"], region["pos_end"], track, self.counter_matrix[self._get_group_id(group), self._get_track_id(track), region["id"]]))
+
+                if self.IS_FAI:
+                    # Calculate the offset caused by line endings seen to the current position
+                    line_ends_before = int((region["pos_start"]-1) / self.groups[group]["seq"][region["chr"]]["line_bases"])
+                    start_offset = line_ends_before * self.groups[group]["seq"][region["chr"]]["line_ends"]
+
+                    # Calculate the offset caused by line endings that will be encountered during the current window
+                    line_ends_during = int((region["pos_end"]-1) / self.groups[group]["seq"][region["chr"]]["line_bases"])
+                    end_offset = (line_ends_during * self.groups[group]["seq"][region["chr"]]["line_ends"]) - start_offset
+
+                    data = self.groups[group]["seq"][region["chr"]]["seq"][region["pos_start"]-1+start_offset:region["pos_end"]+start_offset+end_offset].replace("\n","")
+                    if len(data) != self.LENGTH:
+                        sys.stderr.write("[FAIL] Window of incorrect length extracted for output to FASTA. Refusing to continue.\n")
+                        sys.stderr.write("       GROUP: %s\tTRACK: %s\tCHR: %s\tSTARTPOS: %d\n" % (group, track, str(region["chr"]), region["pos_start"]))
+                        sys.exit(1)
+                    else:
+                        to.write("\n".join(wrap(data, 80)) + "\n")
+                else:
+                    to.write("\n".join(wrap(self.groups[group][region["chr"]][region["pos_start"]-1:region["pos_end"]], 80)) + "\n")
         if divide:
             for h in handles:
                 handles[h].close()

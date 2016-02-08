@@ -23,9 +23,7 @@ History
   value unless `bin_max` is also provided.
 * Bins may have a hard upper limit set with `bin_max`. This will override the
   default of the largest observed value regardless of whether `bin_max` is smaller.
-* Binning may now be plotted by proportion by setting `bin_prop`, showing the
-  percentage of regions that were added to a given bin, rather than the total
-  count.
+* Plots can now be plotted proportionally with `prop=True`.
 * Improve labels for plotting.
 * Reduce duplication of plotting code inside `plot`.
 * Share Y axis across plot panels to prevent potentially misleading default plots.
@@ -42,7 +40,19 @@ History
         A plain tabular format that will suit for quick outputs with
         some munging
 * Remove `print_melt`, use `export_meta` with `fmt=melt`.
-
+* Add `is_pos_file` kwarg to Goldilocks, allows user to specify position based
+  variants in the format `CHR\tPOS` or `CHR:POS` in a newline delimited file.
+* Changed required `idx` key to `file` in sequence dictionaries.
+* Added custom strategy and plotting examples to the documentation.
+* The `Goldilocks` class is now imported as `from goldilocks import Goldilocks`.
+* The `textwrap.wrap` function is used to write out FASTA more cleanly.
+* A serious regression in the parsing of FASTA files introduced by v0.0.80 has
+  been closed.
+* Improved plotting functionality for co-plotting groups, tracks of chromosome
+  has been introduced. Tracks can now be plotted together on the same panel by
+  providing their names as a list to the `tracks` keyword.
+* `reset_candidates` allows users to "reset" the Goldilocks object after a
+  query or sort has been performed on the regions.
 
 0.0.82 (2016-01-29)
 -------------------
