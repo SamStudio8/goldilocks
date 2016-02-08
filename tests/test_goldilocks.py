@@ -20,7 +20,7 @@ sequence_data = {
         },
         "my_other_sample": {
             "one": "TATANTATA",
-            2: "GANGANGAN",
+            2: "GANGANGAN_",
             "X": "GATTACAGATTACAN",
             "three": ".N.",
         }

@@ -205,13 +205,14 @@ class Goldilocks(object):
         If either `length` or `stride` are less than one.
 
     """
-    def __init__(self, strategy, data, length, stride, is_pos=False, is_faidx=False, is_pos_file=False, processes=2):
+    def __init__(self, strategy, data, length, stride, is_pos=False, is_faidx=False, is_pos_file=False, ignore_len_mismatch=False, processes=2):
 
         self.strategy = strategy
         self.PROCESSES = processes
         self.IS_POS = is_pos
         self.IS_FAI = is_faidx
         self.IS_POSF = is_pos_file
+        self.IGNORE_LENGTH_MISMATCH = ignore_len_mismatch
         if self.IS_POS or self.IS_POSF:
             self.IS_POS = True
             sys.stderr.write("[WARN] Positional data expected as input, forcing selection of PositionCounterStrategy.\n")
@@ -297,8 +298,12 @@ class Goldilocks(object):
                     if chrom not in self.chr_max_len:
                         self.chr_max_len[chrom] = len_current_seq
 
-                    if len_current_seq < self.chr_max_len[chrom]:
-                        self.chr_max_len[chrom] = len_current_seq
+                    if self.IGNORE_LENGTH_MISMATCH:
+                        if len_current_seq > self.chr_max_len[chrom]:
+                            self.chr_max_len[chrom] = len_current_seq
+                    else:
+                        if len_current_seq < self.chr_max_len[chrom]:
+                            self.chr_max_len[chrom] = len_current_seq
             else:
                 #TODO Catch duplicates etc..
                 for chrom in self.groups[group]:
@@ -310,8 +315,12 @@ class Goldilocks(object):
                     if chrom not in self.chr_max_len:
                         self.chr_max_len[chrom] = len_current_seq
 
-                    if len_current_seq < self.chr_max_len[chrom]:
-                        self.chr_max_len[chrom] = len_current_seq
+                    if self.IGNORE_LENGTH_MISMATCH:
+                        if len_current_seq > self.chr_max_len[chrom]:
+                            self.chr_max_len[chrom] = len_current_seq
+                    else:
+                        if len_current_seq < self.chr_max_len[chrom]:
+                            self.chr_max_len[chrom] = len_current_seq
 
         num_expected_regions = 0
         for chrom in self.chr_max_len:

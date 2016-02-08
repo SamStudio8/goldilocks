@@ -151,7 +151,6 @@ def _test_sort_candidates(suite, op, group, track, EXPECTED_RANK, targets=None):
             if track not in targets:
                 suite.fail("Invalid test on op:mean|median using no target.")
 
-            suite.assertEqual(targets[track], new_g.target)
             delta_target = abs(suite.g.counter_matrix[suite.g._get_group_id(group), suite.g._get_track_id(track), c["id"]] - targets[track])
             last_delta_target = abs(last_seen - targets[track])
             suite.assertTrue(delta_target >= last_delta_target)
@@ -180,7 +179,7 @@ class TestGoldilocksRegression_NucleotideCounter(unittest.TestCase):
                     "three": ".N.",
                 }
         }
-        self.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), self.sequence_data, length=3, stride=1)
+        self.g = Goldilocks(NucleotideCounterStrategy(["A","C","G","T","N"]), self.sequence_data, length=3, stride=1, ignore_len_mismatch=True)
 
     def setUp(self):
         self.reset()
@@ -552,7 +551,7 @@ class TestGoldilocksRegression_SimpleGCRatioCounter(unittest.TestCase):
                     1: "GC......GCGC....GCGCGC..GCGCGCGCAAAAAAAA",
                 }
         }
-        self.g = Goldilocks(GCRatioStrategy(), self.sequence_data, length=8, stride=8)
+        self.g = Goldilocks(GCRatioStrategy(), self.sequence_data, length=8, stride=8, ignore_len_mismatch=True)
 
     @classmethod
     def setUpClass(cls):
