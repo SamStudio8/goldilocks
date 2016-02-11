@@ -13,8 +13,9 @@ install: pip install -r requirements.txt
 
 # command to run tests, e.g. python setup.py test
 script:
-  - python setup.py install
+#  - python setup.py install
 #  - nosetests --with-coverage --cover-package=goldilocks
+  - pip install -e .
   - py.test --cov=goldilocks tests/
 
 after_success:
