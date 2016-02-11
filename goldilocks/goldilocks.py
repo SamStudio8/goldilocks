@@ -1356,13 +1356,15 @@ class Goldilocks(object):
             count += 1
             last_chr = region["chr"]
 
-    def export_fasta(self, groups=None, track="default", to=sys.stdout, divide=False):
+    def export_fasta(self, groups=None, track="default", to=None, divide=False):
         """Export all regions held in FASTA format."""
         if self.IS_POS:
             sys.stderr.write("[FAIL] Cannot export FASTA without sequence data!\n")
             sys.exit(1)
 
-        if to is not sys.stdout:
+        if to is None:
+            to = sys.stdout
+        else:
             filename = to
             if divide:
                 handles = {}
