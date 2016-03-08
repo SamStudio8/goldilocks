@@ -1,6 +1,10 @@
 History
 =======
 
+0.1.0 (2016-03-08)
+------------------
+* Goldilocks is published software!
+
 0.0.83-beta
 -------------------
 * `-l` and `-s` CLI arguments and corresponding `length` and `stride` parameters

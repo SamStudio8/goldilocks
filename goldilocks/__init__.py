@@ -3,4 +3,4 @@ from .goldilocks import Goldilocks
 
 __author__ = "Sam Nicholls"
 __email__ = "sam@samnicholls.net"
-__version__ = "0.0.83-beta"
+__version__ = "0.1.0"
