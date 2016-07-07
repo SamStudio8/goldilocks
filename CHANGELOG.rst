@@ -1,6 +1,13 @@
 History
 =======
 
+0.1.1 (2016-07-07)
+------------------
+* Updated citation.
+    Please cite us! <3
+* [PR:ar0ch] Add lowercase matching in GCRatioStrategy
+    Fixes 'feature' where lowercase letters are ignored by GCRatioStrategy.
+
 0.1.0 (2016-03-08)
 ------------------
 * Goldilocks is published software!
