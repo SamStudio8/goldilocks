@@ -100,7 +100,7 @@ class GCRatioStrategy(BaseStrategy):
         self.RATIO_OF = None
 
     def census(self, sequence, track, **kwargs):
-        return float(len(self.modules["re"].findall("[GC]", sequence)))/len(sequence)
+        return float(len(self.modules["re"].findall("[GCgc]", sequence)))/len(sequence)
 
 class ReferenceConsensusStrategy(BaseStrategy): # pragma: no cover
 
