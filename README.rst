@@ -121,19 +121,22 @@ Installation
 Citation
 --------
 
-In press. ::
+Please cite us so we can continue to make useful software! ::
 
-    Nicholls, S. M., Clare, A., & Randall, J. C. (2016). Goldilocks: a tool for identifying genomic regions that are "just right." Bioinformatics, btw116. doi:10.1093/bioinformatics/btw116
+    Nicholls, S. M., Clare, A., & Randall, J. C. (2016). Goldilocks: a tool for identifying genomic regions that are "just right." Bioinformatics (2016) 32 (13): 2047-2049. doi:10.1093/bioinformatics/btw116
     
 ::
 
-    @article{Nicholls07032016,
+    @article{Nicholls01072016,
         author = {Nicholls, Samuel M. and Clare, Amanda and Randall, Joshua C.}, 
         title = {Goldilocks: a tool for identifying genomic regions that are ‘just right’},
+        volume = {32}, 
+        number = {13}, 
+        pages = {2047-2049}, 
         year = {2016}, 
         doi = {10.1093/bioinformatics/btw116}, 
-        URL = {http://bioinformatics.oxfordjournals.org/content/early/2016/03/23/bioinformatics.btw116.abstract}, 
-        eprint = {http://bioinformatics.oxfordjournals.org/content/early/2016/03/23/bioinformatics.btw116.full.pdf+html}, 
+        URL = {http://bioinformatics.oxfordjournals.org/content/32/13/2047.abstract}, 
+        eprint = {http://bioinformatics.oxfordjournals.org/content/32/13/2047.full.pdf+html}, 
         journal = {Bioinformatics} 
     }
 
